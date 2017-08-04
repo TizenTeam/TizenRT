@@ -19,6 +19,8 @@
 #include <stdio.h>
 #include <libtuvapi.h>
 #include <uv.h>
+#include <string.h>
+#include <sys/socket.h>
 
 /****************************************************************************
  * Pre-processor Definitions
