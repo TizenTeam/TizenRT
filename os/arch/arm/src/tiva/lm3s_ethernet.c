@@ -70,8 +70,14 @@
 #include <tinyara/wdog.h>
 #include <tinyara/irq.h>
 #include <arch/board/board.h>
-#include <tinyara/net/arp.h>
+#include <net/if.h>
+#include <net/lwip/netif.h>
+//#include <tinyara/net/arp.h>
+#include <netinet/arp.h>
 #include <tinyara/net/netdev.h>
+#include <tinyara/net/ethernet.h>
+#include <net/lwip/netif/etharp.h>
+#include <net/lwip/tcpip.h>
 
 #ifdef CONFIG_NET_PKT
 #include <tinyara/net/pkt.h>
