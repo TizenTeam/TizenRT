@@ -55,6 +55,7 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include "cfgdefine.h"
@@ -278,14 +279,13 @@ void generate_definitions(FILE * stream)
 	char *varname;
 	char *varval;
 	char *ptr;
-	char **word;
+	char **word = 0;
 	int cnt = 0;
 
 	/* Loop until the entire file has been parsed. */
 
 	do {
 		/* Read the next line from the file */
-
 		ptr = read_line(stream);
 		if (ptr) {
 			/* Parse the line into a variable and a value field */
@@ -335,15 +335,21 @@ void generate_definitions(FILE * stream)
 				tmp = strsep(&varval, "\"");
 				word = (char **)malloc((sizeof(char *)*cnt));
 				while ((tmp = strsep(&varval, ",")) != NULL) {
-					word[i] = (char *)malloc(20);
-					for (ndx = 0; ndx < strlen(tmp); ndx++) {
+					int len = strlen(tmp);
+					word[i] = (char *)malloc(1 + len);
+					for (ndx = 0; ndx < len; ndx++) {
 						word[i][ndx] = (char)toupper(tmp[ndx]);
 					}
+					word[i][ndx] = 0;
 					i++;
 				}
 			}
 
 			if (strcmp(varname, "CONFIG_ARTIK05X_FLASH_PART_LIST") == 0) {
+				if (! word) {
+					fprintf(stderr, "error: CONFIG_ARTIK05X_FLASH_PART_NAME must be scanned before %s\n", varname);
+					exit(1);
+				}
 				char *tmp;
 				int step = 0;
 				int temp = 0;
