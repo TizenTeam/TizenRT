@@ -1,28 +1,36 @@
-#! /usr/bin/make -f
+#!/usr/bin/make -f
+# -*- makefile -*-
+# ex: set tabstop=4 noexpandtab:
+# -*- coding: utf-8 -*-
 
-#{
-#machine?=qemu
-#qemu_machine?=lm3s6965evb
-#image_type?=tash_16m
-#qemu?=qemu-system-arm
-#}
+default: rule/default
+	@echo "# $@: $^"
 
+#-include qemu.mk
 #{
 #machine?=artik053
 #image_type?=tash
 #}
 
 #{
+#TODO
 url?=https://github.com/SamsungARTIK/artik-sdk
 machine?=artik055s
 machine_family?=artik05x
-# bin  extra  minimal  nettest  onboard  README.md  scripts  typical
+#image_type?=minimal
 #image_type?=nettest
-#image_type=devel
-image_type=extra
 #image_type=typical
 #image_type=onboard
+#image_type=extra
+#image_type?=tash
+#image_type?=minimal
+#image_type?=hello
+base_config?=minimal
+base_config=nettest
+image_type?=devel
+
 partition?=./build/configs/artik05x/scripts/partition_map.cfg
+image_elf?=build/output/bin/tinyara
 image?=build/output/bin/tinyara_head.bin
 deploy_image?=${image}-signed
 cfg=${CURDIR}/build/configs/${machine_family}/scripts/${machine_family}.cfg
@@ -32,31 +40,23 @@ product_id?=6010
 
 udev?=/etc/udev/rules.d/99-usb-${vendor_id}-${product_id}.rules
 tty?=/dev/ttyUSB1
+tty_rate?=115200
 
 sdk?=${HOME}/Downloads/artik-ide-linux-x64-installer-V1.3-1020.tar.gz
 signer?=${HOME}/ARTIK/SDK/A053/v1.6/source/tinyara/build/configs/artik05x/tools/codesigner/artik05x_codesigner
 #signer?=${CURDIR}/build/configs/artik05x/tools/codesigner/artik05x_codesigner
 
-
-#image_type?=nettest
-#image_type?=tash
-#image_type?=minimal
-image_type?=hello
-
 machine_family?=${machine}
 export machine
-config?=${machine}/${image_type}
-export config
+config_type?=${machine}/${image_type}
+export config_type
 
+config?=os/.config
 MAKE+=V=1
-
-
 build_dir?=build/output/bin/
-
 openocd?=openocd
 #openocd=/usr/bin/openocd -d
 #openocd=openocd -d
-
 
 partition?=${CURDIR}/build/configs/${machine}/tools/openocd/partition_map.cfg
 bl1?=${CURDIR}/build/configs/${machine}/bin/bl1.bin
@@ -79,10 +79,17 @@ export XPATH
 export PATH := ${XPATH}:${PATH}
 
 
-default: rule/all
+rule/default: rule/all
+	@echo "# $@: $^"
 
-distclean:
-	rm -f os/.config
+clean:
+	rm -fv *~
+
+cleanall: clean
+	-rm -v ${deploy_image} ${image}
+
+distclean: cleanall
+	rm -f ${config}
 
 help: Makefile
 	@echo "# Available rules:"
@@ -91,65 +98,35 @@ help: Makefile
 prep: os/Make.defs
 	@echo "# $@: $^"
 
-rule/%: os/.config prep
+rule/%: ${config} prep
 	cd ${<D} && PATH=${PATH}:${XPATH} ${MAKE} ${@F}
 
+${config}: os/tools/configure.sh build/configs/${config_type} #Makefile
+	@echo "# Configure: ${config_type}"
+	cd ${<D} && ./${<F} ${config_type}
+	ls -l "$@"
 
-os/.config: os/tools/configure.sh build/configs/${config} Makefile
-	 cd ${<D} && ./${<F} ${config}
-
-todo/os/.config: os/tools/configure.sh build/configs/${config} Makefile
-	ls -l ${@} || { cd ${<D} && ./${<F} ${config}; }
-	ls -l ${@}
-	-cp build/configs/${config}/.config "$@"
-
-
+config: os/tools/configure.sh build/configs/${config_type} #Makefile
+	@echo "# Configure: ${config_type}"
+	cd ${<D} && ./${<F} ${config_type}
+	ls -l ${config}
+#TODO
 os/Make.defs:
 	ls $@ || make config
 	ls $@
-
-config: os/tools/configure.sh build/configs/${config} Makefile
-	@echo "# Configure: ${config}"
-	cd ${<D} && ./${<F} ${config}
-	ls -l os/.config
 
 menuconfig:
 	ls os/.config || ${MAKE} config
 	make -C os menuconfig
 
-run: build/output/bin/tinyara
-	ls -l ${<D}
-	${qemu} -M ${qemu_machine} -kernel $< -nographic
+${image_elf}: rule/all
+	@echo "# $@: $^"
 
-run/bg: build/output/bin/tinyara
-	ls -l ${<D}
-	${qemu} -M ${qemu_machine} -kernel $< -nographic &
-	echo $? > pid.tmp
+${image}: ${image_elf}
+	ls $@ || ${MAKE} build
+	ls -l "$@"
 
-sleep/%:
-	sleep ${@F}
-
-build/output/bin/tinyara: rule/all
-
-stop:
-	killall ${qemu}
-
-stop/bg: pid.tmp
-	kill $$(cat ${<}) && rm $<
-
-
-build/configs/${config}/.config: os/.config
-	cp -a $< $@
-
-save: build/configs/${config}/.config 
-
-check: run/bg sleep/20 stop/bg
-
-
-image: rule/all
-
-${image}:
-	ls $@ || ${MAKE} image
+build: rule/all
 	ls -l "$@"
 
 flash/${machine}: ${cfg} ${partition} ${bl1} ${bl2} ${sssfw} ${wlanfw} ${os}
@@ -168,18 +145,23 @@ openocd/%: ${cfg}
 	cd ${<D} && ${openocd} -f "${<F}" -c "${@F}; exit 0;" 2>&1
 
 flash: flash/${machine}
+	@echo "# $@: $^"
 
 #flash: download
 
-download: ${deploy_image}
-	${MAKE} -C os download ALL
+download/%: ${deploy_image}
+	${MAKE} -C os ${@D} ${@F}
 
+#TODO Add stamp
+download: download/ALL
+	@echo "# $@: $^"
 
 # http://openocd.org/doc-release/html/index.html#toc-Reset-Configuration-1
 reset: openocd/help
-	@echo "press siwtcg near to leds"
+	@echo "press micron switch near to led and mcu of S05s"
 
 help: openocd/help
+	@echo "# $@: $^"
 
 partition: ${partition}
 	cat "$<"
@@ -197,7 +179,25 @@ setup/debian:
 	sudo apt-get install genromfs time
 
 console: ${tty}
-	screen $< 115200
+	@echo "Hit reset button next to module"
+	screen $< ${tty_rate}
+
+cu?=/usr/bin/cu
+
+test: ${tty}
+	sudo sync
+	sudo stty -F ${<} raw speed ${tty_rate}
+	sudo stty -F ${<}
+	xterm -e "cat ${<}" &
+	sleep 1
+	"$(shell sleep 3)cat /proc/version$(shell sleep 3)\n" | sudo tee -a ${tty}
+
+todo/test: ${tty}
+	@echo "$(shell sleep 3)cat /proc/version$(shell sleep 3)\n~." \
+| ${cu} -s ${tty_rate} -l ${tty}
+
+${cu}: /etc/debian_release
+	sudo apt-get install cu
 
 ${tty}:
 	ls /dev/ttyUSB*
@@ -241,7 +241,63 @@ configs: build/configs/${machine}/
 
 ${signer}: ${sdk}
 
-build/configs/${machine}/devel: build/configs/${machine}/extra 
+build/configs/${machine}/devel: build/configs/${machine}/${base_config}
 	cp -rf $< $@
 	${MAKE} config 
-	${MALE} -C os menuconfig
+	${MAKE} -C os menuconfig
+
+all: ${firmware}
+	ls $<
+
+env:
+	@echo "image_type=${image_type}"
+
+#{ TODO
+
+todo/os/.config: os/tools/configure.sh build/configs/${config_type} Makefile
+	ls -l ${@} || { cd ${<D} && ./${<F} ${config_type}; }
+	ls -l ${@}
+	-cp build/configs/${config_type}/.config "$@"
+
+commit:  build/configs/${machine}/${image_type}
+	git add build/configs/${machine}/${image_type}
+	git commit -sam "WIP: ${image_type}" ||:
+
+save: 
+	mkdir -p build/configs/${config_type}/ 
+	cp -av ${config} build/configs/${config_type}/defconfig
+	${MAKE} commit
+
+save/%: save
+	mkdir -p build/configs/${machine}/${@F}
+	cp -rf build/configs/${config_type}/* build/configs/${machine}/${base_config}/
+	cp ${config} build/configs/${machine}/${@F}/defconfig
+	git add build/configs/${machine}/${@F} ||:
+	${MAKE} commit
+
+demo: commit cleanall menuconfig all download/ALL console
+	${MAKE} console commit
+
+diff: build/configs/${machine}/${image_type}/defconfig 
+	meld $^ ${config}
+
+devel: build/configs/${machine}/${base_config}/defconfig build/configs/${machine}/devel/defconfig 
+	meld $^
+
+devel/rm:
+	rm -rf build/configs/${machine}/devel
+	${MAKE} commit
+
+TODO/minimal: build/configs/artik053/minimal/defconfig  build/configs/${machine}/minimal/defconfig 
+	meld $^
+
+TODO/055s: build/configs/${machine}/audio/defconfig ${config}
+	meld $^
+
+TODO/053: build/configs/artik053/minimal/defconfig ${config}
+	meld $^
+
+build/configs/${config_type}/.config:
+	exit 1
+	cp -a os/.config $@
+
