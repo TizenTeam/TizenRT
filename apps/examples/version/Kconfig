@@ -1,0 +1,26 @@
+#
+# For a description of the syntax of this configuration file,
+# see kconfig-language at https://www.kernel.org/doc/Documentation/kbuild/kconfig-language.txt
+#
+
+config EXAMPLES_VERSION
+	bool "\"Version, World!\" example"
+	default n
+	---help---
+		Enable the \"Version, World!\" example
+
+if EXAMPLES_VERSION
+
+config EXAMPLES_VERSION_PROGNAME
+	string "Program name"
+	default "version"
+	depends on BUILD_KERNEL
+	---help---
+		This is the name of the program that will be use when the NSH ELF
+		program is installed.
+
+endif
+
+config USER_ENTRYPOINT
+	string
+	default "version_main" if ENTRY_VERSION
