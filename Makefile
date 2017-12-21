@@ -26,7 +26,7 @@ machine_family?=artik05x
 #image_type?=minimal
 #image_type?=hello
 base_config?=minimal
-base_config=nettest
+#base_config=nettest
 image_type?=devel
 
 partition?=./build/configs/artik05x/scripts/partition_map.cfg
