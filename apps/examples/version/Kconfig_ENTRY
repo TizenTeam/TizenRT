@@ -1,0 +1,3 @@
+config ENTRY_VERSION
+	bool "\"Version, World!\" example"
+	depends on EXAMPLES_VERSION
