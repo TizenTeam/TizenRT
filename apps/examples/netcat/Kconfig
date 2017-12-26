@@ -1,0 +1,26 @@
+#
+# For a description of the syntax of this configuration file,
+# see kconfig-language at https://www.kernel.org/doc/Documentation/kbuild/kconfig-language.txt
+#
+
+config EXAMPLES_NETCAT
+	bool "\"NetCat, World!\" example"
+	default n
+	---help---
+		Enable the \"NetCat, World!\" example
+
+if EXAMPLES_NETCAT
+
+config EXAMPLES_NETCAT_PROGNAME
+	string "Program name"
+	default "netcat"
+	depends on BUILD_KERNEL
+	---help---
+		This is the name of the program that will be use when the NSH ELF
+		program is installed.
+
+endif
+
+config USER_ENTRYPOINT
+	string
+	default "netcat_main" if ENTRY_NETCAT

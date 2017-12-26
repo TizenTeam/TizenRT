@@ -1,0 +1,3 @@
+config ENTRY_NETCAT
+	bool "\"NetCat, World!\" example"
+	depends on EXAMPLES_NETCAT
