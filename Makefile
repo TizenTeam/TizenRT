@@ -14,7 +14,7 @@ default: rule/default
 
 #{
 #TODO
-url?=https://github.com/SamsungARTIK/artik-sdk
+#url?=https://github.com/SamsungARTIK/artik-sdk
 machine?=artik055s
 machine_family?=artik05x
 #image_type?=minimal
@@ -25,9 +25,12 @@ machine_family?=artik05x
 #image_type?=tash
 #image_type?=minimal
 #image_type?=hello
-base_config?=minimal
-#base_config=nettest
+base_config?=minimal  # ok for parts #TODO
+#base_config=nettest # ok for parts #TODO
+base_config=extra
 image_type?=devel
+base_defconfig?=build/configs/${machine}/${base_config}/defconfig
+defconfig?=build/configs/${machine}/${image_type}/defconfig
 
 partition?=./build/configs/artik05x/scripts/partition_map.cfg
 image_elf?=build/output/bin/tinyara
@@ -68,11 +71,12 @@ os?=${CURDIR}/${deploy_image}
 TIZENRT_BASEDIR?=${CURDIR}
 OPENOCD_SCRIPTS=${CURDIR}/build/tools/openocd
 
-cfg?=${CURDIR}/build/configs/${machine}/tools/openocd/  
+cfg?=${CURDIR}/build/configs/${machine}/tools/openocd/
 #TODO
 cfg=${CURDIR}/build/configs/${machine_family}/scripts/${machine_family}.cfg
 
 gcc_package?=gcc-arm-none-eabi-4_9-2015q3
+configure?=os/tools/configure.sh
 
 XPATH=${HOME}/mnt/${gcc_package}/bin
 export XPATH
@@ -87,6 +91,7 @@ clean:
 
 cleanall: clean
 	-rm -v ${deploy_image} ${image}
+	-rm -rf tmp
 
 distclean: cleanall
 	rm -f ${config}
@@ -101,22 +106,22 @@ prep: os/Make.defs
 rule/%: ${config} prep
 	cd ${<D} && PATH=${PATH}:${XPATH} ${MAKE} ${@F}
 
-${config}: os/tools/configure.sh build/configs/${config_type} #Makefile
+${config}: ${configure} ${defconfig} #Makefile
 	@echo "# Configure: ${config_type}"
 	cd ${<D} && ./${<F} ${config_type}
 	ls -l "$@"
 
-config: os/tools/configure.sh build/configs/${config_type} #Makefile
+#TODO
+config: ${configure} build/configs/${config_type} #Makefile
 	@echo "# Configure: ${config_type}"
 	cd ${<D} && ./${<F} ${config_type}
 	ls -l ${config}
-#TODO
+
 os/Make.defs:
 	ls $@ || make config
 	ls $@
 
-menuconfig:
-	ls os/.config || ${MAKE} config
+menuconfig: ${config}
 	make -C os menuconfig
 
 ${image_elf}: rule/all
@@ -147,27 +152,28 @@ openocd/%: ${cfg}
 flash: flash/${machine}
 	@echo "# $@: $^"
 
-#flash: download
+#flash: deploy
 
-download/%: ${deploy_image}
-	${MAKE} -C os ${@D} ${@F}
+deploy/%: ${deploy_image} os
+	${MAKE} -C os download ${@F}
 
-#TODO Add stamp
-download: download/ALL
+deploy: deploy/ALL
+	@echo "# $@: $^"
+
+done/deploy: tmp/done/deploy.tmp
+
+tmp/done/deploy.tmp: deploy
+	mkdir -p ${@D}
+	touch $@
+deploy/help: openocd/help
 	@echo "# $@: $^"
 
 # http://openocd.org/doc-release/html/index.html#toc-Reset-Configuration-1
 reset: openocd/help
 	@echo "press micron switch near to led and mcu of S05s"
 
-help: openocd/help
-	@echo "# $@: $^"
-
 partition: ${partition}
 	cat "$<"
-
-ls: ${image}
-	ls $^
 
 configure: os/build/configs
 	ls $<
@@ -226,7 +232,7 @@ ${deploy_image}: ${image} ${signer}
 	${signer} -verify "${@}"
 	ls -l "$@"
 
-${partition}: download
+${partition}: deploy
 
 #${partition}: # ${image}
 #	echo build/configs/${machine}/README.md
@@ -241,16 +247,15 @@ configs: build/configs/${machine}/
 
 ${signer}: ${sdk}
 
-build/configs/${machine}/devel: build/configs/${machine}/${base_config}
-	cp -rf $< $@
-	${MAKE} config 
-	${MAKE} -C os menuconfig
+defconfig: ${defconfig} ${base_defconfig}
+	ls -l $^
 
-all: ${firmware}
-	ls $<
+${defconfig}: ${base_defconfig}
+	@mkdir -p ${@D}
+	cp -rfv ${<D}/* ${@D}
 
-env:
-	@echo "image_type=${image_type}"
+all: ${image} ${config} ${defconfig} ${base_defconfig}
+	ls -l $^
 
 #{ TODO
 
@@ -259,13 +264,13 @@ todo/os/.config: os/tools/configure.sh build/configs/${config_type} Makefile
 	ls -l ${@}
 	-cp build/configs/${config_type}/.config "$@"
 
-commit:  build/configs/${machine}/${image_type}
-	git add build/configs/${machine}/${image_type}
+commit:
+	git add build/configs/${machine}/${image_type} ||:
 	git commit -sam "WIP: ${image_type}" ||:
 
-save: 
-	mkdir -p build/configs/${config_type}/ 
-	cp -av ${config} build/configs/${config_type}/defconfig
+save:
+	mkdir -p build/configs/${config_type}/
+	cp -av ${config} ${defconfig}
 	${MAKE} commit
 
 save/%: save
@@ -275,20 +280,26 @@ save/%: save
 	git add build/configs/${machine}/${@F} ||:
 	${MAKE} commit
 
-demo: commit cleanall menuconfig all download/ALL console
-	${MAKE} console commit
+demo: commit cleanall menuconfig all deploy console
+	${MAKE} commit
 
-diff: build/configs/${machine}/${image_type}/defconfig 
+run: commit done/deploy console
+	${MAKE} commit
+
+diff: ${defconfig}
 	meld $^ ${config}
 
-devel: build/configs/${machine}/${base_config}/defconfig build/configs/${machine}/devel/defconfig 
+diff/%: build/configs/${machine} ${config}
+	meld $</${@F}/defconfig ${config}
+
+devel: ${defconfig} build/configs/${machine}/devel/defconfig
 	meld $^
 
 devel/rm:
 	rm -rf build/configs/${machine}/devel
 	${MAKE} commit
 
-TODO/minimal: build/configs/artik053/minimal/defconfig  build/configs/${machine}/minimal/defconfig 
+TODO/minimal: build/configs/artik053/minimal/defconfig  build/configs/${machine}/minimal/defconfig
 	meld $^
 
 TODO/055s: build/configs/${machine}/audio/defconfig ${config}
@@ -301,3 +312,5 @@ build/configs/${config_type}/.config:
 	exit 1
 	cp -a os/.config $@
 
+env:
+	@echo "image_type=${image_type}"
