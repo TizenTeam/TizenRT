@@ -67,6 +67,62 @@ int main(int argc, FAR char *argv[])
 int netcat_main(int argc, char *argv[])
 #endif
 {
-	printf("NetCat, World!!\n");
+
+    int socket_desc , new_socket , c;
+    struct sockaddr_in server , client;
+    char *message =0;
+     
+    //Create socket
+    socket_desc = socket(AF_INET , SOCK_STREAM , 0);
+    if (socket_desc == -1)
+    {
+        fprintf(stderr,"Could not create socket\n");
+    }
+     
+    //Prepare the sockaddr_in structure
+    server.sin_family = AF_INET;
+    server.sin_addr.s_addr = INADDR_ANY;
+    server.sin_port = htons( PORT );
+     
+    //Bind
+    if( bind(socket_desc,(struct sockaddr *)&server , sizeof(server)) < 0)
+    {
+        fprintf(stderr,"bind failed\n");
+        return 1;
+    }
+    fprintf(stderr,"bind done\n");
+    //Listen
+    listen(socket_desc , 3);
+     
+    //Accept and incoming connection
+    fprintf(stderr,"listening on :%d\n", PORT);
+    c = sizeof(struct sockaddr_in);
+    int len = 10;
+    char buf[len];
+    while( (new_socket = accept(socket_desc, (struct sockaddr *)&client, (socklen_t*)&c)) )
+    {
+        int read_size = 1;
+        //printf("reading 0x%x\n", new_socket);
+        while( read_size > 0)
+        {
+            read_size = recv(new_socket , buf, len , 0 );
+            buf[read_size]=0;
+            //printf("reading");
+            //printf("\n%d\n", read_size);
+            //*(message+read_size) = 0;
+            printf("%s",buf);
+            write(new_socket , buf, len);
+            //Reply to the client
+            //write(new_socket , message , strlen(message));
+        } 
+        //printf("reading: over\n");
+    }
+     
+    if (new_socket<0)
+    {
+        perror("accept failed");
+        return 1;
+    }
+     
 	return 0;
 }
