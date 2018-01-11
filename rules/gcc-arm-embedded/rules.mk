@@ -46,5 +46,8 @@ ${toolchain_dir}:
 ${toolchain_dir}/%: ${toolchain_dir}
 	ls $@
 
-toolchain/setup: ${CC}
+gcc-arm-embedded/setup: ${CC}
 	$< --version
+
+gcc-arm-embedded/setup/debian:
+	sudo apt-get install -y libc6-i386 
