@@ -35,7 +35,7 @@
 
 toolchain_abi?=arm-none-eabi
 toolchain_package?=gcc-${toolchain_abi}-4_9-2015q3
-#TODO: overide in configure file
+#TODO: override in configure file
 extra_dir?=${CURDIR}/tmp/extra
 toolchain_dir?=${extra_dir}/${toolchain_package}
 

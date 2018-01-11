@@ -46,5 +46,5 @@ ${toolchain_dir}:
 ${toolchain_dir}/%: ${toolchain_dir}
 	ls $@
 
-toolchain/setup: ${CC}
+gcc-arm-embedded/setup: ${CC}
 	$< --version
