@@ -42,11 +42,11 @@ env_()
     url_suffix="#${branch}"
 
     #{TODO: Update here if needed
-    #user="rzr"
-    #org="${user}"
+    user="rzr"
+    org="${user}"
     #branch="sandbox/${user}/devel/${branch}"
     #url_suffix="#${branch}"
-    #url_suffix="" # TODO: For older docker
+    url_suffix="" # TODO: For older docker
     #}
 
     url="https://github.com/${org}/${project}.git${url_suffix}"
