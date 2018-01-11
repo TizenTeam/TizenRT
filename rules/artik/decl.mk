@@ -32,29 +32,36 @@
 #
 ############################################################################
 
+top_dir?=.
+rules_dir?=${topdir}/rules
+platform?=artik
+base_image_type?=minimal
 
-#default: rule/default
-#	@echo "# $@: $^"
+platform?=artik
+machine_family?=artik05x
+machine?=${platform}055s
+vendor_id?=0403
+product_id?=6010
+toolchain?=gcc-arm-embedded
 
-# TODO: Override here if needed:
+image=${build_dir}/output/bin/tinyara_head.bin
+deploy_image=${image}
 
-# Default:
-os?=tinyara
-platform?=qemu
-base_image_type?=tc_64k
+configure?=${os_dir}/tools/configure.sh
+image_type?=minimal
+config_type?=${machine}/${image_type}
+build_dir?=${top_dir}/build/output/bin/
 
-# Where to download and install tools or extra files:
-extra_dir?=${HOME}/usr/local/opt/${os}/extra
+base_image_type?=minimal
 
-# make sure user belongs to sudoers
-sudo?=sudo
-export sudo
+base_defconfig?=${configs_dir}/${machine}/${base_image_type}/defconfig
+defconfig?=${configs_dir}/${machine}/${image_type}/defconfig
+config_type?=${machine}/${image_type}
+config?=${os_dir}/.config
 
-# More work in progress rules can be shared in
--include rules/devel.mk
-image_type=devel
-#base_image_type=nettest
+all+=${image} ${config} ${defconfig} ${base_defconfig}
+all+=${deploy_image}
 
-# which can contain extra rules ie: include rules/iotjs/rules.mk
+setup_debian_rules+=artik/setup/debian
 
-#} devel
+include ${rules_dir}/${toolchain}/decl.mk
