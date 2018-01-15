@@ -37,8 +37,8 @@ default: rule/default
 	@echo "# $@: $^"
 
 # TODO: Override here if needed:
-#platform?=artik
-#base_image_type?=nettest
+platform?=artik
+base_image_type?=nettest
 
 # Default:
 os?=tinyara
