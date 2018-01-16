@@ -63,12 +63,27 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
+#ifndef CONFIG_DEFAULT_CAPACITY
+#define CONFIG_DEFAULT_CAPACITY 256*4*2
+#endif
+#ifndef CONFIG_DEFAULT_PORT
+#define CONFIG_DEFAULT_PORT 54200
+#endif
+
+
+int die(int err, char* message)
+{
+    fprintf(stderr,"error: die: [%d] %s\n", err, message);
+    perror(message);
+    return err;
+}
 
 int netcat_server(int argc, char* argv[])
 {
+    int capacity = CONFIG_DEFAULT_CAPACITY;
     FILE* fout = stdout;
     struct sockaddr_in server, client;
-    int port = 54200;
+    int port = CONFIG_DEFAULT_PORT;
     
     if ((1 < argc) && (0 == strcmp("-l", argv[1]))) {
         if (2 < argc) {
@@ -77,8 +92,7 @@ int netcat_server(int argc, char* argv[])
         if (3 < argc) {
             fout = fopen(argv[3],"w");
             if ( 0 > fout ) {
-                perror("error: io: Failed to create file");
-                return 1;
+                return die(1, "error: io: Failed to create file");
             }
         }
     }
@@ -101,23 +115,25 @@ int netcat_server(int argc, char* argv[])
     }
     fprintf(stderr,"log: net: listening on :%d\n", port);
     listen(id , 3);
-    int capacity = 256;
     char buf[capacity];
     socklen_t addrlen;
     int conn;
     while ((conn = accept(id, (struct sockaddr *)&client, &addrlen)))
     {
-        int avail = 1;
+        ssize_t avail = 1;
         while (0 < avail)
         {
-            avail = recv(conn, buf, capacity, 0 );
+            avail = recv(conn, buf, capacity, 0);
             buf[avail]=0;
             fprintf(fout, "%s", buf);
             int status = fflush(fout);
             if (0 != status) {
                 perror("error: io: Failed to flush");
             }
-            write(conn, buf, avail); // echo back to client
+            if (false) {
+                if ( avail != write(conn, buf, avail))
+                    perror("error: io: Failed to echo back to client");
+            }
         }
     }
     if (0 > conn)
@@ -137,7 +153,7 @@ int netcat_client(int argc, char* argv[])
 {
     FILE *fout = stdout;
     char *host = "127.0.0.1";
-    int port = 54200;
+    int port = CONFIG_DEFAULT_PORT;
 
     if (argc > 1) {
         host = argv[1];
@@ -177,9 +193,9 @@ int netcat_client(int argc, char* argv[])
         return 4;
     }
 
-    int capacity = 256;
+    int capacity = CONFIG_DEFAULT_CAPACITY;
     char buf[capacity];
-    int avail;
+    ssize_t avail;
     for(;;) {
         fgets(buf, capacity, stdin);
         avail = strnlen(buf, capacity);
@@ -210,6 +226,8 @@ int netcat_main(int argc, char *argv[])
     int status = EXIT_SUCCESS;
     if (2 > argc) {
         fprintf(stderr, "Usage: $0 [-l] [destination] [port] [file]\n");
+        fprintf(stderr, "Default capacity: %d\n", CONFIG_DEFAULT_CAPACITY);
+        fprintf(stderr, "Default port: %d\n", CONFIG_DEFAULT_PORT);
     } else if ((1 < argc) && (0 == strcmp("-l", argv[1]))) {
         status = netcat_server(argc, argv);
     } else {
