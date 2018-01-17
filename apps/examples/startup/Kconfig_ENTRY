@@ -1,0 +1,3 @@
+config ENTRY_STARTUP
+	bool "StartUp example"
+	depends on EXAMPLES_STARTUP

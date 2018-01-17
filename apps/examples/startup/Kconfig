@@ -1,0 +1,53 @@
+#
+# For a description of the syntax of this configuration file,
+# see kconfig-language at https://www.kernel.org/doc/Documentation/kbuild/kconfig-language.txt
+#
+
+config EXAMPLES_STARTUP
+	bool "StartUp example"
+	default n
+	select ENABLE_IOTJS
+	---help---
+		Enable the StartUp example
+
+if EXAMPLES_STARTUP
+
+config EXAMPLES_STARTUP_PROGNAME
+	string "Program name"
+	default "startup"
+	depends on BUILD_KERNEL
+	---help---
+		This is the name of the program that will be use when the NSH ELF
+		program is installed.
+
+config EXAMPLES_STARTUP_JS_FILE
+	string "Program main file"
+	default "/rom/example/index.js"
+	---help---
+		This is the name of the program that will be use when the NSH ELF
+		program is installed.
+
+config EXAMPLES_STARTUP_WIFI
+	bool "Connect WiFi"
+        select WIFI_MANAGER
+	select CONFIG_SCSC_WLAN
+        default n
+                ---help---
+                Enable WiFi on boot
+
+if EXAMPLES_STARTUP_WIFI
+
+config EXAMPLES_STARTUP_WIFI_SSID
+	string "wifi ap SSID"
+	default "public"
+
+config EXAMPLES_STARTUP_WIFI_PASS
+	string "wifi ap password"
+	default ""
+endif
+
+endif
+
+config USER_ENTRYPOINT
+	string
+	default "startup_main" if ENTRY_STARTUP
