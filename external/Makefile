@@ -182,7 +182,8 @@ iotjs_build:
 ifeq ($(CONFIG_ENABLE_IOTJS),y)
 	python $(IOTJS_ROOT_DIR)/tools/build.py --target-arch=arm --target-os=tizenrt \
 	--sysroot=../os --target-board=artik05x --jerry-heaplimit=$(CONFIG_IOTJS_JERRY_HEAP) \
-	--buildtype=$(IOTJS_BUILDTYPE) --no-init-submodule $(IOTJS_BUILD_OPTION)
+	--buildtype=$(IOTJS_BUILDTYPE) --no-init-submodule $(IOTJS_BUILD_OPTION) \
+	--profile test/profiles/tizenrt.profile
 endif
 
 iotjs_clean:
