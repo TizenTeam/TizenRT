@@ -23,7 +23,7 @@ if (undefined !== process.argv[0]) {
   runtime = process.argv[0];
 }
 
-var serialport = runtime + '/' + 'serialport';
+var serialport = (runtime === "iotjs") ? runtime + '/' + 'serialport' : 'serialport';
 var SerialPort = require(serialport);
 
 function log(arg) {
