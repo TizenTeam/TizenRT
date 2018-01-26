@@ -93,7 +93,8 @@ backup: ${CURDIR}/extra/private/
 	rsync -avx $</ ${HOME}/backup/${<}
 
 ${CURDIR}/extra/private/%:
-	ls $@ || rsync -avx ${HOME}/backup/${@D} ${@D} || echo "TODO"
+	mkdir -p ${@D}
+	ls $@ || rsync -avx ${HOME}/backup/${@D}/ ${@D}/ || echo "TODO"
 	ls $@
 
 #} devel
