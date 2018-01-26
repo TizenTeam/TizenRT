@@ -44,8 +44,9 @@ var runtime = "iotjs"
 if (undefined !== process.argv[0]) {
   runtime = process.argv[0];
 }
+var pwd = ( runtime == "iotjs" ) ? "/rom" : "./";
 var fs = require('fs');
-var config = fs.existsSync('/rom/private/config.js') ? 'private/config' : 'config';
+var config = fs.existsSync( pwd + 'private/config.js') ? 'private/config' : 'config';
 var Config = require(config);
 console.log(Config);
 
