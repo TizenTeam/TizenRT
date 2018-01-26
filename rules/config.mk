@@ -72,7 +72,7 @@ example: extra/ tools/fs/contents
 image_type=devel
 base_image_type=devel
 
-demo:
+demo: ${CURDIR}/extra/private/config.js
 	${make} -e help configure
 	grep STARTUP os/.config
 	grep IOTJS os/.config
@@ -88,12 +88,12 @@ commit: external/iotjs/.clang-format extra
 	which clang-format-3.9 || sudo apt-get install clang-format-3.9
 	cd extra && clang-format-3.9 -i *.js */*.js
 
-backup: ${CURDIR}/extra/private
+backup: ${CURDIR}/extra/private/
 	mkdir -p ${HOME}/backup/$</
-	rsync -avx ${HOME}/backup/$</ ${HOME}/backup/${<}
+	rsync -avx $</ ${HOME}/backup/${<}
 
-${CURDIR}/extra/private:
-	ls $@ || rsync -avx ${HOME}/backup/${<} $@ || echo "TODO"
+${CURDIR}/extra/private/%:
+	ls $@ || rsync -avx ${HOME}/backup/${@D} ${@D} || echo "TODO"
 	ls $@
 
 #} devel
