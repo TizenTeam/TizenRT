@@ -33,8 +33,8 @@
 ############################################################################
 
 
-default: rule/default
-	@echo "# $@: $^"
+#default: rule/default
+#	@echo "# $@: $^"
 
 # TODO: Override here if needed:
 platform?=artik
@@ -44,3 +44,52 @@ base_image_type?=nettest
 os?=tinyara
 platform?=qemu
 base_image_type?=tc_64k
+
+# Where to download and install tools or extra files:
+extra_dir?=${HOME}/usr/local/opt/${os}/extra
+
+# make sure user belongs to sudoers
+sudo?=sudo
+export sudo
+
+# Overload external dep to be pulled
+iotjs_url=https://github.com/tizenteam/iotjs
+iotjs_branch=master
+#iotjs_branch=sandbox/rzr/devel/demo/master
+#iotjs_url=file://${HOME}/mnt/iotjs
+#iotjs_branch=sandbox/rzr/devel/tizenrt/master
+
+
+include rules/iotjs/rules.mk
+
+
+#{ devel
+example: extra/ tools/fs/contents
+	@echo "# log: TODO: $<"
+	du -hs $^
+	rsync -avx $^
+
+image_type=devel
+base_image_type=devel
+
+demo:
+	${make} -e help configure
+	grep STARTUP os/.config
+	grep IOTJS os/.config
+	grep NETCAT os/.config
+	grep 'BAUD=' os/.config 
+	${make} -e example deploy
+	${make} -e run 
+#	${make} console/screen  # baudrate=57600
+#	sed -e 's|115200|57600|g' -i os/.config
+
+commit: external/iotjs/.clang-format extra
+	ln -fs $^
+	which clang-format-3.9 || sudo apt-get install clang-format-3.9
+	cd extra && clang-format-3.9 -i *.js */*.js
+
+backup: ${CURDIR}/extra
+	mkdir -p ${HOME}/backup/$</
+	rsync -avx ${HOME}/backup/$</ ${HOME}/backup/${<}
+
+#} devel
