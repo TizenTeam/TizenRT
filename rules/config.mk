@@ -88,8 +88,12 @@ commit: external/iotjs/.clang-format extra
 	which clang-format-3.9 || sudo apt-get install clang-format-3.9
 	cd extra && clang-format-3.9 -i *.js */*.js
 
-backup: ${CURDIR}/extra
+backup: ${CURDIR}/extra/private
 	mkdir -p ${HOME}/backup/$</
 	rsync -avx ${HOME}/backup/$</ ${HOME}/backup/${<}
+
+${CURDIR}/extra/private:
+	ls $@ || rsync -avx ${HOME}/backup/${<} $@ || echo "TODO"
+	ls $@
 
 #} devel
