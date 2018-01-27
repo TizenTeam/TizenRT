@@ -72,6 +72,7 @@ int startup_main(int argc, char *argv[])
     char * targv[] = { "iotjs",
                        "/rom/index.js" };
     int targc = 2;
-    iotjs(targc, targv);
+    for(;;)
+        iotjs(targc, targv);
     return 0;
 }
