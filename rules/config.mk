@@ -72,7 +72,7 @@ example: extra/ tools/fs/contents
 image_type=devel
 base_image_type=devel
 
-#prep_files+=${CURDIR}/extra/private/config.js
+prep_files+=${CURDIR}/extra/private/config.js
 #prep_files+=external/iotjs/profiles/default.profile
 
 demo: ${prep_files}
