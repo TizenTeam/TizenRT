@@ -73,7 +73,7 @@ image_type=devel
 base_image_type=devel
 
 prep_files+=${CURDIR}/extra/private/config.js
-#prep_files+=external/iotjs/profiles/default.profile
+prep_files+=external/iotjs/profiles/default.profile
 
 demo: ${prep_files}
 	${make} -e help configure
@@ -101,7 +101,7 @@ ${CURDIR}/extra/private/%:
 	ls $@
 
 external/iotjs/profiles/%:
-	${make} iotjs/import
+	ls $@ || ${make} iotjs/import
 	ls $@
 
 
