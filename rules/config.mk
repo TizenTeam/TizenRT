@@ -64,16 +64,20 @@ include rules/iotjs/rules.mk
 
 
 #{ devel
-example: extra/ tools/fs/contents
-	@echo "# log: TODO: $<"
-	du -hs $^
-	rsync -avx $^
-
 image_type=devel
 base_image_type=devel
 
 prep_files+=${CURDIR}/extra/private/config.js
 prep_files+=external/iotjs/profiles/default.profile
+rom_dir?=tools/fs/contents
+
+
+rom: extra/ ${rom_dir}
+	@echo "# log: TODO: $<"
+	du -hs $^
+	rsync -avx $^
+	@mkdir -p ${rom_dir}/iotjs/samples
+	rsync -avx external/iotjs/samples/ ${rom_dir}/iotjs/samples/
 
 demo: ${prep_files}
 	${make} -e help configure
@@ -81,7 +85,7 @@ demo: ${prep_files}
 	grep IOTJS os/.config
 	grep NETCAT os/.config
 	grep 'BAUD=' os/.config 
-	${make} -e example deploy
+	${make} -e rom deploy
 	${make} -e run 
 #	${make} console/screen  # baudrate=57600
 #	sed -e 's|115200|57600|g' -i os/.config
@@ -103,7 +107,5 @@ ${CURDIR}/extra/private/%:
 external/iotjs/profiles/%:
 	ls $@ || ${make} iotjs/import
 	ls $@
-
-
 
 #} devel
