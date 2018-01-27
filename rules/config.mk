@@ -72,7 +72,10 @@ example: extra/ tools/fs/contents
 image_type=devel
 base_image_type=devel
 
-demo: ${CURDIR}/extra/private/config.js
+#prep_files+=${CURDIR}/extra/private/config.js
+#prep_files+=external/iotjs/profiles/default.profile
+
+demo: ${prep_files}
 	${make} -e help configure
 	grep STARTUP os/.config
 	grep IOTJS os/.config
@@ -96,5 +99,11 @@ ${CURDIR}/extra/private/%:
 	mkdir -p ${@D}
 	ls $@ || rsync -avx ${HOME}/backup/${@D}/ ${@D}/ || echo "TODO"
 	ls $@
+
+external/iotjs/profiles/%:
+	${make} iotjs/import
+	ls $@
+
+
 
 #} devel
