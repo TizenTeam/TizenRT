@@ -15,11 +15,10 @@
  */
 
 //'use strict'; //TODO
-
-
 function log(arg) {
   try {
-    console.log("log: " + JSON.stringify(arg));
+    console.log.apply(console, [].slice.call(arguments));
+//    console.log("log: " + JSON.stringify(arg));
   } catch (err) {
     console.log("log: arg: " + arg);
     console.log("log: err");
@@ -42,11 +41,14 @@ function die(err, message) {
 
 var runtime = "iotjs"
 if (undefined !== process.argv[0]) {
+  console.log(process);
   runtime = process.argv[0];
 }
-var pwd = ( runtime == "iotjs" ) ? "/rom" : "./";
+var pwd = ( runtime === "iotjs" ) ? "/rom/" : "./";
 var fs = require('fs');
-var config = fs.existsSync( pwd + 'private/config.js') ? 'private/config' : 'config';
+var config = pwd  + 'private/config.js';
+if (! fs.existsSync(config))
+  config = 'config';
 var Config = require(config);
 console.log(Config);
 

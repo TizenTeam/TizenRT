@@ -88,9 +88,6 @@ LoraWan.prototype.join = function join() {
 
   self.tx("mac get devaddr"); // expect: 26ffFFff
   self.tx("mac join " +  self.config.method); // expect: ok, accepted (after 5secs)
-  setTimeout(function() {
-    log("expect: accepted after 5secs? " + self.state);
-  }, 6000);
   self.tx("radio get mod");   // expect: lora
   self.tx("radio get freq");  // expect: 868500000
   self.tx("radio get pwr");   // export:
@@ -126,6 +123,8 @@ LoraWan.prototype.start = function start() {
       self.state = "accepted";
     } else if (data.indexOf("busy") >= 0) {
     } else if (data.indexOf("no_free_ch") >= 0) {
+      self.state = 'wait';
+      self.timeout = setTimeout(function() { self.state = "accepted"; }, self.delay);
     }
   });
 
@@ -173,6 +172,10 @@ LoraWan.prototype.start = function start() {
       if (message.indexOf("mac tx") >= 0) {
         self.state = "wait";
         self.timeout = setTimeout(function() { self.state = "accepted"; }, self.delay);
+      } else if (message.indexOf("join") >= 0) {
+        setTimeout(function() {
+          log("expect: accepted after 5secs? " + self.state);
+        }, 6000);
       }
     });
   }, self.tick);
