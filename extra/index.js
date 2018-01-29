@@ -55,7 +55,7 @@ console.log(Config);
 // var AirQuality = require('airquality');
 var AirQuality = require('airquality-mq2');
 var LoraWan = require('lorawan');
-
+var PwmAudio = require('pwm-audio');
 var airquality = new AirQuality(Config.airquality);
 var lpwan = new LoraWan(Config.lorawan);
 
@@ -69,6 +69,7 @@ airquality.on('onreading', function(value) {
   if (value > airquality.unhealthy) {
     log("sending: " + value + ">" + airquality.unhealthy);
     lpwan.send(Number(value).toString(16));
+    PwmAudio.play();
   }
 });
 
