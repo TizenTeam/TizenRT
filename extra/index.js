@@ -59,7 +59,7 @@ var PwmAudio = require('pwm-audio');
 
 var airquality = new AirQuality(Config.airquality);
 var lpwan = new LoraWan(Config.lorawan);
-var pwmaudio = new PwnAudio();
+var pwmaudio = new PwmAudio();
 
 airquality.on('onerror', function(value) {
   console.log("onerror:");
@@ -71,10 +71,12 @@ airquality.on('onreading', function(value) {
   if (value > airquality.unhealthy) {
     log("sending: " + value + ">" + airquality.unhealthy);
     lpwan.send(Number(value).toString(16));
+    pwmaudio.play();
   }
 });
 
-pwmaudio.play();
+if (!false)  pwmaudio.play();
+if (!false)  pwmaudio.play();
 
 setTimeout(function() { lpwan.start(); }, 1 * 1000);
 setTimeout(function() { airquality.start() }, 10 * 1000);
