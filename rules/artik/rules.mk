@@ -32,7 +32,7 @@
 #
 ############################################################################
 
-#{openocd
+#TODO: relocate if shared
 openocd/%: ${openocd_cfg}
 	cd ${<D} && ${openocd} -f "${<F}" -c "${@F}; exit 0;" 2>&1
 #}openocd
@@ -151,13 +151,7 @@ artik/deploy/help: openocd/help
 	@echo "# $@: $^"
 
 
-#}generic
-
-
-
-#EOF
-
-
+#TODO:
 artik/todo:
 	cd os && sh -x -e ${CURDIR}/tools/fs/mkromfsimg.sh
 
