@@ -42,6 +42,7 @@ help: ${README} help
 	@echo "# apps_dir=${apps_dir}"
 	@echo "# config=${config}"
 	@echo "# defconfig=${defconfig}"
+	@echo "# base_defconfig=${base_defconfig}"
 	@echo "# deploy_image=${deploy_image}"
 	@echo "# image=${image}"
 	@echo "# image_type=${image_type}"
@@ -101,12 +102,22 @@ rule/default: rule/prep all
 ${image}: rule/make
 	ls -l "$@"
 
+${defconfig}: ${base_defconfig}
+	@ls $@ && echo "#TODO: update manually $@ from $<" || echo "# Create $@ from $<"
+	@mkdir -p ${@D}
+	@ls $@ || cp -rv ${<D}/* ${@D}
+	@ls $@
+
 defconfig: ${defconfig}
-	ls $^
+	@ls $^
+
+defconfig/save: ${config}
+	@cp -av ${config} ${defconfig}
+	@ls -l ${defconfig}
 
 menuconfig: ${os_dir} ${config} 
 	${MAKE} -C $< $@
-
+	@ls -l ${config}
 
 ${platform}/%: rules/${platform}/rules.mk
 	@echo "# $@ can be overidden in $^"
@@ -123,6 +134,5 @@ deploy: ${tmp_dir}/rule/done/deploy
 
 run: done/deploy ${platform}/run
 	sync
-
 
 .PHONY: rule/configure rule/make
