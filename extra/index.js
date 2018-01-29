@@ -74,7 +74,7 @@ airquality.on('onreading', function(value) {
   }
 });
 
-pwmAudio.play();
+pwmaudio.play();
 
 setTimeout(function() { lpwan.start(); }, 1 * 1000);
 setTimeout(function() { airquality.start() }, 10 * 1000);
