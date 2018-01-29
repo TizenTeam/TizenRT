@@ -1,3 +1,4 @@
+// -*- mode: js; js-indent-level:2; -*-
 /* Copyright 2017-present Samsung Electronics Co., Ltd. and other contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -78,13 +79,12 @@ var pwm = require('pwm'),
       ["C5", 0.3], ["B4", 0.2], ["B4", 0.1], ["D5", 0.1],
       ["A4", 0.3], ["A4", 0.4],
       ["A4", 0.7],
-  ],
-  device = null;
+  ];
 
 
 // log only when log_enable flag is set to true
 function log(/*...args*/) {
-var log_enable = true;
+var log_enable = !true;
   if (log_enable) {
     console.log.apply(console, [].slice.call(arguments));
   }
@@ -101,10 +101,20 @@ function note2freq(noteStr) {
   return 0;
 }
 
+
+function PwmAudio()
+{
+    var self = this;
+    self.device = null;
+    self.ready = true;
+    return self;
+}
+
 // sets pwm period and runs callback after specified length of time
-function setPeriod(period, length, callback) {
+PwmAudio.prototype.setPeriod = function setPeriod(period, length, callback) {
+var self = this;
   log('period: ' + period + ', length: ' + length + ' ms');
-  device.setPeriod(period, function (err) {
+    self.device.setPeriod(period, function (err) {
     if (err) {
       callback(err);
     } else {
@@ -114,40 +124,45 @@ function setPeriod(period, length, callback) {
 }
 
 // plays each note of song recursively and runs callback on end
-function playSong(song, callback, currentNote) {
+PwmAudio.prototype.playsong = function playSong(song, callback, currentNote) {
+  var self = this;
   var idx = currentNote === undefined ? 0 : currentNote,
     freq = 0;
   if (idx < song.length) {
     freq = note2freq(song[idx][0]);
     // period = 1 second / frequency
-    setPeriod(freq !== 0 ? 1 / freq : 0.5, 1000 * song[idx][1],
-             playSong.bind(null, song, callback, ++idx));
+      self.setPeriod(freq !== 0 ? 1 / freq : 0.5, 1000 * song[idx][1],
+                     self.playSong.bind(null, song, callback, ++idx));
   } else {
     callback();
   }
 }
 
-function PwmAudio()
-{
-    return device;
-}
 
-module.exports = PwmAudio;
 
-PwmAudio.prototype.play = function play()
+PwmAudio.prototype.start = function start()
 {
- device = pwm.open({
+    var self = this;
+    if (! self.ready ) return false;
+    self.ready = false;
+    self.device = pwm.open({
   pin: 0,
   dutyCycle: 0.5,
   period: 1 / 10
 }, function (err) {
   if (err) {
   } else {
-    device.setEnableSync(true);
-    playSong(song, function () {
-      device.close(function (e) {
+      self.device.setEnableSync(true);
+      self.playSong(song, function () {
+        self.device.close(function (e) {
+          self.ready = true;
       });
     });
   }
 });
 };
+
+module.exports = PwmAudio;
+
+var pwm = new PwmAudio();
+pwm.start();
