@@ -124,6 +124,18 @@ app/%: apps/examples/hello
 	@echo "TODO: $@: from $^"
 
 #TODO
+
+tizen_iotivity_example_url?=https://github.com/tizenteam/iotivity-example
+tizen_iotivity_example_branch?=sandbox/rzr/tizen/1.2-rel
+
+local/iotivity-example-tizen:
+	git clone ${tizen_iotivity_example_url} -b ${tizen_iotivity_example_branch} $@
+	cd $@ && ./tizen.mk tpk
+
+tizen: local/iotivity-example-tizen
+
+
+
 iotivity_example_url?=https://github.com/tizenteam/iotivity-example
 iotivity_example_branch?=sandbox/rzr/tizen/rt/1.2-rel
 apps/examples/iotivity_example: 
