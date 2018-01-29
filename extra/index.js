@@ -15,12 +15,13 @@
  */
 
 //'use strict'; //TODO
-function log(arg) {
+
+function log(...) {
   try {
     console.log.apply(console, [].slice.call(arguments));
-//    console.log("log: " + JSON.stringify(arg));
+    // console.log("log: " + JSON.stringify(arg));
   } catch (err) {
-    console.log("log: arg: " + arg);
+    console.log("log: err: " + err);
     console.log("log: err");
   }
 }
@@ -55,11 +56,11 @@ console.log(Config);
 // var AirQuality = require('airquality');
 var AirQuality = require('airquality-mq2');
 var LoraWan = require('lorawan');
-var PwmAudio = require('pwm-audio');
+var Audiopwm = require('audio-pwm');
 
 var airquality = new AirQuality(Config.airquality);
 var lpwan = new LoraWan(Config.lorawan);
-var pwmaudio = new PwmAudio();
+var audiopwm = new AudioPwm();
 
 airquality.on('onerror', function(value) {
   console.log("onerror:");
@@ -71,12 +72,11 @@ airquality.on('onreading', function(value) {
   if (value > airquality.unhealthy) {
     log("sending: " + value + ">" + airquality.unhealthy);
     lpwan.send(Number(value).toString(16));
-    pwmaudio.play();
+    audiopwm.play();
   }
 });
 
-if (!false)  pwmaudio.play();
-if (!false)  pwmaudio.play();
+if (false)  audiopwm.play();
 
 setTimeout(function() { lpwan.start(); }, 1 * 1000);
 setTimeout(function() { airquality.start() }, 10 * 1000);
