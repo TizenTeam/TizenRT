@@ -16,7 +16,7 @@
 
 //'use strict'; //TODO
 
-function log(...) {
+function log(/*...*/) {
   try {
     console.log.apply(console, [].slice.call(arguments));
     // console.log("log: " + JSON.stringify(arg));
@@ -56,7 +56,7 @@ console.log(Config);
 // var AirQuality = require('airquality');
 var AirQuality = require('airquality-mq2');
 var LoraWan = require('lorawan');
-var Audiopwm = require('audio-pwm');
+var AudioPwm = require('audio-pwm');
 
 var airquality = new AirQuality(Config.airquality);
 var lpwan = new LoraWan(Config.lorawan);
@@ -72,11 +72,11 @@ airquality.on('onreading', function(value) {
   if (value > airquality.unhealthy) {
     log("sending: " + value + ">" + airquality.unhealthy);
     lpwan.send(Number(value).toString(16));
-    audiopwm.play();
+    audiopwm.start();
   }
 });
 
-if (false)  audiopwm.play();
+if (false)  audiopwm.start();
 
 setTimeout(function() { lpwan.start(); }, 1 * 1000);
 setTimeout(function() { airquality.start() }, 10 * 1000);
