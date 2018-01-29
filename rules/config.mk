@@ -52,60 +52,11 @@ extra_dir?=${HOME}/usr/local/opt/${os}/extra
 sudo?=sudo
 export sudo
 
-# Overload external dep to be pulled
-iotjs_url=https://github.com/tizenteam/iotjs
-iotjs_branch=master
-#iotjs_branch=sandbox/rzr/devel/demo/master
-#iotjs_url=file://${HOME}/mnt/iotjs
-#iotjs_branch=sandbox/rzr/devel/tizenrt/master
-
-
-include rules/iotjs/rules.mk
-
-
-#{ devel
+# More work in progress rules can be shared in
+-include rules/devel.mk
 image_type=devel
-base_image_type=devel
+base_image_type=nettest
 
-prep_files+=${CURDIR}/extra/private/config.js
-prep_files+=external/iotjs/profiles/default.profile
-rom_dir?=tools/fs/contents
-
-
-rom: extra/ ${rom_dir}
-	@echo "# log: TODO: $<"
-	du -hs $^
-	rsync -avx $^
-	@mkdir -p ${rom_dir}/iotjs/samples
-	rsync -avx external/iotjs/samples/ ${rom_dir}/iotjs/samples/
-
-demo: ${prep_files}
-	${make} -e help configure
-	grep STARTUP os/.config
-	grep IOTJS os/.config
-	grep NETCAT os/.config
-	grep 'BAUD=' os/.config 
-	${make} -e rom deploy
-	${make} -e run 
-#	${make} console/screen  # baudrate=57600
-#	sed -e 's|115200|57600|g' -i os/.config
-
-commit: external/iotjs/.clang-format extra
-	ln -fs $^
-	which clang-format-3.9 || sudo apt-get install clang-format-3.9
-	cd extra && clang-format-3.9 -i *.js */*.js
-
-backup: ${CURDIR}/extra/private/
-	mkdir -p ${HOME}/backup/$</
-	rsync -avx $</ ${HOME}/backup/${<}
-
-${CURDIR}/extra/private/%:
-	mkdir -p ${@D}
-	ls $@ || rsync -avx ${HOME}/backup/${@D}/ ${@D}/ || echo "TODO"
-	ls $@
-
-external/iotjs/profiles/%:
-	ls $@ || ${make} iotjs/import
-	ls $@
+# which can contain extra rules ie: include rules/iotjs/rules.mk
 
 #} devel
