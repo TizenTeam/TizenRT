@@ -36,24 +36,19 @@
 platform?=artik
 base_image_type?=minimal
 
-#{artik
 url?=https://github.com/SamsungARTIK/artik-sdk
 machine?=artik055s
 machine_family?=artik05x
 vendor_id?=0403
 product_id?=6010
 
-
-
 image=build/output/bin/tinyara_head.bin
-#TODO
 deploy_image=${image}-signed
-
+#deploy_image=${image}-${platform}-signed # TODO: rm
 partition_map?=${CURDIR}/${configs_dir}/${machine_family}/scripts/partition_map.cfg
-
 factory_image?=${build_dir}/output/bin/factoryimage.gz
-#deploy_image=${image}-${platform}-signed
 
+#TODO: relocate if shared
 openocd?=openocd
 OPENOCD_SCRIPTS=${CURDIR}/build/tools/openocd
 openocd_cfg=${CURDIR}/${configs_dir}/${machine_family}/scripts/${machine_family}.cfg
