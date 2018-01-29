@@ -133,7 +133,7 @@ local/iotivity-example-tizen:
 	cd $@ && ./tizen.mk tpk
 
 tizen: local/iotivity-example-tizen
-
+	ls $^
 
 
 iotivity_example_url?=https://github.com/tizenteam/iotivity-example
