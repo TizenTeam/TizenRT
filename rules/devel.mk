@@ -131,6 +131,11 @@ apps/examples/iotivity_example:
 	git clone --recursive -b ${iotivity_example_branch} ${iotivity_example_url} $@
 	ls $@
 
+apps/examples/iotivity_example/%: apps/examples/iotivity_example
+	ls $@
+
+prep_files+=apps/examples/iotivity_example/Kconfig
+
 local/apps/examples/iotivity_example: ${HOME}/mnt/iotivity-example/
 	-rm $@
 	mkdir -p ${@}
