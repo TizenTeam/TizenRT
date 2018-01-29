@@ -1,5 +1,5 @@
 // -*- mode: js; js-indent-level:2; -*-
-/* Copyright 2017-present Samsung Electronics Co., Ltd. and other contributors
+/* Copyright 2018-present Samsung Electronics Co., Ltd. and other contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,14 @@
 /**
  * Description:
  *
- * Plays Freesoftware song using PWM
- *
+ * Plays Freesoftware song using PWM based on IoT's sample fur-elise
+*
  * Usage:
  *
  * To run this sample please connect a low-power speaker, like a passive buzzer
  * (piezoelectric speaker), negative feed (-) to GND and positive feed (+) to
  * pin 3 on Artik055s CON703, and run the code by executing
  *
- * $ iotjs play.js
  *
  */
 
