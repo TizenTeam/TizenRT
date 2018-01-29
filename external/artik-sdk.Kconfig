@@ -1,0 +1,28 @@
+#
+# For a description of the syntax of this configuration file,
+# see kconfig-language at https://www.kernel.org/doc/Documentation/kbuild/kconfig-language.txt
+#
+
+config ARTIK_SDK
+	bool "ARTIK SDK"
+	default n
+	select SPI
+	select ADC
+	select GPIO
+	select PWM
+	select S5J_I2C
+	select S5J_SPI
+	select S5J_ADC
+	select S5J_PWM
+	select NETUTILS_DHCPD
+	select NETUTILS_DHCPC
+	select NETUTILS_WEBSERVER
+	select NETUTILS_WEBSOCKET
+	select NETUTILS_WEBCLIENT
+	select NETUTILS_MQTT
+	select NETUTILS_MQTT_SECURITY
+	select TLS_WITH_SSS
+	select DM
+	select LWM2M_WAKAAMA_CLIENT
+	---help---
+		include the ARTIK SDK
