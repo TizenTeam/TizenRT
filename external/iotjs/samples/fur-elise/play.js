@@ -46,7 +46,7 @@ var pwm = require('pwm'),
   },
   // note frequencies
   frequencies = [
-    //C, C#, D, Eb, E, F, F#, G, G#, A, Bb, B in ocatves from 0 to 8
+    //C, C#, D, Eb, E, F, F#, G, G#, A, Bb, B in octaves from 0 to 8
     [16.35, 17.32, 18.35, 19.45, 20.60, 21.83, 23.12, 24.50, 25.96, 27.50,
       29.14, 30.87],
     [32.70, 34.65, 36.71, 38.89, 41.20, 43.65, 46.25, 49.00, 51.91, 55.00,
