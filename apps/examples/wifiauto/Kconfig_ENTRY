@@ -1,0 +1,3 @@
+config ENTRY_WIFIAUTO
+	bool "Wifi Auto Connect example"
+	depends on EXAMPLES_WIFIAUTO
