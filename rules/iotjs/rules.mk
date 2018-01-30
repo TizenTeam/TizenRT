@@ -37,6 +37,12 @@ iotjs_dir?=external/iotjs
 iotjs_url?=https://github.com/Samsung/iotjs
 iotjs_branch?=master
 
+${iotjs_dir}/deps/%: 
+	ls ${iotjs_dir}/.git ${iotjs_dir}/.gitmodules
+	cd ${iotjs_dir} && git submodule update --init --recursive 
+
+iotjs/deps: ${iotjs_dir}/deps/jerry/CMakeLists.txt
+	ls $<
 
 iotjs/import:
 	rm -rf ${iotjs_dir}
