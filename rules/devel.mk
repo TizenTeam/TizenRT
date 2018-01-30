@@ -224,6 +224,12 @@ external/artik-sdk:
 
 artik/import: external/artik-sdk
 
+iotjs/local:
+	-rm -f external/iotjs
+	rm -rf external/iotjs/
+	rsync -avx  --delete ~/mnt/iotjs/ external/iotjs/
+	${make} iotjs/deps
+
 .PHONY: devel/commit
 
 #} devel
