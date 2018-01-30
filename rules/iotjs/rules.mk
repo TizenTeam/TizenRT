@@ -44,13 +44,17 @@ ${iotjs_dir}/deps/%:
 iotjs/deps: ${iotjs_dir}/deps/jerry/CMakeLists.txt
 	ls $<
 
-iotjs/import:
+${iotjs_dir}:
+	git clone -b "${iotjs_branch}" --recursive --depth 1 ${iotjs_url} ${iotjs_dir}
+
+iotjs/rm:
 	rm -rf ${iotjs_dir}
 	git commit -am 'WIP: iotjs: About to replace import (${iotjs_branch})'
-	git clone -b "${iotjs_branch}" --recursive --depth 1 ${iotjs_url} ${iotjs_dir}
+
+iotjs/import: iotjs/rm ${iotjs_dir}
 	${RM} -rfv ${iotjs_dir}/.git ${iotjs_dir}/.gitmodules \
  ${iotjs_dir}/deps/*/.git ${iotjs_dir}/deps/*/*.gitmodules
 	git add -f ${iotjs_dir}
 	git commit -am 'WIP: iotjs: import sync (${iotjs_branch})'
-	-git checkout HEAD~2 external/iotjs/Kconfig.runtime
-	-git commit -am 'WIP: iotjs: Reverted Kconfig.runtime'
+#	-git checkout HEAD~2 external/iotjs/Kconfig.runtime
+#	-git commit -am 'WIP: iotjs: Reverted Kconfig.runtime'

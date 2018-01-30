@@ -69,6 +69,7 @@ base_image_type=nettest
 
 prep_files+=${CURDIR}/extra/private/config.js
 prep_files+=external/iotjs/profiles/default.profile
+prep_files+=external/iotjs/Kconfig.runtime
 contents_dir?=tools/fs/contents
 
 js_minifier?=slimit
