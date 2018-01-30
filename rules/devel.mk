@@ -117,9 +117,9 @@ ${CURDIR}/extra/private/%:
 	ls $@ || rsync -avx ${HOME}/backup/${@D}/ ${@D}/ || echo "TODO"
 	ls $@
 
-external/iotjs/profiles/%:
-	ls $@ || ${make} iotjs/import
-	ls $@
+#external/iotjs/profiles/%:
+#	ls $@ || ${make} iotjs/import
+#	ls $@
 
 app/%: apps/examples/hello
 	@echo "TODO: $@: from $^"
