@@ -47,6 +47,7 @@ help: ${README} help
 	@echo "# image=${image}"
 	@echo "# image_type=${image_type}"
 	@echo "# machine=${machine}"
+	@echo "# prep_files=${prep_files}"
 
 longhelp: ${self}
 	@echo "# Available rules:"
