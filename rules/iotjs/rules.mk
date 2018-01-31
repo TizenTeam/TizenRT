@@ -54,8 +54,8 @@ iotjs/prep: ${iotjs_dir} iotjs/deps
 	@ls -l ${iotjs_dir}/Kconfig.runtime
 
 iotjs/rm:
-	rm -rf ${iotjs_dir}
-	git commit -am 'WIP: iotjs: About to replace import (${iotjs_branch})'
+	rm -rf ${iotjs_dir} 
+	-git commit -am 'WIP: iotjs: About to replace import (${iotjs_branch})'
 
 iotjs/import: iotjs/rm 
 	${make} iotjs/prep
