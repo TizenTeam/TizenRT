@@ -37,12 +37,13 @@ openocd/%: ${openocd_cfg}
 	cd ${<D} && ${openocd} -f "${<F}" -c "${@F}; exit 0;" 2>&1
 #}openocd
 
-artik/help: ${configs_dir}/${machine}/README.mk rules/${platform}/decl.mk rules/${platform}/rules.mk
+artik/help: ${configs_dir}/${machine}/README.md rules/${platform}/decl.mk rules/${platform}/rules.mk
 	-cat $<
 	@echo "# ${make} openocd/help"
 	@echo "# deploy_image=${deploy_image}"
 	@echo "# cfg=${openocd_cfg}"
 	@echo "# tty=${tty}"
+	${signer} -h
 
 ${deploy_image}: ${image} ${signer}
 	${signer} -sign "${<}"
