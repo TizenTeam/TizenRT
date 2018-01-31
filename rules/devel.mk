@@ -90,39 +90,18 @@ contents: extra/ ${contents_dir}
   ${js_minifier} $${file} > $${file}.tmp && mv -v $${file}.tmp $${file} ; \
   done
 
-demo: ${prep_files}
-	${make} -e help configure
-#	grep STARTUP os/.config
-#	grep IOTJS os/.config
-#	grep NETCAT os/.config
-	grep 'BAUD=' os/.config 
-	${make} -e contents deploy
-	${make} -e run 
-#	${make} console/screen  # baudrate=57600
-#	sed -e 's|115200|57600|g' -i os/.config
+artik_sdk_url?=https://github.com/SamsungARTIK/artik-sdk.git
 
-commit: external/iotjs/.clang-format extra
-	ln -fs $^
-	which clang-format-3.9 || sudo apt-get install clang-format-3.9
-	cd extra && clang-format-3.9 -i *.js */*.js
+external/artik-sdk:
+	git clone --recursive ${artik_sdk_url} $@
 
-backup: ${CURDIR}/extra/private/
-	mkdir -p ${HOME}/backup/$</
-	rsync -avx $</ ${HOME}/backup/${<}
+artik/import: external/artik-sdk
 
-${CURDIR}/extra/private/%:
-	mkdir -p ${@D}
-	ls $@ || rsync -avx ${HOME}/backup/${@D}/ ${@D}/ || echo "TODO"
-	ls $@
-
-#external/iotjs/profiles/%:
-#	ls $@ || ${make} iotjs/import
-#	ls $@
-
-app/%: apps/examples/hello
-	@echo "TODO: $@: from $^"
-
-#TODO
+iotjs/local:
+	-rm -f external/iotjs
+	rm -rf external/iotjs/
+	rsync -avx  --delete ~/mnt/iotjs/ external/iotjs/
+	${make} iotjs/deps
 
 tizen_iotivity_example_url?=https://github.com/tizenteam/iotivity-example
 tizen_iotivity_example_branch?=sandbox/rzr/tizen/1.2-rel
@@ -178,6 +157,41 @@ ioty: ${HOME}/mnt/iotivity-example/ apps/examples/iotivity_example/
 	grep '^CONFIG_EXAMPLES_IOTIVITY_EXAMPLE' ${config} || ${make} menuconfig
 	${make}
 
+
+demo: ${prep_files}
+	${make} -e help configure
+#	grep STARTUP os/.config
+#	grep IOTJS os/.config
+#	grep NETCAT os/.config
+	grep 'BAUD=' os/.config 
+	${make} -e contents deploy
+	${make} -e run 
+#	${make} console/screen  # baudrate=57600
+#	sed -e 's|115200|57600|g' -i os/.config
+
+commit: external/iotjs/.clang-format extra
+	ln -fs $^
+	which clang-format-3.9 || sudo apt-get install clang-format-3.9
+	cd extra && clang-format-3.9 -i *.js */*.js
+
+backup: ${CURDIR}/extra/private/
+	mkdir -p ${HOME}/backup/$</
+	rsync -avx $</ ${HOME}/backup/${<}
+
+${CURDIR}/extra/private/%:
+	mkdir -p ${@D}
+	ls $@ || rsync -avx ${HOME}/backup/${@D}/ ${@D}/ || echo "TODO"
+	ls $@
+
+#external/iotjs/profiles/%:
+#	ls $@ || ${make} iotjs/import
+#	ls $@
+
+app/%: apps/examples/hello
+	@echo "TODO: $@: from $^"
+
+#TODO
+
 local_mk?=rules/local.tmp.mk
 
 devel/start: rules/config.mk clean
@@ -217,19 +231,6 @@ devel/demo: devel/start
 	${make} devel/commit run menuconfig devel/save devel/commit
 #	${make} devel/commit
 	sync
-
-artik_sdk_url?=https://github.com/SamsungARTIK/artik-sdk.git
-
-external/artik-sdk:
-	git clone --recursive ${artik_sdk_url} $@
-
-artik/import: external/artik-sdk
-
-iotjs/local:
-	-rm -f external/iotjs
-	rm -rf external/iotjs/
-	rsync -avx  --delete ~/mnt/iotjs/ external/iotjs/
-	${make} iotjs/deps
 
 .PHONY: devel/commit
 
