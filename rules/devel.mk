@@ -137,6 +137,8 @@ tizen: local/iotivity-example-tizen
 
 iotivity_example_url?=https://github.com/tizenteam/iotivity-example
 iotivity_example_branch?=sandbox/rzr/tizen/rt/1.2-rel
+iotivity_example_prep_files?=apps/examples/iotivity_example/Kconfig
+
 apps/examples/iotivity_example: 
 	mkdir -p ${@D}
 	git clone --recursive -b ${iotivity_example_branch} ${iotivity_example_url} $@
@@ -145,7 +147,7 @@ apps/examples/iotivity_example:
 apps/examples/iotivity_example/%: apps/examples/iotivity_example
 	ls $@
 
-prep_files+=apps/examples/iotivity_example/Kconfig
+prep_files+=${iotivity_example_prep_files}
 
 local/apps/examples/iotivity_example: ${HOME}/mnt/iotivity-example/
 	-rm $@
