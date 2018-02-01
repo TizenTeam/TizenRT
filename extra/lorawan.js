@@ -43,8 +43,8 @@ function LoraWan(configuration) {
   if (null === configuration) {
     configuration = {
       method : "abp",
-      appskey : "2B7E151628AED2A6ABF7158809CF4F3C", // TODO: TheThingNetwork
       nwkskey : "2B7E151628AED2A6ABF7158809CF4F3C", // TODO: (demo settings)
+      appskey : "2B7E151628AED2A6ABF7158809CF4F3C", // TODO: TheThingNetwork
       devaddr : "1B4DC0DE",
       serialport : {device : '/dev/ttyS1', config : {baudrate : 57600}}
     }
@@ -135,9 +135,10 @@ LoraWan.prototype.start = function start() {
 
   if (true) { // TODO: only set once to speed up
     if ("abp" === self.config.method) {
-      self.tx("mac set devaddr " + self.config.devaddr); // expect: ok
-      self.tx("mac set appskey " + self.config.appskey); // expect: ok
       self.tx("mac set nwkskey " + self.config.nwkskey); // expect: ok
+      self.tx("mac set appskey " + self.config.appskey); // expect: ok
+      self.tx("mac set devaddr " + self.config.devaddr); // expect: ok
+
     } else if ("otaa" === self.config.method) {
       self.tx("mac set appeui " + self.config.appeui); // expect: ok
       self.tx("mac set appkey " + self.config.appkey); // expect: ok
