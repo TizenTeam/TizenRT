@@ -37,7 +37,7 @@ function AirQuality(configuration) {
   self.contaminantvalue = 0;
   self.contaminanttype = "AirPollution";
   self.valuetype = "Measured";
-  self.unhealthy = 142; // TODO: Calibrate
+  self.unhealthy = 69; // TODO: Calibrate
   self.adc = new Adc();
   return self;
 }
