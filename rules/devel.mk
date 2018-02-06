@@ -84,6 +84,8 @@ contents: extra/ ${contents_dir}
 	@mkdir -p ${contents_dir}/iotjs/samples
 	rsync -avx external/iotjs/samples/ ${contents_dir}/iotjs/samples/
 	find ${contents_dir} -iname "*~" -exec rm {} \;
+
+contents/compress:
 	find ${contents_dir} -iname "*.js" \
   | while read file ; do \
   echo "#log: $${file}"; \
@@ -182,6 +184,9 @@ ${CURDIR}/extra/private/%:
 	mkdir -p ${@D}
 	ls $@ || rsync -avx ${HOME}/backup/${@D}/ ${@D}/ || echo "TODO"
 	ls $@
+
+private/rm:
+	rm -rf ${CURDIR}/extra/private
 
 #external/iotjs/profiles/%:
 #	ls $@ || ${make} iotjs/import
