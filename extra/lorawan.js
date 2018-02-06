@@ -91,6 +91,9 @@ LoraWan.prototype.join = function join() {
   self.tx("radio get mod");   // expect: lora
   self.tx("radio get freq");  // expect: 868500000
   self.tx("radio get pwr");   // export:
+  self.tx("radio get sf");      // expect: 0
+  self.tx("radio set sf sf12");      // expect: 0
+  self.tx("radio get sf");      // expect: 0
   self.tx("mac get band");    // expect:
   self.tx("mac get dr");      // expect: 0
   self.tx("mac get gwnb");    // expect:
