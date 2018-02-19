@@ -1,0 +1,27 @@
+#
+# For a description of the syntax of this configuration file,
+# see kconfig-language at https://www.kernel.org/doc/Documentation/kbuild/kconfig-language.txt
+#
+
+config EXAMPLES_IOTIVITY_EXAMPLE
+	bool "iotivity_example"
+	select ENABLE_IOTIVITY
+	default n
+	---help---
+		Enable the iotivity_example
+
+if EXAMPLES_IOTIVITY_EXAMPLE
+
+config EXAMPLES_IOTIVITY_EXAMPLE_PROGNAME
+	string "Program name"
+	default "iotivity_example"
+	depends on BUILD_KERNEL
+	---help---
+		This is the name of the program that will be use when the TASH ELF
+		program is installed.
+
+endif
+
+config USER_ENTRYPOINT
+	string
+	default "iotivity_example_main" if ENTRY_IOTIVITY_EXAMPLE
