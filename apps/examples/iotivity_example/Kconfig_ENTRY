@@ -1,0 +1,3 @@
+config ENTRY_IOTIVITY_EXAMPLE
+	bool "IoTivitiy example"
+	depends on EXAMPLES_IOTIVITY_EXAMPLE

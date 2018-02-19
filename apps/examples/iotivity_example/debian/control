@@ -1,0 +1,17 @@
+Source: iotivity-example
+Section: net
+Priority: optional
+Maintainer: Philippe Coval <philippe.coval@osg.samsung.com>
+Build-Depends: debhelper (>= 8.0.0),
+ iotivity-dev
+Standards-Version: 3.9.4
+Homepage: <insert the upstream URL, if relevant>
+Vcs-Git: http://github.com/TizenTeam/iotivity-example
+Vcs-Browser: http://github.com/TizenTeam/iotivity-example
+
+Package: iotivity-example
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
