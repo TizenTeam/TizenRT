@@ -1,0 +1,27 @@
+{
+  "name": "air-lpwan-demo",
+  "version": "1.0.0",
+  "description": "Basic demo created for Tizen:RT showcase",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "file:///home/philippe/var/cache/url/git/ssh/github.com/TizenTeam/TizenRT/src/TizenRT"
+  },
+  "keywords": [
+    "iotjs",
+    "tizenrt",
+    "lpwan",
+    "lorawan",
+    "modem",
+    "uart",
+    "mq2",
+    "gaz",
+    "sensor",
+    "airquality"
+  ],
+  "author": "Philippe Coval <philippe.coval@osg.samsung.com>",
+  "license": "Apache-2.0"
+}
