@@ -113,7 +113,7 @@ $(foreach SDIR, $(CONFIGURED_EXT), $(eval $(call SDIR_template,$(SDIR),depend)))
 $(foreach SDIR, $(BUILDIRS), $(eval $(call SDIR_template,$(SDIR),clean)))
 $(foreach SDIR, $(BUILDIRS), $(eval $(call SDIR_template,$(SDIR),distclean)))
 
-$(BIN): $(OBJS) $(foreach SDIR, $(CONFIGURED_EXT), $(SDIR)_all) iotivity_build iotjs_build
+$(BIN): $(OBJS) $(foreach SDIR, $(CONFIGURED_EXT), $(SDIR)_all) $(build_rules)
 	$(call ARCHIVE, $@, $(OBJS))
 
 .depdirs: $(foreach SDIR, $(CONFIGURED_EXT), $(SDIR)_depend)
@@ -137,6 +137,7 @@ distclean: $(foreach SDIR, $(BUILDIRS), $(SDIR)_distclean)
 	$(call CLEAN)
 
 ifeq ($(CONFIG_ENABLE_IOTIVITY),y)
+build_rules+=iotivity_build
 IOTIVITY_RELEASE=${shell echo $(CONFIG_IOTIVITY_RELEASE_VERSION) | sed 's/"//g'}
 IOTIVITY_BASE_DIR=$(EXTDIR)/iotivity/iotivity_$(IOTIVITY_RELEASE)
 endif
@@ -167,6 +168,7 @@ endif
 endif
 
 ifeq ($(CONFIG_ENABLE_IOTJS),y)
+build_rules+=iotjs_build
 IOTJS_ROOT_DIR ?= $(EXTDIR)/iotjs
 IOTJS_BUILD_OPTION ?=
 ifeq ($(CONFIG_DEBUG),y)
