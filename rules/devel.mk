@@ -195,6 +195,7 @@ devel/demo: devel/start
 #	ln -fs $< $@
 
 -include rules/kconfig-frontends/rules.mk
+-include rules/iotivity-constrained/rules.mk
 
 .PHONY: devel/commit
 
