@@ -119,7 +119,7 @@ struct timeval {
  * it as the fourth argument of function send()
  */
 
-#ifdef HAVE_MSG_NOSIGNAL
+#if defined(HAVE_MSG_NOSIGNAL) && defined(MSG_NOSIGNAL)
 #define SEND_4TH_ARG MSG_NOSIGNAL
 #else
 #define SEND_4TH_ARG 0
