@@ -113,9 +113,6 @@ $(foreach SDIR, $(CONFIGURED_EXT), $(eval $(call SDIR_template,$(SDIR),depend)))
 $(foreach SDIR, $(BUILDIRS), $(eval $(call SDIR_template,$(SDIR),clean)))
 $(foreach SDIR, $(BUILDIRS), $(eval $(call SDIR_template,$(SDIR),distclean)))
 
-$(BIN): $(OBJS) $(foreach SDIR, $(CONFIGURED_EXT), $(SDIR)_all) iotivity_build iotjs_build
-	$(call ARCHIVE, $@, $(OBJS))
-
 .depdirs: $(foreach SDIR, $(CONFIGURED_EXT), $(SDIR)_depend)
 
 .depend: Makefile .depdirs
@@ -137,6 +134,7 @@ distclean: $(foreach SDIR, $(BUILDIRS), $(SDIR)_distclean)
 	$(call CLEAN)
 
 ifeq ($(CONFIG_ENABLE_IOTIVITY),y)
+build_rules+=iotivity_build
 IOTIVITY_RELEASE=${shell echo $(CONFIG_IOTIVITY_RELEASE_VERSION) | sed 's/"//g'}
 IOTIVITY_BASE_DIR=$(EXTDIR)/iotivity/iotivity_$(IOTIVITY_RELEASE)
 endif
@@ -166,7 +164,28 @@ ifneq ("$(wildcard $(IOTIVITY_BASE_DIR)/iotivity.built)","")
 endif
 endif
 
+ifeq ($(CONFIG_ENABLE_IOTIVITY_CONSTRAINED),y)
+build_rules+=iotivity-constrained_build
+iotivity-constrained_port?=tizenrt
+project_dir?=iotivity-constrained
+IOTIVITY_CONSTRAINED_BASE_DIR?=${TOPDIR}/../external/${project_dir}
+iotivity_constrained_make=${MAKE} -C ${IOTIVITY_CONSTRAINED_BASE_DIR}/port/${iotivity-constrained_port} os_dir=${TOPDIR}
+endif
+
+iotivity-constrained_build:
+ifeq ($(CONFIG_ENABLE_IOTIVITY_CONSTRAINED),y)
+	${iotivity_constrained_make}
+endif
+
+iotivity_constrained_clean:
+ifeq ($(CONFIG_ENABLE_IOTIVITY_CONSTRAINED),y)
+ifneq ("$(wildcard $(IOTIVITY_CONSTRAINED_BASE_DIR)/iotivity_constrained.built)","")
+	${iotivity_constrained_make} clean
+endif
+endif
+
 ifeq ($(CONFIG_ENABLE_IOTJS),y)
+build_rules+=iotjs_build
 IOTJS_ROOT_DIR ?= $(EXTDIR)/iotjs
 IOTJS_BUILD_OPTION ?=
 ifeq ($(CONFIG_DEBUG),y)
@@ -191,3 +210,6 @@ ifeq ($(CONFIG_ENABLE_IOTJS),y)
 endif
 
 -include Make.dep
+
+$(BIN): $(OBJS) $(foreach SDIR, $(CONFIGURED_EXT), $(SDIR)_all) $(build_rules)
+	$(call ARCHIVE, $@, $(OBJS))
