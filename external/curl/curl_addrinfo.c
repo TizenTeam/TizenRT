@@ -491,6 +491,7 @@ Curl_addrinfo *Curl_str2addr(char *address, int port)
 Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath, bool abstract)
 {
   Curl_addrinfo *ai;
+#ifdef AF_UNIX
   struct sockaddr_un *sa_un;
   size_t path_len;
 
@@ -504,7 +505,6 @@ Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath, bool abstract)
     free(ai);
     return NULL;
   }
-
   sa_un = (void *) ai->ai_addr;
   sa_un->sun_family = AF_UNIX;
 
@@ -527,7 +527,7 @@ Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath, bool abstract)
     memcpy(sa_un->sun_path + 1, path, path_len - 1);
   else
     memcpy(sa_un->sun_path, path, path_len); /* copy NUL byte */
-
+#endif
   return ai;
 }
 #endif
