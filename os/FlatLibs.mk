@@ -108,6 +108,13 @@ TINYARALIBS += $(LIBRARIES_DIR)$(DELIM)libresource_directory$(LIBEXT)
 endif
 endif
 
+# Add libraries for iotivity-constrained support
+ifeq ($(CONFIG_ENABLE_IOTIVITY_CONSTRAINED),y)
+#LIBEXT?=.a
+#TINYARALIBS += ${TOPDIR}/../external/iotivity-constrained/port/tizenrt/libiotivity-constrained-client-server$(LIBEXT)
+#TINYARALIBS += $(LIBRARIES_DIR)$(DELIM)libiotivity-constrained-client-server$(LIBEXT)
+endif
+
 # Add libraries for power management module
 
 ifeq ($(CONFIG_PM),y)
