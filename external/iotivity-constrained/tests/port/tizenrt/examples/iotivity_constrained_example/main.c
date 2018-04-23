@@ -18,10 +18,12 @@
 
 #include "oc_api.h"
 #include "port/oc_clock.h"
+#include "port/oc_assert.h"
 
 #include <pthread.h>
 #include <signal.h>
 #include <stdio.h>
+
 
 static pthread_mutex_t mutex;
 static pthread_cond_t cv;
@@ -33,6 +35,7 @@ static void
 set_device_custom_property(void *data)
 {
   (void)data;
+  LOG();
   oc_set_custom_device_property(purpose, "desk lamp");
 }
 
@@ -40,8 +43,10 @@ static int
 app_init(void)
 {
   int ret = oc_init_platform("Intel", NULL, NULL);
+  LOG();
   ret |= oc_add_device("/oic/d", "oic.d.light", "Kishen's light", "ocf.1.0.0",
                        "ocf.res.1.0.0", set_device_custom_property, NULL);
+  LOG();
   return ret;
 }
 
@@ -49,6 +54,7 @@ static void
 get_light(oc_request_t *request, oc_interface_mask_t interface, void *user_data)
 {
   (void)user_data;
+  LOG();
   PRINT("GET_light:\n");
   oc_rep_start_root_object();
   switch (interface) {
@@ -71,6 +77,7 @@ post_light(oc_request_t *request, oc_interface_mask_t interface, void *user_data
 {
   (void)user_data;
   (void)interface;
+  LOG();
   PRINT("POST_light:\n");
   bool state = false;
   oc_rep_t *rep = request->request_payload;
@@ -96,12 +103,14 @@ static void
 put_light(oc_request_t *request, oc_interface_mask_t interface,
            void *user_data)
 {
+  LOG();
   post_light(request, interface, user_data);
 }
 
 static void
 register_resources(void)
 {
+  LOG();
   oc_resource_t *res = oc_new_resource("lightbulb", "/light/1", 1, 0);
   oc_resource_bind_resource_type(res, "oic.r.light");
   oc_resource_bind_resource_interface(res, OC_IF_RW);
@@ -117,6 +126,7 @@ register_resources(void)
 static void
 signal_event_loop(void)
 {
+  LOG();
   pthread_mutex_lock(&mutex);
   pthread_cond_signal(&cv);
   pthread_mutex_unlock(&mutex);
@@ -125,6 +135,7 @@ signal_event_loop(void)
 static void
 handle_signal(int signal)
 {
+  LOG();
   (void)signal;
   signal_event_loop();
   quit = 1;
@@ -143,6 +154,7 @@ int iotivity_constrained_example_main(int argc, char *argv[])
 
   oc_clock_time_t next_event;
 
+  LOG();
 #ifdef OC_SECURITY
   oc_storage_config("./server_creds");
 #endif /* OC_SECURITY */
@@ -150,8 +162,10 @@ int iotivity_constrained_example_main(int argc, char *argv[])
   init = oc_main_init(&handler);
   if (init < 0)
     return init;
-
+  PRINT("######\n");
+  PRINT(__func__);
   while (quit != 1) {
+    LOG();
     next_event = oc_main_poll();
     pthread_mutex_lock(&mutex);
     if (next_event == 0) {
