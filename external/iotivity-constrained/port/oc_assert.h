@@ -25,8 +25,11 @@ void exit_impl(int status);
 static inline void
 oc_abort(const char *msg)
 {
-  PRINT("\n%s\nAbort.\n", msg);
-  abort_impl();
+    PRINT("\nabort: { @@@\n");
+    PRINT("\nabort: %s\nAbort. @@@\n", msg);
+    PRINT("\nabort: } @@@\n");
+    for(;;);
+    abort_impl();
 }
 
 #define oc_assert(cond)                                                        \
