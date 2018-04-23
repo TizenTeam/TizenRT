@@ -312,7 +312,7 @@ oc_core_add_new_device(const char *uri, const char *rt, const char *name,
   if (oc_connectivity_init(device_count) < 0) {
     oc_abort("error initializing connectivity for device");
   }
-
+  LOG();
   device_count++;
 
   return &oc_device_info[device_count];
