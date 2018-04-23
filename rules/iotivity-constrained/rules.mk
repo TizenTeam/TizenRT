@@ -77,5 +77,7 @@ iotivity-constrained/build:
 	${MAKE} -C external/iotivity-constrained/tests/port/tizenrt os_dir="${PWD}"
 
 
-apps/examples/iotivity_constrained_example: ${iotivity_constrained_dir}/tests/port/tizenrt/examples/iotivity_constrained_example
-	cp -rfva $< $@
+apps/examples/iotivity_constrained_example: ${CURDIR}/${iotivity_constrained_dir}/tests/port/tizenrt/examples/iotivity_constrained_example
+#	cp -rfva $< $@
+	ln -fs $< $@
+
