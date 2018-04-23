@@ -135,15 +135,14 @@ int main(int argc, FAR char *argv[])
 #else
 int iotivity_constrained_example_main(int argc, char *argv[])
 #endif
-
 {
   int init;
   static const oc_handler_t handler = {.init = app_init,
                                        .signal_event_loop = signal_event_loop,
-                                       //TODO: tizenrt skiped
-                                       };
+                                       .register_resources = register_resources };
+
   oc_clock_time_t next_event;
-  
+
 #ifdef OC_SECURITY
   oc_storage_config("./server_creds");
 #endif /* OC_SECURITY */
