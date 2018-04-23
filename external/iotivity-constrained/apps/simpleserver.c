@@ -101,8 +101,6 @@ static void
 put_light(oc_request_t *request, oc_interface_mask_t interface,
            void *user_data)
 {
-  (void)interface;
-  (void)user_data;
   post_light(request, interface, user_data);
 }
 
