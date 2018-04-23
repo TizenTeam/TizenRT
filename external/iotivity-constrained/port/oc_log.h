@@ -19,6 +19,8 @@
 
 #include <stdio.h>
 
+#define LOG() printf("\n\n%s:%n: log: %s @@@\n\n", __FILE__, __LINE__, __func__ );
+
 #define PRINT(...) printf(__VA_ARGS__)
 
 #define PRINTipaddr(endpoint)                                                  \
