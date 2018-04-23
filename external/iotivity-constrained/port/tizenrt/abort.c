@@ -21,11 +21,13 @@
 void
 abort_impl(void)
 {
+    LOG();
   abort();
 }
 
 void
 exit_impl(int status)
 {
+        LOG();
   exit(status);
 }
