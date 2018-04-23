@@ -74,7 +74,8 @@ static ip_context_t devices[OC_MAX_NUM_DEVICES];
 void
 oc_network_event_handler_mutex_init(void)
 {
-  if (pthread_mutex_init(&mutex, NULL) != 0) {
+        LOG();
+    if (pthread_mutex_init(&mutex, NULL) != 0) {
     oc_abort("error initializing network event handler mutex\n");
   }
 }
@@ -82,16 +83,19 @@ oc_network_event_handler_mutex_init(void)
 void
 oc_network_event_handler_mutex_lock(void)
 {
+            LOG();
   pthread_mutex_lock(&mutex);
 }
 
 void
 oc_network_event_handler_mutex_unlock(void)
 {
+            LOG();
   pthread_mutex_unlock(&mutex);
 }
 
 void oc_network_event_handler_mutex_destroy(void) {
+        LOG();
 #ifdef OC_NETLINK
   close(ifchange_sock);
 #endif
@@ -99,6 +103,7 @@ void oc_network_event_handler_mutex_destroy(void) {
 }
 
 static ip_context_t *get_ip_context_for_device(int device) {
+        LOG();
 #ifdef OC_DYNAMIC_ALLOCATION
   ip_context_t *dev = oc_list_head(ip_contexts);
   while (dev != NULL && dev->device != device) {
@@ -118,7 +123,7 @@ static int add_mcast_sock_to_ipv4_mcast_group(int mcast_sock,
                                               const struct in_addr *local,
                                               int interface_index) {
   struct ip_mreqn mreq;
-
+        LOG();
   memset(&mreq, 0, sizeof(mreq));
   mreq.imr_multiaddr.s_addr = htonl(ALL_COAP_NODES_V4);
   mreq.imr_ifindex = interface_index;
@@ -141,7 +146,7 @@ static int add_mcast_sock_to_ipv4_mcast_group(int mcast_sock,
 static int add_mcast_sock_to_ipv6_mcast_group(int mcast_sock,
                                               int interface_index) {
   struct ipv6_mreq mreq;
-
+        LOG();
   /* Link-local scope */
   memset(&mreq, 0, sizeof(mreq));
   memcpy(mreq.ipv6mr_multiaddr.s6_addr, ALL_OCF_NODES_LL, 16);
@@ -191,6 +196,7 @@ static int add_mcast_sock_to_ipv6_mcast_group(int mcast_sock,
 static int configure_mcast_socket(int mcast_sock, int sa_family) {
   int ret = 0;
   struct ifaddrs *ifs = NULL, *interface = NULL;
+        LOG();
 #ifdef TODO_IS_DONE
   if (getifaddrs(&ifs) < 0) {
     OC_ERR("querying interface addrs\n");
@@ -246,8 +252,8 @@ static int configure_mcast_socket(int mcast_sock, int sa_family) {
 static int process_interface_change_event(void) {
   int ret = 0, i, num_devices = oc_core_get_num_devices();
   struct nlmsghdr *response = NULL;
-
   int guess = 512, response_len;
+          LOG();
   do {
     guess <<= 1;
     uint8_t dummy[guess];
@@ -313,6 +319,7 @@ static int process_interface_change_event(void) {
 
 static void *network_event_thread(void *data) {
   struct sockaddr_storage client;
+  LOG();
   memset(&client, 0, sizeof(struct sockaddr_storage));
 #ifdef OC_IPV6
   struct sockaddr_in6 *c = (struct sockaddr_in6 *)&client;
@@ -327,7 +334,7 @@ static void *network_event_thread(void *data) {
 
   fd_set rfds, setfds;
   FD_ZERO(&rfds);
-
+  printf("log: %p\n", dev);
 #ifdef OC_NETLINK
   /* Monitor network interface changes on the platform from only the 0th logical
    * device
@@ -503,6 +510,7 @@ get_interface_addresses(unsigned char family, uint16_t port, bool secure)
 {
    struct sockaddr_in addr;
    oc_endpoint_t ep;
+           LOG();
    OC_DBG("get_interface_addresses : in");
    memset(&ep, 0, sizeof(oc_endpoint_t));
 
@@ -525,6 +533,7 @@ oc_endpoint_t *
 oc_connectivity_get_endpoints(int device)
 {
   OC_DBG("oc_connectivity_get_endpoints : in");
+          LOG();
   oc_init_endpoint_list();
   ip_context_t *dev = get_ip_context_for_device(device);
 #ifdef OC_IPV6
@@ -540,10 +549,11 @@ oc_connectivity_get_endpoints(int device)
   get_interface_addresses(AF_INET, dev->dtls4_port, true);
 #endif /* OC_SECURITY */
 #endif /* OC_IPV4 */
-  return oc_get_endpoint_list();
+   return oc_get_endpoint_list();
 }
 
 void oc_send_buffer(oc_message_t *message) {
+         LOG();
 #ifdef OC_DEBUG
   PRINT("Outgoing message of size %d bytes to ", message->length);
   PRINTipaddr(message->endpoint);
@@ -636,6 +646,7 @@ void oc_send_buffer(oc_message_t *message) {
 void
 oc_send_discovery_request(oc_message_t *message)
 {
+             LOG();
   struct ifaddrs *ifs = NULL, *interface = NULL;
 #ifdef TODO_IS_DONE
   if (getifaddrs(&ifs) < 0) {
@@ -688,7 +699,7 @@ done:
 static int
 connectivity_ipv4_init(ip_context_t *dev)
 {
-
+         LOG();
   OC_DBG("Initializing IPv4 connectivity for device %d\n", dev->device);
   memset(&dev->mcast4, 0, sizeof(struct sockaddr_storage));
   memset(&dev->server4, 0, sizeof(struct sockaddr_storage));
@@ -788,7 +799,9 @@ connectivity_ipv4_init(ip_context_t *dev)
 #endif
 
 int oc_connectivity_init(int device) {
+  LOG();
   OC_DBG("Initializing connectivity for device %d\n", device);
+  LOG();
 #ifdef OC_DYNAMIC_ALLOCATION
   ip_context_t *dev = (ip_context_t *)calloc(1, sizeof(ip_context_t));
   if (!dev) {
@@ -799,7 +812,7 @@ int oc_connectivity_init(int device) {
   ip_context_t *dev = &devices[device];
 #endif /* !OC_DYNAMIC_ALLOCATION */
   dev->device = device;
-
+  LOG();
 #ifdef OC_IPV6
   memset(&dev->mcast, 0, sizeof(struct sockaddr_storage));
   memset(&dev->server, 0, sizeof(struct sockaddr_storage));
@@ -948,6 +961,7 @@ int oc_connectivity_init(int device) {
 void
 oc_connectivity_shutdown(int device)
 {
+             LOG();
   ip_context_t *dev = get_ip_context_for_device(device);
   dev->terminate = 1;
 
