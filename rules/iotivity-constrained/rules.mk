@@ -78,6 +78,7 @@ iotivity-constrained/build:
 
 
 apps/examples/iotivity_constrained_example: ${CURDIR}/${iotivity_constrained_dir}/tests/port/tizenrt/examples/iotivity_constrained_example
+	@echo "TODO: sync $< and $@"
 	cp -rfva $< $@
 #	ln -fs $< $@
 
