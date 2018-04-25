@@ -25,6 +25,8 @@
 #ifndef COMPILERSUPPORT_H
 #define COMPILERSUPPORT_H
 
+#include <tinyara/math.h>
+
 #include "cbor.h"
 
 #ifndef _BSD_SOURCE
