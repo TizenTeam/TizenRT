@@ -78,6 +78,6 @@ iotivity-constrained/build:
 
 
 apps/examples/iotivity_constrained_example: ${CURDIR}/${iotivity_constrained_dir}/tests/port/tizenrt/examples/iotivity_constrained_example
-#	cp -rfva $< $@
-	ln -fs $< $@
+	cp -rfva $< $@
+#	ln -fs $< $@
 
