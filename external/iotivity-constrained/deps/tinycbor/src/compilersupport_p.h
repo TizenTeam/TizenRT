@@ -39,10 +39,14 @@
 #  include <assert.h>
 #endif
 #include <float.h>
-#include <math.h>
+
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+
+#include <sys/types.h>
+#include <wchar.h>
+#include <math.h>
 
 #ifndef __cplusplus
 #  include <stdbool.h>
