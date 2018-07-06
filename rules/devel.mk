@@ -35,6 +35,7 @@
 
 #default: rule/default
 #	@echo "# $@: $^"
+devel_self?=rules/devel.mk
 
 # TODO: Override here if needed:
 platform?=artik
@@ -83,6 +84,10 @@ devel/help:
 ${contents_dir}:
 	mkdir -p $@
 
+
+#webthing_module_url?=https://github.com/tizenteam/iotjs
+#webthing_dir?=${HOME}/mnt/webthing-node/
+
 iotjs_modules_url=https://github.com/tizenteam/iotjs
 iotjs_modules_branch?=sandbox/rzr/air-lpwan-demo/master
 demo_dir?=external/iotjs_modules/air-lpwan-demo
@@ -101,11 +106,11 @@ prep_files+=${demo_dir}/index.js
 
 
 ${demo_dir}/private/config.js: ${demo_dir}/config.js
-	mkdir -p ${@D}
+	@mkdir -p ${@D}
 	cp -av $< $@
 
 devel/private:
-	mkdir -p ${demo_dir}/private
+	@mkdir -p ${demo_dir}/private
 	rsync -avx ${HOME}/backup/${CURDIR}/${private_dir}/ ${private_dir}/ || echo "TODO"
 	ls ${private_dir} 
 
@@ -113,7 +118,7 @@ private/rm:
 	rm -rf ${CURDIR}/${demo_dir}/private
 
 
-contents: ${demo_dir} ${contents_dir}
+devel/iotjs/contents: ${demo_dir} ${contents_dir}
 	@echo "# log: TODO: $<"
 	du -hs ${demo_dir}/ ${contents_dir}/
 	mkdir -p ${contents_dir}/example/
@@ -136,72 +141,13 @@ contents/compress:
   ${js_minifier} $${file} > $${file}.tmp && mv -v $${file}.tmp $${file} ; \
   done
 
-artik_sdk_url?=https://github.com/SamsungARTIK/artik-sdk.git
-
-external/artik-sdk:
-	git clone --recursive ${artik_sdk_url} $@
-
-artik/import: external/artik-sdk
+-include rules/webthings.mk
 
 iotjs/local:
 	-rm -f external/iotjs
 	rm -rf external/iotjs/
 	rsync -avx  --delete ~/mnt/iotjs/ external/iotjs/
 	${make} iotjs/deps
-
-tizen_iotivity_example_url?=https://github.com/tizenteam/iotivity-example
-tizen_iotivity_example_branch?=sandbox/rzr/tizen/1.2-rel
-
-local/iotivity-example-tizen:
-	git clone ${tizen_iotivity_example_url} -b ${tizen_iotivity_example_branch} $@
-	cd $@ && ./tizen.mk tpk
-
-tizen: local/iotivity-example-tizen
-	ls $^
-
-iotivity_example_url?=https://github.com/tizenteam/iotivity-example
-iotivity_example_branch?=sandbox/rzr/tizen/rt/1.2-rel
-iotivity_example_prep_files?=apps/examples/iotivity_example/Kconfig
-
-apps/examples/iotivity_example: 
-	mkdir -p ${@D}
-	git clone --recursive -b ${iotivity_example_branch} ${iotivity_example_url} $@
-	ls $@
-
-apps/examples/iotivity_example/%: apps/examples/iotivity_example
-	ls $@
-
-#prep_files+=${iotivity_example_prep_files}
-
-local/apps/examples/iotivity_example: ${HOME}/mnt/iotivity-example/
-	-rm $@
-	mkdir -p ${@}
-	rsync -avx $</ $@/
-
-TODO/apps/examples/iotivity-example: ${HOME}/mnt/iotivity-example
-	mkdir -p ${@D}
-	ln -fs $< $@
-
-#TODO
-ocf_my_light_url?=https://github.com/webispy/ocf_mylight
-#ocf_my_light_branch?=oic_1.1 # 1.2-rel
-ocf_my_light_branch?=master
-
-apps/examples/ocf_mylight:
-	git clone --recursive ${ocf_my_light_url} -b ${ocf_my_light_branch} $@
-
-ocf: apps/examples/ocf_mylight ./external/iotivity/iotivity_1.3-rel/resource/csdk/stack/include
-	ln -fsv ${CURDIR}/external/iotivity/iotivity_1.3-rel/out/tizenrt/armv7-r/release/include/c_common/iotivity_config.h ./external/iotivity/iotivity_1.3-rel/resource/csdk/stack/include
-	ln -fsv ${CURDIR}/./external/iotivity/iotivity_1.3-rel/build_common/tizenrt/compatibility/*.h ./external/iotivity/iotivity_1.3-rel/resource/csdk/stack/include/
-	ln -fsv ${CURDIR}/./external/iotivity/iotivity_1.3-rel/resource/csdk/include/*.h ./external/iotivity/iotivity_1.3-rel/resource/csdk/stack/include/
-	grep '^CONFIG_EXAMPLES_OCFMYLIGHT' ${config} || ${make} menuconfig
-
-ioty: ${HOME}/mnt/iotivity-example/ apps/examples/iotivity_example/
-	rsync -avx $^
-	ls $</Kconfig*
-	grep '^CONFIG_EXAMPLES_IOTIVITY_EXAMPLE' ${config} || ${make} menuconfig
-	${make}
-
 
 demo: ${prep_files}
 	${make} -e help configure
