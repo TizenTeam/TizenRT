@@ -39,12 +39,15 @@ help: ${README} help
 	@echo "# config_type=${config_type}"
 	@echo "# "
 	@echo "# build_dir=${build_dir}"
+	@echo "# apps_dir=${apps_dir}"
 	@echo "# config=${config}"
 	@echo "# defconfig=${defconfig}"
+	@echo "# base_defconfig=${base_defconfig}"
 	@echo "# deploy_image=${deploy_image}"
 	@echo "# image=${image}"
 	@echo "# image_type=${image_type}"
 	@echo "# machine=${machine}"
+	@echo "# prep_files=${prep_files}"
 
 longhelp: ${self}
 	@echo "# Available rules:"
@@ -74,8 +77,8 @@ rule/%: ${config}
 rule/make: ${config}
 	cd ${<D} && PATH=${PATH}:${XPATH} ${MAKE}
 
-${apps_dir}:
-	ls ${@}
+apps_dir: ${apps_dir}
+	ls $<
 
 #${config}: ${configure} ${defconfig}
 #	ls -l $^
