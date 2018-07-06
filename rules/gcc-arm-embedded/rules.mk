@@ -52,3 +52,5 @@ gcc-arm-embedded/setup: ${CC}
 gcc-arm-embedded/setup/debian:
 	sudo apt-get install -y libc6-i386
 
+${CC}: ${toolchain_dir}
+	ls $@
