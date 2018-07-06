@@ -69,7 +69,7 @@ include rules/iotjs/rules.mk
 base_image_type=minimal
 
 prep_files+=${private_dir}/config.js
-#prep_files+=external/iotjs/profiles/default.profile
+prep_files+=external/iotjs/profiles/default.profile
 #prep_files+=external/iotjs/Kconfig.runtime
 #prep_files+=external/iotjs.Kconfig
 contents_dir?=tools/fs/contents
