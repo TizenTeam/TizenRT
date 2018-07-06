@@ -111,6 +111,9 @@ contents/compress:
 
 -include rules/webthings/rules.mk
 
+contents: ${contents_rules}
+
+
 iotjs/local:
 	-rm -f external/iotjs
 	rm -rf external/iotjs/
