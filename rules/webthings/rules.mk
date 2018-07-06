@@ -33,15 +33,19 @@
 ############################################################################
 
 
-#webthing_module_url?=https://github.com/tizenteam/iotjs
-#webthing_dir?=${HOME}/mnt/webthing-node/
+webthings_self?=rules/webthings/rules.mk
+webthing_branch?=sandbox/rzr/devel/iotjs/master
+webthing_url?=https://github.com/tizenteam/webthing-node
+webthing_dir?=${HOME}/mnt/webthing-node/
 
-devel/webthings: ${contents_dir}/webthing-node
+contents_dir?=tools/fs/contents
+contents_rules+=webthings/contents
+contents_rules+=${contents_dir}/webthing-node
+
+webthings/contents: ${contents_dir}/webthing-node
 	ls $<
 
-${contents_dir}/webthing-node: ${HOME}/mnt/webthing-node/ ${devel_self}
+${contents_dir}/webthing-node: ${HOME}/mnt/webthing-node/ ${webthings_self}
 	rsync -avx "$</" "$@/"
 	rm -rf "$@/.git"
 	rm -rf "$@/node_modules"
-
-contents: devel/webthings
