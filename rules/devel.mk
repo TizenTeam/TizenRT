@@ -76,6 +76,9 @@ contents_dir?=tools/fs/contents
 js_minifier?=slimit
 #js_minifier?=yui-compressor
 
+devel/help:
+	@echo "# make demo "
+	@echo "# make demo tty=/dev/ttyUSB2"
 
 ${contents_dir}:
 	mkdir -p $@
