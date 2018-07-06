@@ -37,7 +37,8 @@ iotjs_dir?=external/iotjs
 iotjs_url?=https://github.com/Samsung/iotjs
 iotjs_branch?=master
 iotjs_profile?=default
-iotjs_profile_file?=${iotjs_dir}/profiles/${iotjs_profile}.profile
+#iotjs_profile_file?=${iotjs_dir}/profiles/${iotjs_profile}.profile
+iotjs_kconfig?=${iotjs_dir}/config/tizenrt/Kconfig.runtime
 
 ${iotjs_dir}/deps/%:  ${iotjs_dir}
 	-ls ${iotjs_dir}/.git ${iotjs_dir}/.gitmodules
@@ -74,15 +75,15 @@ iotjs/import: iotjs/rm
 	git commit -am "WIP: iotjs: import sync (${iotjs_branch})"
 
 #TODO: remove
-${iotjs_dir}/Kconfig.runtime:
+TODO/${kconfig}:
 	@ls $@ \
   || git checkout d9d52392ab5d8411eb5a24a58e123f01aa984b5f $@
 	@ls $@
 	-git commit -m "WIP: iotjs: ${@F}" $@
 
 prep_files+=${iotjs_dir}/deps/jerry/CMakeLists.txt
-prep_files+=${iotjs_dir}/../iotjs.Kconfig
-prep_files+=${iotjs_profile_file}
+prep_files+=${iotjs_kconfig}
+#prep_files+=${iotjs_profile_file}
 
 iotjs/setup/debian: /etc/debian_version
 	sudo apt-get install -y cmake python
