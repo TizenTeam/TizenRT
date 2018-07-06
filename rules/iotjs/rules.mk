@@ -46,8 +46,8 @@ prep_files+=${iotjs_profile_file}
 
 
 ${iotjs_dir}/deps/%:  ${iotjs_dir}
-	-ls ${iotjs_dir}/.git ${iotjs_dir}/.gitmodules
-	ls $@ || cd ${iotjs_dir} && git submodule update --init --recursive 
+	-@ls ${iotjs_dir}/.git ${iotjs_dir}/.gitmodules
+	@ls $@ || cd ${iotjs_dir} && git submodule update --init --recursive 
 
 ${iotjs_dir}:
 	git clone -b "${iotjs_branch}" --recursive --depth 1 ${iotjs_url} ${iotjs_dir}
