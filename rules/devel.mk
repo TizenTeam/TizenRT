@@ -84,6 +84,8 @@ devel/help:
 ${contents_dir}:
 	mkdir -p $@
 
+-include rules/air-lpwan-demo/rules.mk
+
 devel/iotjs/contents: ${demo_dir} ${contents_dir}
 	@echo "# log: TODO: $<"
 	du -hs ${demo_dir}/ ${contents_dir}/
