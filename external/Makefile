@@ -168,6 +168,7 @@ endif
 
 ifeq ($(CONFIG_ENABLE_IOTJS),y)
 IOTJS_ROOT_DIR ?= $(EXTDIR)/iotjs
+IOTJS_PROFILE_FILE ?= ${CURDIR}/${IOTJS_ROOT_DIR}/test/profiles/tizenrt.profile
 IOTJS_BUILD_OPTION ?=
 ifeq ($(CONFIG_DEBUG),y)
   IOTJS_BUILDTYPE = debug
@@ -182,7 +183,8 @@ iotjs_build:
 ifeq ($(CONFIG_ENABLE_IOTJS),y)
 	python $(IOTJS_ROOT_DIR)/tools/build.py --target-arch=$(CONFIG_ARCH) --target-os=tizenrt \
 	--sysroot=$(TOPDIR) --target-board=$(CONFIG_ARCH_BOARD) --jerry-heaplimit=$(CONFIG_IOTJS_JERRY_HEAP) \
-	--buildtype=$(IOTJS_BUILDTYPE) --no-init-submodule $(IOTJS_BUILD_OPTION)
+	--buildtype=$(IOTJS_BUILDTYPE) --no-init-submodule $(IOTJS_BUILD_OPTION) \
+	--profile ${IOTJS_PROFILE_FILE}
 endif
 
 iotjs_clean:
