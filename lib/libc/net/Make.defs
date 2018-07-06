@@ -52,10 +52,6 @@
 
 # Add the networking C files to the build
 
-ifeq ($(CONFIG_NET_IPv6),y)
-CSRCS += lib_addrconfig.c 
-endif
-
 # Routing table support
 
 ifeq ($(CONFIG_NET_ROUTE),y)
@@ -68,4 +64,3 @@ CSRCS += lib_etherntoa.c
 
 DEPPATH += --dep-path net
 VPATH += :net
-
