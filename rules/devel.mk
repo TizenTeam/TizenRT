@@ -64,13 +64,13 @@ include rules/iotjs/rules.mk
 
 
 #{ devel
-image_type=iotivity
+#image_type=iotivity
 base_image_type=minimal
 
 prep_files+=${private_dir}/config.js
-prep_files+=external/iotjs/profiles/default.profile
+#prep_files+=external/iotjs/profiles/default.profile
 #prep_files+=external/iotjs/Kconfig.runtime
-prep_files+=external/iotjs.Kconfig
+#prep_files+=external/iotjs.Kconfig
 contents_dir?=tools/fs/contents
 
 js_minifier?=slimit
@@ -171,7 +171,7 @@ apps/examples/iotivity_example:
 apps/examples/iotivity_example/%: apps/examples/iotivity_example
 	ls $@
 
-prep_files+=${iotivity_example_prep_files}
+#prep_files+=${iotivity_example_prep_files}
 
 local/apps/examples/iotivity_example: ${HOME}/mnt/iotivity-example/
 	-rm $@
