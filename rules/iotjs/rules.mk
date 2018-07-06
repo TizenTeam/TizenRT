@@ -36,16 +36,18 @@
 iotjs_dir?=external/iotjs
 iotjs_url?=https://github.com/Samsung/iotjs
 iotjs_branch?=master
-iotjs_profile?=default
-#iotjs_profile_file?=${iotjs_dir}/profiles/${iotjs_profile}.profile
+iotjs_profile?=tizenrt
+iotjs_profile_file?=${iotjs_dir}/test/profiles/${iotjs_profile}.profile
 iotjs_kconfig?=${iotjs_dir}/config/tizenrt/Kconfig.runtime
+
+prep_files+=${iotjs_dir}/deps/jerry/CMakeLists.txt
+prep_files+=${iotjs_kconfig}
+prep_files+=${iotjs_profile_file}
+
 
 ${iotjs_dir}/deps/%:  ${iotjs_dir}
 	-ls ${iotjs_dir}/.git ${iotjs_dir}/.gitmodules
 	ls $@ || cd ${iotjs_dir} && git submodule update --init --recursive 
-
-iotjs/deps: ${iotjs_dir}/deps/jerry/CMakeLists.txt
-	ls $<
 
 ${iotjs_dir}:
 	git clone -b "${iotjs_branch}" --recursive --depth 1 ${iotjs_url} ${iotjs_dir}
@@ -56,6 +58,10 @@ ${iotjs_dir}/%: ${iotjs_dir}
 
 ${iotjs_profile_file}: ${iotjs_dir}
 	@ls $@
+
+
+iotjs/deps: ${iotjs_dir}/deps/jerry/CMakeLists.txt
+	ls $<
 
 iotjs/prep: ${iotjs_dir} iotjs/deps
 	ls $<
@@ -73,17 +79,6 @@ iotjs/import: iotjs/rm
   ${iotjs_dir}/deps/*/*.gitmodules
 	git add -f ${iotjs_dir}
 	git commit -am "WIP: iotjs: import sync (${iotjs_branch})"
-
-#TODO: remove
-TODO/${kconfig}:
-	@ls $@ \
-  || git checkout d9d52392ab5d8411eb5a24a58e123f01aa984b5f $@
-	@ls $@
-	-git commit -m "WIP: iotjs: ${@F}" $@
-
-prep_files+=${iotjs_dir}/deps/jerry/CMakeLists.txt
-prep_files+=${iotjs_kconfig}
-#prep_files+=${iotjs_profile_file}
 
 iotjs/setup/debian: /etc/debian_version
 	sudo apt-get install -y cmake python
