@@ -37,12 +37,13 @@ openocd/%: ${openocd_cfg}
 	cd ${<D} && ${openocd} -f "${<F}" -c "${@F}; exit 0;" 2>&1
 #}openocd
 
-artik/help: ${configs_dir}/${machine}/README.mk rules/${platform}/decl.mk rules/${platform}/rules.mk
+artik/help: ${configs_dir}/${machine}/README.md rules/${platform}/decl.mk rules/${platform}/rules.mk
 	-cat $<
 	@echo "# ${make} openocd/help"
 	@echo "# deploy_image=${deploy_image}"
 	@echo "# cfg=${openocd_cfg}"
 	@echo "# tty=${tty}"
+	${signer} -h
 
 ${deploy_image}: ${image} ${signer}
 	${signer} -sign "${<}"
@@ -71,7 +72,8 @@ reset/%: openocd/help
 
 ${signer_archive}: 
 	@echo "# Please download from:"
-	@echo "# https://developer.artik.io/downloads/artik-053s/download# "
+	@echo "# ${signer_url}#${@F}"
+	ls $@
 
 ${signer}: ${signer_archive}
 	@echo "unpack $< to $@"
@@ -135,6 +137,7 @@ artik/deploy: artik/deploy/${machine}
 
 artik/deploy/%: ${deploy_image} os
 	@echo "TODO: only download ${@F}"
+	ls -l $<
 	${MAKE} -C os download ALL
 
 
@@ -149,12 +152,7 @@ artik/deploy/help: openocd/help
 	@echo "# $@: $^"
 
 
-#}generic
-
-
-
-#EOF
-
+#TODO:
 
 artik/todo:
 	cd os && sh -x -e ${CURDIR}/tools/fs/mkromfsimg.sh
@@ -163,5 +161,11 @@ artik/run: console
 	echo "TODO deploy once"
 
 .PHONY: artik/download
+
+artik/prep: ${prep_files}
+	ls $<
+
+artik/setup:
+	sudo apt-get install -y genromfs openocd
 
 #} generic
