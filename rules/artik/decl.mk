@@ -66,11 +66,11 @@ cfg=${configs_dir}/${machine_family}/scripts/${machine_family}.cfg
 #openocd=openocd -d
 
 
-#sdk?=${HOME}/Downloads/artik-ide-linux-x64-installer-V1.3-1020.tar.gz
-#signer?=${HOME}/ARTIK/SDK/A053/v1.6/source/tinyara/build/configs/artik05x/tools/codesigner/artik05x_codesigner
-#signer?=${CURDIR}/build/configs/artik05x/tools/codesigner/artik05x_codesigner
+signer_url?=https://developer.artik.io/downloads/artik-053s/download#
 signer_archive?=${HOME}/Downloads/ARTIK053S.zip
 signer?=${extra_dir}/ARTIK053/artik05x_codesigner
+prep_files+=${signer}
+
 tty?=/dev/ttyUSB1
 baudrate?=115200
 
@@ -134,10 +134,12 @@ config?=${os_dir}/.config
 image?=${project}
 elf_image?=${image}
 deploy_image?=${image}._deploy.bin
-
+all+=${deploy_image}
 
 # board usb
 
 tty?=/dev/ttyUSB0
 tty_rate?=115200
 udev?=/etc/udev/rules.d/99-usb-${vendor_id}-${product_id}.rules
+
+include rules/gcc-arm-embedded/decl.mk
