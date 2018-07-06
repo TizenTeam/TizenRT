@@ -39,6 +39,8 @@ setup/%: /etc/os-release
 /etc/os-release:
 	@echo "TODO: Please install lsb package to guess your system"
 
+sudo?=sudo
+
 setup/debian:
 	${sudo} apt-get update -y
 	${sudo} apt-get install -y git gperf libncurses5-dev flex bison
