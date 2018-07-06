@@ -38,7 +38,7 @@ base_image_type?=minimal
 
 #{artik
 url?=https://github.com/SamsungARTIK/artik-sdk
-machine?=artik055s
+machine?=artik053
 machine_family?=artik05x
 vendor_id?=0403
 product_id?=6010
