@@ -32,6 +32,7 @@
 #
 ############################################################################
 
+#IOTJS_ROOT_DIR ?= $(EXTDIR)/iotjs
 
 iotjs_dir?=external/iotjs
 iotjs_url?=https://github.com/Samsung/iotjs
