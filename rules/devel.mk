@@ -35,10 +35,13 @@
 
 #default: rule/default
 #	@echo "# $@: $^"
+devel_self?=rules/devel.mk
 
 # TODO: Override here if needed:
 platform?=artik
-base_image_type?=minimal
+machine?=artik055s
+base_image_type?=nettest
+#base_image_type?=minimal #TODO
 
 # Default:
 os?=tinyara
@@ -61,59 +64,29 @@ iotjs_branch=sandbox/rzr/tizen/rt/master
 #iotjs_url=file://${HOME}/mnt/iotjs
 
 include rules/iotjs/rules.mk
+#contents_rules+=devel/iotjs/contents
+#contents_rules+=devel/contents/example
 
 
 #{ devel
-image_type=iotivity
+#image_type=iotivity
 base_image_type=minimal
 
-prep_files+=${private_dir}/config.js
-prep_files+=external/iotjs/profiles/default.profile
+#prep_files+=${private_dir}/config.js
+#prep_files+=external/iotjs/profiles/default.profile
 #prep_files+=external/iotjs/Kconfig.runtime
-prep_files+=external/iotjs.Kconfig
+#prep_files+=external/iotjs.Kconfig
 contents_dir?=tools/fs/contents
+prep_files+=${contents_dir}
 
-js_minifier?=slimit
-#js_minifier?=yui-compressor
+devel_js_minifier?=slimit
+#devel_js_minifier?=yui-compressor
 
 devel/help:
 	@echo "# make demo "
 	@echo "# make demo tty=/dev/ttyUSB2"
 
-${contents_dir}:
-	mkdir -p $@
-
-iotjs_modules_url=https://github.com/tizenteam/iotjs
-iotjs_modules_branch?=sandbox/rzr/air-lpwan-demo/master
-demo_dir?=external/iotjs_modules/air-lpwan-demo
-private_dir?=${demo_dir}/private
-#demo_dir?=.
-
-${demo_dir}:
-	mkdir -p ${@D}
-	git clone -b ${iotjs_modules_branch} ${iotjs_modules_url} $@
-
-${demo_dir}/%: ${demo_dir}
-	ls $@
-
-prep_files+=${demo_dir}
-prep_files+=${demo_dir}/index.js
-
-
-${demo_dir}/private/config.js: ${demo_dir}/config.js
-	mkdir -p ${@D}
-	cp -av $< $@
-
-devel/private:
-	mkdir -p ${demo_dir}/private
-	rsync -avx ${HOME}/backup/${CURDIR}/${private_dir}/ ${private_dir}/ || echo "TODO"
-	ls ${private_dir} 
-
-private/rm:
-	rm -rf ${CURDIR}/${demo_dir}/private
-
-
-contents: ${demo_dir} ${contents_dir}
+devel/todo/iotjs/contents: ${demo_dir} ${contents_dir}
 	@echo "# log: TODO: $<"
 	du -hs ${demo_dir}/ ${contents_dir}/
 	mkdir -p ${contents_dir}/example/
@@ -123,25 +96,8 @@ contents: ${demo_dir} ${contents_dir}
 	rsync -avx external/iotjs/samples/ ${contents_dir}/iotjs/samples/
 	find ${contents_dir} -iname "*~" -exec rm {} \;
 
-contents/rm:
-	rm -rf ${contents_dir}
 
-${contents_dir}:
-	mkdir -p $@
-
-contents/compress:
-	find ${contents_dir} -iname "*.js" \
-  | while read file ; do \
-  echo "#log: $${file}"; \
-  ${js_minifier} $${file} > $${file}.tmp && mv -v $${file}.tmp $${file} ; \
-  done
-
-artik_sdk_url?=https://github.com/SamsungARTIK/artik-sdk.git
-
-external/artik-sdk:
-	git clone --recursive ${artik_sdk_url} $@
-
-artik/import: external/artik-sdk
+-include rules/webthings/rules.mk
 
 iotjs/local:
 	-rm -f external/iotjs
@@ -149,69 +105,16 @@ iotjs/local:
 	rsync -avx  --delete ~/mnt/iotjs/ external/iotjs/
 	${make} iotjs/deps
 
-tizen_iotivity_example_url?=https://github.com/tizenteam/iotivity-example
-tizen_iotivity_example_branch?=sandbox/rzr/tizen/1.2-rel
-
-local/iotivity-example-tizen:
-	git clone ${tizen_iotivity_example_url} -b ${tizen_iotivity_example_branch} $@
-	cd $@ && ./tizen.mk tpk
-
-tizen: local/iotivity-example-tizen
-	ls $^
-
-iotivity_example_url?=https://github.com/tizenteam/iotivity-example
-iotivity_example_branch?=sandbox/rzr/tizen/rt/1.2-rel
-iotivity_example_prep_files?=apps/examples/iotivity_example/Kconfig
-
-apps/examples/iotivity_example: 
-	mkdir -p ${@D}
-	git clone --recursive -b ${iotivity_example_branch} ${iotivity_example_url} $@
-	ls $@
-
-apps/examples/iotivity_example/%: apps/examples/iotivity_example
-	ls $@
-
-prep_files+=${iotivity_example_prep_files}
-
-local/apps/examples/iotivity_example: ${HOME}/mnt/iotivity-example/
-	-rm $@
-	mkdir -p ${@}
-	rsync -avx $</ $@/
-
-TODO/apps/examples/iotivity-example: ${HOME}/mnt/iotivity-example
-	mkdir -p ${@D}
-	ln -fs $< $@
-
-#TODO
-ocf_my_light_url?=https://github.com/webispy/ocf_mylight
-#ocf_my_light_branch?=oic_1.1 # 1.2-rel
-ocf_my_light_branch?=master
-
-apps/examples/ocf_mylight:
-	git clone --recursive ${ocf_my_light_url} -b ${ocf_my_light_branch} $@
-
-ocf: apps/examples/ocf_mylight ./external/iotivity/iotivity_1.3-rel/resource/csdk/stack/include
-	ln -fsv ${CURDIR}/external/iotivity/iotivity_1.3-rel/out/tizenrt/armv7-r/release/include/c_common/iotivity_config.h ./external/iotivity/iotivity_1.3-rel/resource/csdk/stack/include
-	ln -fsv ${CURDIR}/./external/iotivity/iotivity_1.3-rel/build_common/tizenrt/compatibility/*.h ./external/iotivity/iotivity_1.3-rel/resource/csdk/stack/include/
-	ln -fsv ${CURDIR}/./external/iotivity/iotivity_1.3-rel/resource/csdk/include/*.h ./external/iotivity/iotivity_1.3-rel/resource/csdk/stack/include/
-	grep '^CONFIG_EXAMPLES_OCFMYLIGHT' ${config} || ${make} menuconfig
-
-ioty: ${HOME}/mnt/iotivity-example/ apps/examples/iotivity_example/
-	rsync -avx $^
-	ls $</Kconfig*
-	grep '^CONFIG_EXAMPLES_IOTIVITY_EXAMPLE' ${config} || ${make} menuconfig
-	${make}
-
-
-demo: ${prep_files}
+devel/demo: ${prep_files}
 	${make} -e help configure
 #	grep STARTUP os/.config
 #	grep IOTJS os/.config
 #	grep NETCAT os/.config
 	grep 'BAUD=' os/.config 
-	${make} -e contents deploy
+#	${make} -e devel/contents
+	${make} -e deploy
 	${make} -e run 
-#	${make} console/screen  # baudrate=57600
+#	${make} console/screen
 #	sed -e 's|115200|57600|g' -i os/.config
 
 commit: ${demo_dir} external/iotjs/.clang-format
@@ -268,7 +171,7 @@ devel/del:
 	git commit -sm "WIP: devel: Del (${machine})" ${configs_dir}/${machine}/
 	echo "TODO: check ${local_mk}"
 
-devel/demo: devel/start
+devel/test: devel/start
 	${make} devel/commit run menuconfig devel/save devel/commit
 #	${make} devel/commit
 	sync
@@ -278,6 +181,51 @@ devel/demo: devel/start
 #	ln -fs $< $@
 
 -include rules/kconfig-frontends/rules.mk
+-include rules/iotivity-constrained/rules.mk
+
+
+#contents_rules+=devel/contents/wifi
+
+devel/contents/wifi: ${contents_dir}/mnt/wifi/slsiwifi.conf
+	cat $<
+
+#TODO: update here with WiFi creds
+devel_wifi_ssid?="private"
+devel_wifi_pass?="password"
+
+${contents_dir}/mnt/wifi/slsiwifi.conf: ${contents_dir} ${devel_self}
+	@mkdir -p ${@D}
+	echo 'join ${devel_wifi_ssid} ${devel_wifi_pass}' > $@
+
+
+
+${contents_dir}:
+	mkdir -p $@
+
+devel/contents/compress:
+	find ${contents_dir} -iname "*.js" \
+  | while read file ; do \
+  echo "#log: $${file}"; \
+  ${devel_js_minifier} $${file} > $${file}.tmp && mv -v $${file}.tmp $${file} ; \
+  done
+
+devel/contents/del:
+	rm -rf ${contents_dir}
+
+devel/contents: devel/contents/del ${contents_dir} ${contents_rules}
+	@echo "#$@: $^"
+	ls ${contents_dir}
+
+#devel/demo: 
+
+#	@echo "Ready"
+## demo
+
+#TODO
+devel/contents/example: ${contents_dir}/webthing-node
+	rm -rf ${contents_dir}/example
+	rsync -avx ${contents_dir}/webthing-node/ ${contents_dir}/example/
+	cp -av $</example/artik05x-thing.js ${contents_dir}/example/index.js
 
 .PHONY: devel/commit
 
