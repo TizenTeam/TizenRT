@@ -167,7 +167,11 @@ endif
 endif
 
 ifeq ($(CONFIG_ENABLE_IOTJS),y)
+iotjs_profile?=tizenrt
+iotjs_profile_file?=${iotjs_dir}/test/profiles/${iotjs_profile}.profile
+iotjs_profile_file?=${iotjs_dir}/test/profiles/${iotjs_profile}.profile
 IOTJS_ROOT_DIR ?= $(EXTDIR)/iotjs
+iotjs_dir?=${CURDIR}/${IOTJS_ROOT_DIR}
 IOTJS_BUILD_OPTION ?=
 ifeq ($(CONFIG_DEBUG),y)
   IOTJS_BUILDTYPE = debug
