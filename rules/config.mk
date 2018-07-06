@@ -39,6 +39,7 @@
 # TODO: Override here if needed:
 platform?=artik
 base_image_type?=nettest
+image_type?=devel
 
 # Default:
 os?=tinyara
