@@ -53,7 +53,7 @@ configure?=${os_dir}/tools/configure.sh
 config?=${os_dir}/.config
 image?=${build_dir}/output/bin/${project}
 deploy_image?=${image}
-all+=${image}
+all+=${deploy_image}
 
 prep_files+=${os_dir}/Make.defs
 README?=$(wildcard README*)
