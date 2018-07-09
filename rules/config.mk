@@ -36,6 +36,9 @@
 default: rule/default
 	@echo "# $@: $^"
 
+# More work in progress rules can be shared in
+-include rules/devel.mk
+
 # TODO: Override here if needed:
 platform?=artik
 base_image_type?=nettest
@@ -44,3 +47,11 @@ base_image_type?=nettest
 os?=tinyara
 platform?=qemu
 base_image_type?=tc_64k
+
+# Where to download and install tools or extra files:
+extra_dir?=${HOME}/usr/local/opt/${os}/extra
+
+# make sure user belongs to sudoers
+sudo?=sudo
+export sudo
+
