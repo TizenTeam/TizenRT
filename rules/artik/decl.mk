@@ -71,10 +71,6 @@ signer_archive?=${HOME}/Downloads/ARTIK053S.zip
 signer?=${extra_dir}/ARTIK053/artik05x_codesigner
 prep_files+=${signer}
 
-tty?=/dev/ttyUSB1
-baudrate?=115200
-
-
 bl1?=${CURDIR}/build/configs/${machine}/bin/bl1.bin
 bl2?=${CURDIR}/build/configs/${machine}/bin/bl2.bin
 sssfw?=${CURDIR}/build/configs/${machine}/bin/sssfw.bin
@@ -139,6 +135,7 @@ all+=${deploy_image}
 # board usb
 
 tty?=/dev/ttyUSB0
+export tty
 tty_rate?=115200
 udev?=/etc/udev/rules.d/99-usb-${vendor_id}-${product_id}.rules
 
