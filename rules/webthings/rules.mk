@@ -32,7 +32,6 @@
 #
 ############################################################################
 
-
 webthings_self?=rules/webthings/rules.mk
 webthings_branch?=sandbox/rzr/devel/iotjs/tizenrt/master
 webthings_url?=https://github.com/tizenteam/webthing-node
@@ -43,18 +42,16 @@ contents_rules+=webthings/contents
 webthings/contents: ${contents_dir}/webthing-node
 	ls $<
 
-${webthing_dir}:
+${webthings_dir}:
 	mkdir -p $@
 	git clone --recursive --depth 1 ${webthings_url} -b ${webthings_branch} $@
 
-${contents_dir}/webthing-node: ${webthing_dir} ${webthings_self}
+${contents_dir}/webthing-node: ${webthings_dir} ${webthings_self}
 	rsync -avx --delete "$</" "$@/"
 	rm -rf "$@/.git"
 	rm -rf "$@/node_modules"
 
-#webthing_dir?=${HOME}/mnt/webthing-node/
-# ${contents_dir}/webthing-node: ${HOME}/mnt/webthing-node/ ${webthings_self}
-# 	rsync -avx "$</" "$@/"
-# 	rm -rf "$@/.git"
-# 	rm -rf "$@/node_modules"
-
+webthings/home: ${HOME}/mnt/webthing-node
+	rsync -avx "${HOME}/mnt/webthing-node/" "${contents_dir}/webthing-node" 
+	rm -rf "${contents_dir}/webthing-node/.git"
+	rm -rf "${contents_dir}/webthing-node/node_modules"
