@@ -39,6 +39,7 @@ private_dir?=${demo_dir}/private
 #demo_dir?=.
 prep_files+=${demo_dir}
 prep_files+=${demo_dir}/index.js
+contents_rules+=air-lpwan-demo/contents
 
 ${demo_dir}:
 	mkdir -p ${@D}
@@ -59,3 +60,10 @@ devel/private:
 private/rm:
 	rm -rf ${CURDIR}/${demo_dir}/private
 
+${contents_dir}/air-lpwan-demo: ${demo_dir} ${prep_files}
+	rsync -avx --delete "$</" "$@/"
+	rm -rf "$@/.git"
+	rm -rf "$@/node_modules"
+
+air-lpwan-demo/contents: ${contents_dir}/air-lpwan-demo
+	ls $<
