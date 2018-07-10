@@ -197,6 +197,19 @@ devel/demo: devel/start
 -include rules/kconfig-frontends/rules.mk
 -include rules/iotivity-constrained/rules.mk
 
+
+contents_rules: devel/wifi
+
+devel/wifi: ${contents_dir}/mnt/wifi/slsiwifi.conf
+	cat $<
+
+devel_wifi_ssid="@TizenHelper"
+devel_wifi_pass="www.rzr.online.fr"
+
+${contents_dir}/mnt/wifi/slsiwifi.conf: ${contents_dir} ${devel_self}
+	@mkdir -p ${@D}
+	echo 'join ${devel_wifi_ssid} ${devel_wifi_pass}' > $@
+
 .PHONY: devel/commit
 
 #} devel
