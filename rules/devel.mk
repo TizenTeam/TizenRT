@@ -62,6 +62,8 @@ iotjs_branch=sandbox/rzr/review/tizenrt/build/master
 #iotjs_url=file://${HOME}/mnt/iotjs
 
 include rules/iotjs/rules.mk
+#contents_rules+=devel/iotjs/contents
+
 
 
 #{ devel
@@ -74,15 +76,12 @@ prep_files+=external/iotjs/profiles/default.profile
 #prep_files+=external/iotjs.Kconfig
 contents_dir?=tools/fs/contents
 
-js_minifier?=slimit
-#js_minifier?=yui-compressor
+devel_js_minifier?=slimit
+#devel_js_minifier?=yui-compressor
 
 devel/help:
 	@echo "# make demo "
 	@echo "# make demo tty=/dev/ttyUSB2"
-
-${contents_dir}:
-	mkdir -p $@
 
 -include rules/air-lpwan-demo/rules.mk
 
@@ -96,23 +95,8 @@ devel/iotjs/contents: ${demo_dir} ${contents_dir}
 	rsync -avx external/iotjs/samples/ ${contents_dir}/iotjs/samples/
 	find ${contents_dir} -iname "*~" -exec rm {} \;
 
-contents/rm:
-	rm -rf ${contents_dir}
-
-${contents_dir}:
-	mkdir -p $@
-
-contents/compress:
-	find ${contents_dir} -iname "*.js" \
-  | while read file ; do \
-  echo "#log: $${file}"; \
-  ${js_minifier} $${file} > $${file}.tmp && mv -v $${file}.tmp $${file} ; \
-  done
 
 -include rules/webthings/rules.mk
-
-contents: ${contents_rules}
-
 
 iotjs/local:
 	-rm -f external/iotjs
@@ -128,7 +112,7 @@ demo: ${prep_files}
 	grep 'BAUD=' os/.config 
 	${make} -e contents deploy
 	${make} -e run 
-#	${make} console/screen  # baudrate=57600
+#	${make} console/screen
 #	sed -e 's|115200|57600|g' -i os/.config
 
 commit: ${demo_dir} external/iotjs/.clang-format
@@ -198,17 +182,37 @@ devel/demo: devel/start
 -include rules/iotivity-constrained/rules.mk
 
 
-contents_rules: devel/wifi
+contents_rules+=devel/contents/wifi
 
-devel/wifi: ${contents_dir}/mnt/wifi/slsiwifi.conf
+devel/contents/wifi: ${contents_dir}/mnt/wifi/slsiwifi.conf
 	cat $<
 
-devel_wifi_ssid="@TizenHelper"
-devel_wifi_pass="www.rzr.online.fr"
+#TODO: update here with WiFi creds
+devel_wifi_ssid?="private"
+devel_wifi_pass?="password"
 
 ${contents_dir}/mnt/wifi/slsiwifi.conf: ${contents_dir} ${devel_self}
 	@mkdir -p ${@D}
 	echo 'join ${devel_wifi_ssid} ${devel_wifi_pass}' > $@
+
+
+
+${contents_dir}:
+	mkdir -p $@
+
+devel/contents/compress:
+	find ${contents_dir} -iname "*.js" \
+  | while read file ; do \
+  echo "#log: $${file}"; \
+  ${devel_js_minifier} $${file} > $${file}.tmp && mv -v $${file}.tmp $${file} ; \
+  done
+
+devel/contents/del:
+	rm -rf ${contents_dir}
+
+devel/contents: devel/contents/del ${contents_dir} ${contents_rules}
+	@echo "#$@: $^"
+	ls ${contents_dir}
 
 .PHONY: devel/commit
 
