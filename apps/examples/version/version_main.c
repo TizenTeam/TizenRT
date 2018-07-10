@@ -22,36 +22,36 @@
 #include <stdlib.h>
 #include <errno.h>
 
-
 #ifdef CONFIG_BUILD_KERNEL
 int main(int argc, FAR char *argv[])
 #else
-int version_main(int argc, char *argv[])
+    int version_main(int argc, char *argv[])
 #endif
 {
     /// TODO: this is breaking reproductible build
     printf("log: " __FILE__
            "\nlog:" __DATE__ " " __TIME__  "\n");
-#if 1
+    
+    return 0;
     char* filename = "/proc/version";
     if (1 < argc) {
         filename = argv[1];
     }
-    FILE* f = fopen(filename, "r"); // TODO: "rt" failure=22
-    if (NULL == f) {
-        printf("log: error: io: Failed to open file: %d \n", errno);
-        exit (errno);
-    }
-    char line[1024];
-    int len = fread(line,1,sizeof(line),f);
-    line[len] = 0;
-    fclose(f);
-    printf("log: read=%d/%d\n", len, sizeof(line));
     for(;;) {
-        //printf("%s", line);
-        puts(line);
+        printf("log: %s\n",__FUNCTION__);
+        FILE* f = fopen(filename, "r"); // TODO: "rt" failure=22
+        if (NULL == f) {
+            printf("log: error: io: Failed to open file: %s %d \n", filename, errno);
+        } else {
+            char line[1024];
+            int len = fread(line,1,sizeof(line),f);
+            line[len] = 0;
+            fclose(f);
+            printf("log: read=%d/%d\n", len, sizeof(line));
+            puts(line);
+        }
         sleep(5);
     }
-#endif
+
     return 0;
 }
