@@ -85,7 +85,7 @@ devel/help:
 
 -include rules/air-lpwan-demo/rules.mk
 
-devel/iotjs/contents: ${demo_dir} ${contents_dir}
+devel/todo/xiotjs/contents: ${demo_dir} ${contents_dir}
 	@echo "# log: TODO: $<"
 	du -hs ${demo_dir}/ ${contents_dir}/
 	mkdir -p ${contents_dir}/example/
@@ -213,6 +213,12 @@ devel/contents/del:
 devel/contents: devel/contents/del ${contents_dir} ${contents_rules}
 	@echo "#$@: $^"
 	ls ${contents_dir}
+
+#TODO
+devel/contents/example: ${contents_dir}/webthing-node
+	rm -rf ${contents_dir}/example
+	rsync -avx ${contents_dir}/webthing-node/ ${contents_dir}/example/
+	cp -av $</example/artik05x-thing.js ${contents_dir}/example/index.js
 
 .PHONY: devel/commit
 
