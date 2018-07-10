@@ -54,13 +54,13 @@
 -include $(TOPDIR)/Make.defs
 include $(APPDIR)/Make.defs
 
-# Version, World! built-in application info
+# Version built-in application info
 
 APPNAME = version
 FUNCNAME = $(APPNAME)_main
 THREADEXEC = TASH_EXECMD_ASYNC
 
-# Version, World! Example
+# Version Example
 
 ASRCS =
 CSRCS =
