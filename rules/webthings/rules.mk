@@ -40,7 +40,6 @@ webthing_dir?=${HOME}/mnt/webthing-node/
 
 contents_dir?=tools/fs/contents
 contents_rules+=webthings/contents
-contents_rules+=${contents_dir}/webthing-node
 
 webthings/contents: ${contents_dir}/webthing-node
 	ls $<
