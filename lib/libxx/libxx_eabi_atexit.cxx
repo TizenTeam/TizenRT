@@ -55,7 +55,7 @@
 //***************************************************************************
 
 #include <tinyara/config.h>
-#include <cstdlib>
+#include <cstdlib.h>
 
 #include "libxx_internal.hxx"
 
