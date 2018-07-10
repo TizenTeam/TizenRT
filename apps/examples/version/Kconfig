@@ -4,10 +4,11 @@
 #
 
 config EXAMPLES_VERSION
-	bool "\"Version, World!\" example"
+	bool "\"Version\" example"
 	default n
+        select FS_AUTOMOUNT_PROCFS
 	---help---
-		Enable the \"Version, World!\" example
+		Enable the \"Version\" example
 
 if EXAMPLES_VERSION
 
