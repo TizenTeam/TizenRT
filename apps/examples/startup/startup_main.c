@@ -66,14 +66,23 @@ extern int iotjs(int argc, char *argv[]);
 
 #include <wifi_manager/wifi_manager.h>
 
+
+bool gisconnected = false;
+
+void wifi_connect(void);
+
+
 static void wifi_sta_connected(wifi_manager_result_e result) {
     printf("log: %s\n",__FUNCTION__);
     printf("log: %x\n", result);
-    exit(0);
+    gisconnected = true;
 }
 
 static void wifi_sta_disconnected(void) {
     printf("log: %s\n",__FUNCTION__);
+    gisconnected = false;
+    sleep(10);
+    wifi_connect();
 }
 
 static wifi_manager_cb_s wifi_callbacks = {
@@ -117,7 +126,7 @@ void wifi_connect(void)
     config.ap_crypto_type = (wifi_manager_ap_crypto_type_e) c;
     ret = wifi_manager_connect_ap(&config);
             
-#else
+#else //TODO: try
     int a;
     for (a=0; a<=5; a++) {  //TODO see headers wifi_manager_ap_auth_type_e
         int c;
@@ -139,12 +148,15 @@ int main(int argc, FAR char *argv[])
 int startup_main(int argc, char *argv[])
 #endif
 {
+    chdir("/rom/example");
     char * targv[] = { "iotjs",
                        "/rom/example/index.js" };
     int targc = 2;
+    wifi_connect();
+            
     for(;;) {
-        wifi_connect();
-        iotjs(targc, targv);
+        if (gisconnected) iotjs(targc, targv);
+        sleep(10);
     }
     return 0;
 }
