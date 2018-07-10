@@ -57,10 +57,10 @@ configure: ${configs_dir} ${kernel}/configure
 	ls $<
 
 console/screen: ${tty}
-	screen $< ${baudrate}
+	screen $< ${tty_rate}
 
 console/picocom: ${tty}
-	picocom -b ${baudrate} --omap crcrlf --imap crcrlf --echo ${tty}
+	picocom -b ${tty_rate} --omap crcrlf --imap crcrlf --echo ${tty}
 
 console: console/screen
 	sync
