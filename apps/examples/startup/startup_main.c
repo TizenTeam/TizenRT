@@ -63,6 +63,76 @@
 
 extern int iotjs(int argc, char *argv[]);
 
+
+#include <wifi_manager/wifi_manager.h>
+
+static void wifi_sta_connected(wifi_manager_result_e result) {
+    printf("log: %s\n",__FUNCTION__);
+    printf("log: %x\n", result);
+    exit(0);
+}
+
+static void wifi_sta_disconnected(void) {
+    printf("log: %s\n",__FUNCTION__);
+}
+
+static wifi_manager_cb_s wifi_callbacks = {
+    wifi_sta_connected,
+    wifi_sta_disconnected,
+    NULL,
+    NULL,
+    NULL,
+};
+
+#define CONFIG_EXAMPLES_WIFI_CONNECT_SSID "@TizenHelper"
+#define CONFIG_EXAMPLES_WIFI_CONNECT_PASSPHRASE "www.rzr.online.fr"
+#define CONFIG_EXAMPLES_WIFI_CONNECT_AUTHENTICATION WIFI_MANAGER_AUTH_WPA2_PSK
+#define CONFIG_EXAMPLES_WIFI_CONNECT_CRYPTO  WIFI_MANAGER_CRYPTO_AES
+
+void wifi_connect(void)
+{
+    printf("log: %s\n",__FUNCTION__);
+    int i = 0;
+    for(i = 0; i < 3; i++) {
+        printf("Wait (%d/3) sec...\n", i + 1);
+        sleep(1);
+    }
+
+    wifi_manager_result_e ret = WIFI_MANAGER_FAIL;
+    wifi_manager_ap_config_s config;
+
+    ret = wifi_manager_init(&wifi_callbacks);
+    printf("log: status: %x", WIFI_MANAGER_SUCCESS);
+
+    config.ssid_length = strlen(CONFIG_EXAMPLES_WIFI_CONNECT_SSID);
+    config.passphrase_length = strlen(CONFIG_EXAMPLES_WIFI_CONNECT_PASSPHRASE);
+    strncpy(config.ssid, CONFIG_EXAMPLES_WIFI_CONNECT_SSID, config.ssid_length + 1);
+    strncpy(config.passphrase, CONFIG_EXAMPLES_WIFI_CONNECT_PASSPHRASE, config.passphrase_length + 1);
+
+
+#if 1 //Security: wpa2_aes
+    int a = WIFI_MANAGER_AUTH_WPA2_PSK;
+    int c = WIFI_MANAGER_CRYPTO_AES;
+    config.ap_auth_type = (wifi_manager_ap_auth_type_e) a;
+    config.ap_crypto_type = (wifi_manager_ap_crypto_type_e) c;
+    ret = wifi_manager_connect_ap(&config);
+            
+#else
+    int a;
+    for (a=0; a<=5; a++) {  //TODO see headers wifi_manager_ap_auth_type_e
+        int c;
+        for (c=0; c<=6; c++)  { // TODO: wifi_manager_ap_crypto_type_e
+            config.ap_auth_type = (wifi_manager_ap_auth_type_e) a;
+            config.ap_crypto_type = (wifi_manager_ap_crypto_type_e) c;
+            ret = wifi_manager_connect_ap(&config);
+            printf("log: status: %x", WIFI_MANAGER_SUCCESS);
+        }
+    }
+#endif
+    printf("log: failed: status: %x", WIFI_MANAGER_SUCCESS);
+}
+
+
 #ifdef CONFIG_BUILD_KERNEL
 int main(int argc, FAR char *argv[])
 #else
@@ -72,7 +142,9 @@ int startup_main(int argc, char *argv[])
     char * targv[] = { "iotjs",
                        "/rom/example/index.js" };
     int targc = 2;
-    for(;;)
+    for(;;) {
+        wifi_connect();
         iotjs(targc, targv);
+    }
     return 0;
 }
