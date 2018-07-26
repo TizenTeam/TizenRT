@@ -109,7 +109,7 @@ devel/demo: ${prep_files}
 #	grep IOTJS os/.config
 #	grep NETCAT os/.config
 	grep 'BAUD=' os/.config 
-	${make} -e contents deploy
+	${make} -e devel/contents deploy
 	${make} -e run 
 #	${make} console/screen
 #	sed -e 's|115200|57600|g' -i os/.config
@@ -208,7 +208,7 @@ devel/contents/compress:
 devel/contents/del:
 	rm -rf ${contents_dir}
 
-devel/contents: devel/contents/del ${contents_dir} ${contents_rules}
+devel/contents: ${contents_dir} ${contents_rules}
 	@echo "#$@: $^"
 	ls ${contents_dir}
 
@@ -219,6 +219,8 @@ devel/contents/example: ${contents_dir}/webthing-node
 	cp -av $</example/artik05x-thing.js ${contents_dir}/example/index.js
 
 .PHONY: devel/commit
+
+devel/webthing/demo: devel/contents/del devel/contents/example devel/demo
 
 demo: devel/webthing/demo
 #} devel
