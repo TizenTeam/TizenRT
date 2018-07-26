@@ -36,7 +36,8 @@
 #default: rule/default
 #	@echo "# $@: $^"
 devel_self?=rules/devel.mk
-
+configs_dir?=build/configs
+defconfig?=${configs_dir}/${machine}/devel/defconfig
 # TODO: Override here if needed:
 platform?=artik
 machine?=artik055s
@@ -70,7 +71,8 @@ include rules/iotjs/rules.mk
 
 #{ devel
 #image_type=iotivity
-base_image_type=minimal
+#base_image_type=minimal
+base_image_type=nettest
 
 #prep_files+=${private_dir}/config.js
 #prep_files+=external/iotjs/profiles/default.profile
@@ -170,6 +172,9 @@ devel/del:
 	ls ${configs_dir}/${machine}/
 	git commit -sm "WIP: devel: Del (${machine})" ${configs_dir}/${machine}/
 	echo "TODO: check ${local_mk}"
+
+devel/save: os/.config
+	cp -av $< ${defconfig}
 
 devel/test: devel/start
 	${make} devel/commit run menuconfig devel/save devel/commit
