@@ -71,7 +71,8 @@ include rules/iotjs/rules.mk
 
 #{ devel
 #image_type=iotivity
-base_image_type=minimal
+#base_image_type=minimal
+base_image_type=nettest
 
 #prep_files+=${private_dir}/config.js
 #prep_files+=external/iotjs/profiles/default.profile
