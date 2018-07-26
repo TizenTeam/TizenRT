@@ -179,7 +179,7 @@ devel/demo: devel/start
 #	ln -fs $< $@
 
 -include rules/kconfig-frontends/rules.mk
--include rules/iotivity-constrained/rules.mk
+#-include rules/iotivity-constrained/rules.mk
 
 
 contents_rules+=devel/contents/wifi
