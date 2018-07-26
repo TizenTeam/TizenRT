@@ -56,4 +56,3 @@ webthings/home: ${HOME}/mnt/webthing-node
 	rm -rf "${contents_dir}/webthing-node/.git"
 	rm -rf "${contents_dir}/webthing-node/node_modules"
 
-devel/webthing/demo: devel/contents devel/contents/example devel/demo
