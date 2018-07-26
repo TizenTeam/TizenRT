@@ -72,11 +72,12 @@ include rules/iotjs/rules.mk
 #image_type=iotivity
 base_image_type=minimal
 
-prep_files+=${private_dir}/config.js
+#prep_files+=${private_dir}/config.js
 prep_files+=external/iotjs/profiles/default.profile
 #prep_files+=external/iotjs/Kconfig.runtime
 #prep_files+=external/iotjs.Kconfig
 contents_dir?=tools/fs/contents
+prep_files+=${contents_dir}
 
 devel_js_minifier?=slimit
 #devel_js_minifier?=yui-compressor
@@ -84,8 +85,6 @@ devel_js_minifier?=slimit
 devel/help:
 	@echo "# make demo "
 	@echo "# make demo tty=/dev/ttyUSB2"
-
--include rules/air-lpwan-demo/rules.mk
 
 devel/todo/iotjs/contents: ${demo_dir} ${contents_dir}
 	@echo "# log: TODO: $<"
@@ -112,7 +111,8 @@ devel/demo: ${prep_files}
 #	grep IOTJS os/.config
 #	grep NETCAT os/.config
 	grep 'BAUD=' os/.config 
-	${make} -e devel/contents deploy
+#	${make} -e devel/contents
+	${make} -e deploy
 	${make} -e run 
 #	${make} console/screen
 #	sed -e 's|115200|57600|g' -i os/.config
