@@ -173,7 +173,6 @@ devel/test: devel/start
 #	${make} devel/commit
 	sync
 
-
 #external/iotjs/Kconfig.runtime: external/iotjs/deps/jerry/targets/tizenrt-artik053/apps/jerryscript/Kconfig
 #	ln -fs $< $@
 
