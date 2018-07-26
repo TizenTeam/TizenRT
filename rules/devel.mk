@@ -220,7 +220,7 @@ devel/contents/example: ${contents_dir}/webthing-node
 
 .PHONY: devel/commit
 
-devel/webthing/demo: devel/contents/del devel/contents/example devel/demo
+devel/webthing/demo: devel/contents/del devel/contents devel/contents/example devel/demo
 
 demo: devel/webthing/demo
 #} devel
