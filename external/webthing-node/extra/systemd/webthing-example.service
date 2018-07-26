@@ -1,0 +1,10 @@
+[Unit]
+Description=webthing-example
+After=network.target
+
+[Service]
+ExecStart=/usr/share/local/src/webthing-node/webthing-example.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
