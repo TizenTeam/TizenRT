@@ -135,14 +135,14 @@ artik/deploy: artik/deploy/${machine}
 	@echo "# $@: $^"
 
 
-artik/deploy/%: ${deploy_image} os
+artik/deploy/%: ${deploy_image} os ${contents_dir}
 	@echo "TODO: only download ${@F}"
 	ls -l $<
 	${MAKE} -C os download ALL
 
 
 #flash: download
-artik/download: ${deploy_image}
+artik/download: ${deploy_image} ${contents_dir}
 	${MAKE} -C os download ALL
 
 #artik/deploy/${machine}: deploy/${machine}
