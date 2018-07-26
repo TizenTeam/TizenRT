@@ -40,7 +40,7 @@ devel_self?=rules/devel.mk
 # TODO: Override here if needed:
 platform?=artik
 machine?=artik055s
-#base_image_type?=nettest
+base_image_type?=nettest
 base_image_type?=minimal #TODO
 
 # Default:
