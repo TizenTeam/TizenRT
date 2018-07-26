@@ -53,11 +53,18 @@ extra_dir?=${HOME}/usr/local/opt/${os}/extra
 sudo?=sudo
 export sudo
 
+devel/demo:
+	exit 1
+
 # More work in progress rules can be shared in
 -include rules/devel.mk
 image_type=devel
 #base_image_type=nettest
 
 # which can contain extra rules ie: include rules/iotjs/rules.mk
+
+
+
+demo: devel/demo
 
 #} devel
