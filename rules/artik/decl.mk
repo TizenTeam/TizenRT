@@ -134,9 +134,10 @@ all+=${deploy_image}
 
 # board usb
 
-tty?=/dev/ttyUSB0
+tty?=$(shell ls /dev/ttyUSB* | sort | head -n1)
 export tty
 tty_rate?=115200
+export tty_rate
 udev?=/etc/udev/rules.d/99-usb-${vendor_id}-${product_id}.rules
 
 include rules/gcc-arm-embedded/decl.mk
