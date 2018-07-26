@@ -65,8 +65,7 @@ iotjs_branch=sandbox/rzr/tizen/rt/master
 
 include rules/iotjs/rules.mk
 #contents_rules+=devel/iotjs/contents
-
-contents_rules+=devel/contents/example
+#contents_rules+=devel/contents/example
 
 
 #{ devel
@@ -185,7 +184,7 @@ devel/test: devel/start
 -include rules/iotivity-constrained/rules.mk
 
 
-contents_rules+=devel/contents/wifi
+#contents_rules+=devel/contents/wifi
 
 devel/contents/wifi: ${contents_dir}/mnt/wifi/slsiwifi.conf
 	cat $<
