@@ -42,7 +42,7 @@ defconfig?=${configs_dir}/${machine}/devel/defconfig
 platform?=artik
 machine?=artik055s
 base_image_type?=nettest
-base_image_type?=minimal #TODO
+#base_image_type?=minimal #TODO
 
 # Default:
 os?=tinyara
