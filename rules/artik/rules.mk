@@ -32,7 +32,7 @@
 #
 ############################################################################
 
-#TODO: relocate if shared
+#{openocd
 openocd/%: ${openocd_cfg}
 	cd ${<D} && ${openocd} -f "${<F}" -c "${@F}; exit 0;" 2>&1
 #}openocd
@@ -72,7 +72,7 @@ reset/%: openocd/help
 
 ${signer_archive}: 
 	@echo "# Please download from:"
-	@echo "# ${signer_url}"
+	@echo "# ${signer_url}#${@F}"
 	ls $@
 
 ${signer}: ${signer_archive}
@@ -153,6 +153,7 @@ artik/deploy/help: openocd/help
 
 
 #TODO:
+
 artik/todo:
 	cd os && sh -x -e ${CURDIR}/tools/fs/mkromfsimg.sh
 
@@ -160,6 +161,12 @@ artik/run: console
 	echo "TODO deploy once"
 
 .PHONY: artik/download
+
+artik/prep: ${prep_files}
+	ls $<
+
+artik/setup:
+	sudo apt-get install -y genromfs openocd
 
 #} generic
 
