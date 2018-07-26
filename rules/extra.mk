@@ -56,17 +56,21 @@ ls: ${image}
 configure: ${configs_dir} ${kernel}/configure
 	ls $<
 
-console/screen: ${tty}
+monitor/screen: ${tty}
 	screen $< ${tty_rate}
 
-console/picocom: ${tty}
-	picocom -b ${tty_rate} --omap crcrlf --imap crcrlf --echo ${tty}
+monitor/picocom: ${tty}
+	picocom -b ${tty_rate} --omap crcrlf --imap crcrlf --echo $<
 
-console: console/screen
+monitor: monitor/screen
 	sync
 
+console: monitor
+
 ${tty}:
+	ls /dev/tty*
 	ls /dev/ttyUSB*
+	ls $@
 
 ${udev}:
 	lsusb | grep "${vendor_id}:${product_id}"
