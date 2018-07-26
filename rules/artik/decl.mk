@@ -70,10 +70,7 @@ signer_archive?=${HOME}/Downloads/ARTIK053S.zip
 #signer?=${CURDIR}/build/configs/artik05x/tools/codesigner/artik05x_codesigner
 #signer?=${CURDIR}/${configs_dir}/artik05x/tools/codesigner/artik05x_AppCodesigner
 signer?=${extra_dir}/ARTIK053/artik05x_codesigner
-prep_files+=${singer}
-tty?=/dev/ttyUSB1
-baudrate?=115200
-
+prep_files+=${signer}
 
 bl1?=${CURDIR}/build/configs/${machine}/bin/bl1.bin
 bl2?=${CURDIR}/build/configs/${machine}/bin/bl2.bin
@@ -135,8 +132,10 @@ all+=${deploy_image}
 
 # board usb
 
-tty?=/dev/ttyUSB0
+tty?=$(shell ls /dev/ttyUSB* | sort | head -n1)
+export tty
 tty_rate?=115200
+export tty_rate
 udev?=/etc/udev/rules.d/99-usb-${vendor_id}-${product_id}.rules
 
 include rules/gcc-arm-embedded/decl.mk
