@@ -85,7 +85,7 @@ devel/help:
 
 -include rules/air-lpwan-demo/rules.mk
 
-devel/todo/xiotjs/contents: ${demo_dir} ${contents_dir}
+devel/todo/iotjs/contents: ${demo_dir} ${contents_dir}
 	@echo "# log: TODO: $<"
 	du -hs ${demo_dir}/ ${contents_dir}/
 	mkdir -p ${contents_dir}/example/
@@ -110,7 +110,7 @@ demo: ${prep_files}
 #	grep IOTJS os/.config
 #	grep NETCAT os/.config
 	grep 'BAUD=' os/.config 
-	${make} -e contents deploy
+	${make} -e devel/contents deploy
 	${make} -e run 
 #	${make} console/screen
 #	sed -e 's|115200|57600|g' -i os/.config
@@ -222,4 +222,6 @@ devel/contents/example: ${contents_dir}/webthing-node
 
 .PHONY: devel/commit
 
+
+devel/demo: devel/contents/example demo
 #} devel
