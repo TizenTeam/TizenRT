@@ -220,6 +220,8 @@ devel/contents/example: ${contents_dir}/webthing-node
 	rsync -avx ${contents_dir}/webthing-node/ ${contents_dir}/example/
 	cp -av $</example/artik05x-thing.js ${contents_dir}/example/index.js
 
+devel/webthing/demo: devel/contents devel/contents/example devel/demo
+
 .PHONY: devel/commit
 
 #} devel
