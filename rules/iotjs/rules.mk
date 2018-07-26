@@ -38,12 +38,11 @@ iotjs_dir?=external/iotjs
 iotjs_url?=https://github.com/Samsung/iotjs
 iotjs_branch?=master
 iotjs_profile?=tizenrt
-iotjs_profile_file?=${iotjs_dir}/test/profiles/${iotjs_profile}.profile
 iotjs_kconfig?=${iotjs_dir}/config/tizenrt/Kconfig.runtime
 
 prep_files+=${iotjs_dir}/deps/jerry/CMakeLists.txt
 prep_files+=${iotjs_kconfig}
-prep_files+=${iotjs_profile_file}
+
 
 
 ${iotjs_dir}/deps/%:  ${iotjs_dir}
