@@ -36,7 +36,8 @@
 #default: rule/default
 #	@echo "# $@: $^"
 devel_self?=rules/devel.mk
-
+configs_dir?=build/configs
+defconfig?=${configs_dir}/${machine}/devel/defconfig
 # TODO: Override here if needed:
 platform?=artik
 machine?=artik055s
@@ -170,6 +171,9 @@ devel/del:
 	ls ${configs_dir}/${machine}/
 	git commit -sm "WIP: devel: Del (${machine})" ${configs_dir}/${machine}/
 	echo "TODO: check ${local_mk}"
+
+devel/save: os/.config
+	cp -av $< ${defconfig}
 
 devel/test: devel/start
 	${make} devel/commit run menuconfig devel/save devel/commit
