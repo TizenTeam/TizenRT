@@ -103,7 +103,7 @@ iotjs/local:
 	rsync -avx  --delete ~/mnt/iotjs/ external/iotjs/
 	${make} iotjs/deps
 
-demo: ${prep_files}
+devel/demo: ${prep_files}
 	${make} -e help configure
 #	grep STARTUP os/.config
 #	grep IOTJS os/.config
@@ -168,7 +168,7 @@ devel/del:
 	git commit -sm "WIP: devel: Del (${machine})" ${configs_dir}/${machine}/
 	echo "TODO: check ${local_mk}"
 
-devel/demo: devel/start
+devel/test: devel/start
 	${make} devel/commit run menuconfig devel/save devel/commit
 #	${make} devel/commit
 	sync
@@ -219,8 +219,7 @@ devel/contents/example: ${contents_dir}/webthing-node
 	rsync -avx ${contents_dir}/webthing-node/ ${contents_dir}/example/
 	cp -av $</example/artik05x-thing.js ${contents_dir}/example/index.js
 
-devel/webthing/demo: devel/contents devel/contents/example devel/demo
-
 .PHONY: devel/commit
 
+demo: devel/webthing/demo
 #} devel
