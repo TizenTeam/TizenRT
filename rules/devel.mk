@@ -64,6 +64,7 @@ iotjs_branch=sandbox/rzr/tizen/rt/master
 include rules/iotjs/rules.mk
 #contents_rules+=devel/iotjs/contents
 
+contents_rules+=devel/contents/example
 
 
 #{ devel
@@ -104,7 +105,7 @@ iotjs/local:
 	rsync -avx  --delete ~/mnt/iotjs/ external/iotjs/
 	${make} iotjs/deps
 
-demo: ${prep_files}
+devel/demo: ${prep_files}
 	${make} -e help configure
 #	grep STARTUP os/.config
 #	grep IOTJS os/.config
@@ -169,7 +170,7 @@ devel/del:
 	git commit -sm "WIP: devel: Del (${machine})" ${configs_dir}/${machine}/
 	echo "TODO: check ${local_mk}"
 
-devel/demo: devel/start
+devel/test: devel/start
 	${make} devel/commit run menuconfig devel/save devel/commit
 #	${make} devel/commit
 	sync
@@ -214,6 +215,11 @@ devel/contents: devel/contents/del ${contents_dir} ${contents_rules}
 	@echo "#$@: $^"
 	ls ${contents_dir}
 
+#devel/demo: 
+
+#	@echo "Ready"
+## demo
+
 #TODO
 devel/contents/example: ${contents_dir}/webthing-node
 	rm -rf ${contents_dir}/example
@@ -222,6 +228,4 @@ devel/contents/example: ${contents_dir}/webthing-node
 
 .PHONY: devel/commit
 
-
-devel/demo: devel/contents/example demo
 #} devel
