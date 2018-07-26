@@ -126,9 +126,4 @@ devel/del:
 	git commit -sm "WIP: devel: Del (${machine})" ${configs_dir}/${machine}/
 	echo "TODO: check ${local_mk}"
 
-devel/demo: devel/start
-	${make} devel/commit run menuconfig devel/save devel/commit
-#	${make} devel/commit
-	sync
-
 .PHONY: devel/commit
