@@ -232,6 +232,25 @@ devel/contents/example: ${contents_dir}/webthing-node
 	rsync -avx ${contents_dir}/webthing-node/ ${contents_dir}/example/
 	cp -av $</example/artik05x-thing.js ${contents_dir}/example/index.js
 
+
+defconfigs?=$(wildcard build/configs/*/${base_image_type}/defconfig)
+
+devel/machine/%:
+	${MAKE} machine=${@F} distclean
+	${MAKE} machine=${@F} menuconfig all
+	${MAKE} machine=${@F} devel/commit
+
+devel/machines: ${defconfigs}
+	ls $^
+	for path in $^ ; do \
+ machine=$$(echo "$${path}" \
+ | sed -e "s|build/configs/\(.*\)/${base_image_type}/defconfig|\1|g") ;\
+ ${MAKE} devel/machine/$${machine} ; \
+done
+
+distclean:
+	git.sh op rm
+
 .PHONY: devel/commit
 
 #} devel
