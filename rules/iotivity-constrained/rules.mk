@@ -35,7 +35,7 @@
 
 iotivity_constrained_dir?=external/iotivity-constrained
 iotivity_constrained_url?=https://github.com/tizenteam/iotivity-constrained
-iotivity_constrained_branch?=sandbox/rzr/tizenrt/master
+iotivity_constrained_branch?=sandbox/rzr/samsung
 
 iotivity_constrained_prep_files?=apps/examples/iotivity_constrained_example
 prep_files+=${iotivity_constrained_prep_files}
