@@ -178,6 +178,6 @@ distclean: cleanall
 test:
 	@echo "TODO: https://jira.iotivity.org/browse/LITE-4"
 
-.built: $(OBJS)
-	$(call ARCHIVE, $(BIN), $(OBJS))
-	$(Q) touch .built
+#.built: $(OBJS)
+#	$(call ARCHIVE, $(BIN), $(OBJS))
+#	$(Q) touch .built
