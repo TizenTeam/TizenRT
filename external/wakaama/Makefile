@@ -44,6 +44,7 @@ endif
   CFLAGS+=-I$(TOPDIR)/../framework/include/dm
 endif
 
+ifeq ($(CONFIG_LWM2M_WAKAAMA),y)
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 COBJS = $(CSRCS:.c=$(OBJEXT))
 MAINOBJ = $(MAINSRC:.c=$(OBJEXT))
@@ -93,3 +94,4 @@ distclean: clean
 	$(call DELFILE, .depend)
 
 -include Make.dep
+endif # CONFIG_LWM2M_WAKAAMA
