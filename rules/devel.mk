@@ -64,7 +64,7 @@ iotjs_url=https://github.com/tizenteam/iotjs
 iotjs_branch=sandbox/rzr/tizen/rt/master
 #iotjs_url=file://${HOME}/mnt/iotjs
 
-include rules/iotjs/rules.mk
+#include rules/iotjs/rules.mk
 #contents_rules+=devel/iotjs/contents
 #contents_rules+=devel/contents/example
 
