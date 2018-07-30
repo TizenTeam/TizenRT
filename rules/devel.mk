@@ -40,7 +40,7 @@ configs_dir?=build/configs
 defconfig?=${configs_dir}/${machine}/devel/defconfig
 # TODO: Override here if needed:
 platform?=artik
-machine?=artik053
+machine?=artik055s
 base_image_type?=nettest
 #base_image_type?=minimal #TODO
 
