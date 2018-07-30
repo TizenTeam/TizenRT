@@ -53,7 +53,7 @@ MBEDTLS_DIR := ${topdir}/deps/mbedtls
 
 SRC_COMMON=$(wildcard ${topdir}/util/*.c) ${CBOR}
 SRC=$(wildcard ${topdir}/messaging/coap/*.c ${topdir}/api/*.c ${portdir}/*.c)
-
+SRC+=${topdir}/apps/st_app/tizenrt/port_tinyara.c
 HEADERS = $(wildcard ${topdir}/include/*.h)
 HEADERS += ${portdir}/config.h
 
@@ -69,7 +69,7 @@ OBJ_COMMON=$(addprefix obj/,$(notdir $(SRC_COMMON:.c=.o)))
 OBJ_CLIENT=$(addprefix obj/client/,$(notdir $(SRC:.c=.o)))
 OBJ_SERVER=$(addprefix obj/server/,$(filter-out oc_obt.o,$(notdir $(SRC:.c=.o))))
 OBJ_CLIENT_SERVER=$(addprefix obj/client_server/,$(notdir $(SRC:.c=.o)))
-VPATH=${topdir}/messaging/coap/:${topdir}/util/:${topdir}/api/:${topdir}/deps/tinycbor/src/:${topdir}/deps/mbedtls/library:
+VPATH=${topdir}/messaging/coap/:${topdir}/util/:${topdir}/api/:${topdir}/deps/tinycbor/src/:${topdir}/deps/mbedtls/library:${topdir}/apps/st_app/tizenrt
 LIBS?=
 
 SAMPLES?=
@@ -120,7 +120,7 @@ all?= $(MBEDTLS_PATCH_FILE) $(CONSTRAINED_LIBS) $(SAMPLES)
 all+= .built
 BIN ?= ${os_dir}/../external/libexternal$(LIBEXT)
 OBJS+= $(OBJ_COMMON) $(OBJ_CLIENT_SERVER)
-OBJS+=${topdir}/apps/st_app/tizenrt/port_tinyara.o
+
 
 all: ${all}
 	ls $<
