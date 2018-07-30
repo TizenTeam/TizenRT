@@ -120,8 +120,7 @@ all?= $(MBEDTLS_PATCH_FILE) $(CONSTRAINED_LIBS) $(SAMPLES)
 all+= .built
 BIN ?= ${os_dir}/../external/libexternal$(LIBEXT)
 OBJS+= $(OBJ_COMMON) $(OBJ_CLIENT_SERVER)
-OBJS+=${CURDIR}/${topdir}/apps/st_app/tizenrt/port_tinyara.o
-
+OBJS+=${topdir}/apps/st_app/tizenrt/port_tinyara.o
 
 all: ${all}
 	ls $<
