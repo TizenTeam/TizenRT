@@ -40,14 +40,14 @@ configs_dir?=build/configs
 defconfig?=${configs_dir}/${machine}/devel/defconfig
 # TODO: Override here if needed:
 platform?=artik
-machine?=artik055s
+machine?=${platform}055s
 base_image_type?=nettest
-#base_image_type?=minimal #TODO
 
 # Default:
 os?=tinyara
 platform?=qemu
 base_image_type?=tc_64k
+base_defconfig?=${configs_dir}/${machine}/${base_image_type}/defconfig
 
 # Where to download and install tools or extra files:
 extra_dir?=${HOME}/usr/local/opt/${os}/extra
@@ -64,7 +64,7 @@ iotjs_url=https://github.com/tizenteam/iotjs
 iotjs_branch=sandbox/rzr/tizen/rt/master
 #iotjs_url=file://${HOME}/mnt/iotjs
 
-include rules/iotjs/rules.mk
+#include rules/iotjs/rules.mk
 #contents_rules+=devel/iotjs/contents
 #contents_rules+=devel/contents/example
 
@@ -97,9 +97,6 @@ devel/todo/iotjs/contents: ${demo_dir} ${contents_dir}
 	@mkdir -p ${contents_dir}/iotjs/samples
 	rsync -avx external/iotjs/samples/ ${contents_dir}/iotjs/samples/
 	find ${contents_dir} -iname "*~" -exec rm {} \;
-
-
--include rules/webthings/rules.mk
 
 iotjs/local:
 	-rm -f external/iotjs
@@ -152,7 +149,7 @@ devel/start: rules/config.mk clean
 ${configs_dir}/${machine}/devel/%:
 	echo 'image_type?=devel' > ${local_mk}
 	git add ${local_mk}
-	git commit -sm "WIP: devel: (${machine})" ${local_mk}
+	git commit -sm "WIP: devel: Update defconfig (${machine})" ${local_mk}
 	${make} defconfig
 
 devel/commit: ${defconfig}
@@ -170,11 +167,14 @@ devel/del:
 	git status
 	rm -rf ${configs_dir}/${machine}/devel
 	ls ${configs_dir}/${machine}/
-	git commit -sm "WIP: devel: Del (${machine})" ${configs_dir}/${machine}/
+	git commit -sm "WIP: devel: Del (${machine})" "${configs_dir}/${machine}/"
 	echo "TODO: check ${local_mk}"
 
 devel/save: os/.config
 	cp -av $< ${defconfig}
+
+devel/update: devel/save ${defconfig}
+	cp -av ${defconfig} ${base_defconfig}
 
 devel/test: devel/start
 	${make} devel/commit run menuconfig devel/save devel/commit
@@ -186,7 +186,7 @@ devel/test: devel/start
 #	ln -fs $< $@
 
 -include rules/kconfig-frontends/rules.mk
--include rules/iotivity-constrained/rules.mk
+#-include rules/iotivity-constrained/rules.mk
 
 
 #contents_rules+=devel/contents/wifi
@@ -238,18 +238,18 @@ defconfigs?=$(wildcard build/configs/*/${base_image_type}/defconfig)
 devel/machine/%:
 	${MAKE} machine=${@F} distclean
 	${MAKE} machine=${@F} menuconfig all
-	${MAKE} machine=${@F} devel/commit
+	${MAKE} machine=${@F} devel/save devel/update devel/commit
 
 devel/machines: ${defconfigs}
 	ls $^
 	for path in $^ ; do \
  machine=$$(echo "$${path}" \
  | sed -e "s|build/configs/\(.*\)/${base_image_type}/defconfig|\1|g") ;\
- ${MAKE} devel/machine/$${machine} ; \
+ echo ${MAKE} devel/machine/$${machine} ; \
 done
 
-distclean:
-	git.sh op rm
+devel/distclean: clean
+	git clean -f
 
 .PHONY: devel/commit
 
