@@ -39,6 +39,7 @@
 # TODO: Overide here if needed
 platform?=artik
 machine?=${platform}053
+export machine
 base_image_type?=nettest
 image_type?=devel
 
