@@ -70,7 +70,7 @@ cleanall: clean
 
 distclean: cleanall
 	rm -f ${config}
-	[ ! -d .git ] || git clean -f
+	[ ! -d .git ] || git clean -f -X
 
 
 rule/%: ${config}
