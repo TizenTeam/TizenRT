@@ -70,6 +70,8 @@ cleanall: clean
 
 distclean: cleanall
 	rm -f ${config}
+	[ ! -d .git ] || git clean -f
+
 
 rule/%: ${config}
 	cd ${<D} && PATH=${PATH}:${XPATH} ${MAKE} ${@F}
