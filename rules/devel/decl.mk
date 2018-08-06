@@ -117,7 +117,7 @@ devel/demo: ${prep_files}
 #	${make} console/screen
 #	sed -e 's|115200|57600|g' -i os/.config
 
-commit: ${demo_dir} external/iotjs/.clang-format
+devel/iotjs/commit: ${demo_dir} external/iotjs/.clang-format
 	ln -fs $^
 	which clang-format-3.9 || sudo apt-get install clang-format-3.9
 	cd $< && clang-format-3.9 -i *.js */*.js
@@ -158,7 +158,10 @@ devel/commit: ${defconfig}
 	git add $< 
 	git add ${<D}/*.defs
 	git status \
-  && git commit -sm "WIP: devel: (${machine})" ${<D} \
+  && git commit -sm "WIP: devel: Update defconfig (${machine})" ${<D} \
+  || echo "TODO $@"
+	git status \
+  && git commit -sm "WIP: devel Update machine (${machine})" "${configs_dir}/${machine}" \
   || echo "TODO $@"
 
 devel/diff: ${defconfig} ${config}
@@ -233,9 +236,6 @@ devel/machines: ${defconfigs}
  | sed -e "s|build/configs/\(.*\)/${base_image_type}/defconfig|\1|g") ;\
  ${MAKE} devel/machine/$${machine} ; \
 done
-
-devel/distclean: clean
-	git clean -f
 
 .PHONY: devel/commit
 
