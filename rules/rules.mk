@@ -43,6 +43,7 @@ help: ${README} help
 	@echo "# config=${config}"
 	@echo "# defconfig=${defconfig}"
 	@echo "# base_defconfig=${base_defconfig}"
+	@echo "# defconfigs=${defconfigs}"
 	@echo "# deploy_image=${deploy_image}"
 	@echo "# image=${image}"
 	@echo "# image_type=${image_type}"
