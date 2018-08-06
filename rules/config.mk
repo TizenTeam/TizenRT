@@ -36,28 +36,23 @@
 #default: rule/default
 #	@echo "# $@: $^"
 
-# TODO: Override here if needed:
+# TODO: Overide here if needed
 platform?=artik
+machine?=${platform}053
 base_image_type?=nettest
 image_type?=devel
 
 # Default:
 os?=tinyara
 platform?=qemu
+machine?=${platform}
 base_image_type?=tc_64k
-
-# Where to download and install tools or extra files:
-extra_dir?=${HOME}/usr/local/opt/${os}/extra
-
-# make sure user belongs to sudoers
-sudo?=sudo
-export sudo
 
 devel/demo:
 	exit 1
 
 # More work in progress rules can be shared in
--include rules/devel.mk
+-include rules/devel/decl.mk
 image_type=devel
 #base_image_type=nettest
 
@@ -67,4 +62,5 @@ image_type=devel
 
 demo: devel/demo
 
+-include rules/devel/rules.mk
 #} devel
