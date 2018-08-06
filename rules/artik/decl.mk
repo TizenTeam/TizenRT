@@ -73,9 +73,7 @@ image_type?=hello
 
 
 machine_family?=${machine}
-export machine
 config_type?=${machine}/${image_type}
-export config_type
 
 all+=${image} ${config} ${defconfig} ${base_defconfig}
 
@@ -88,7 +86,6 @@ base_image_type?=nsh
 base_defconfig?=${configs_dir}/${machine}/${base_image_type}/defconfig
 defconfig?=${configs_dir}/${machine}/${image_type}/defconfig
 config_type?=${machine}/${image_type}
-export config_type
 config?=${os_dir}/.config
 
 image?=${project}
