@@ -38,6 +38,11 @@ export tty
 tty_rate?=115200
 export tty_rate
 udev?=/etc/udev/rules.d/99-usb-${vendor_id}-${product_id}.rules
+# Where to download and install tools or extra files:
+extra_dir?=${HOME}/usr/local/opt/${os}/extra
+# make sure user belongs to sudoers
+sudo?=sudo
+export sudo
 
 
 extra/commit:
