@@ -55,7 +55,6 @@ configs_dir?=${build_dir}/configs
 base_defconfig?=${configs_dir}/${machine}/${base_image_type}/defconfig
 image_type?=${base_image_type}
 config_type?=${machine}/${image_type}
-export config_type
 defconfig?=${configs_dir}/${config_type}/defconfig
 
 configure?=${os_dir}/tools/configure.sh
