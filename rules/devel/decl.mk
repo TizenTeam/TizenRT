@@ -49,6 +49,7 @@ os?=tinyara
 platform?=qemu
 base_image_type?=tc_64k
 base_defconfig?=${configs_dir}/${machine}/${base_image_type}/defconfig
+defconfigs?=$(wildcard build/configs/*/${base_image_type}/defconfig)
 
 # Where to download and install tools or extra files:
 extra_dir?=${HOME}/usr/local/opt/${os}/extra
