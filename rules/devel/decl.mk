@@ -182,7 +182,8 @@ devel/update: devel/save ${defconfig}
 	cp -av ${defconfig} ${base_defconfig}
 
 devel/test: devel/start
-	${make} devel/commit run menuconfig devel/save devel/commit
+	${make} devel/commit
+	${make} menuconfig run devel/save devel/commit
 #	${make} devel/commit
 	sync
 
