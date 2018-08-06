@@ -37,6 +37,7 @@
 #	@echo "# $@: $^"
 devel_self?=rules/devel.mk
 configs_dir?=build/configs
+
 defconfig?=${configs_dir}/${machine}/devel/defconfig
 # TODO: Override here if needed:
 platform?=artik
@@ -245,7 +246,7 @@ devel/machines: ${defconfigs}
 	for path in $^ ; do \
  machine=$$(echo "$${path}" \
  | sed -e "s|build/configs/\(.*\)/${base_image_type}/defconfig|\1|g") ;\
- echo ${MAKE} devel/machine/$${machine} ; \
+ ${MAKE} devel/machine/$${machine} ; \
 done
 
 devel/distclean: clean
