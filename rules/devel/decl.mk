@@ -220,9 +220,6 @@ devel/contents/example: ${contents_dir}/webthing-node
 	rsync -avx ${contents_dir}/webthing-node/ ${contents_dir}/example/
 	cp -av $</example/artik05x-thing.js ${contents_dir}/example/index.js
 
-
-defconfigs?=$(wildcard build/configs/*/${base_image_type}/defconfig)
-
 devel/machine/%:
 	${MAKE} -e machine=${@F} help
 	${MAKE} -e machine=${@F} distclean
