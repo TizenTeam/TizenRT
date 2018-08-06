@@ -44,7 +44,6 @@ product_id?=6010
 
 image=build/output/bin/tinyara_head.bin
 deploy_image=${image}-signed
-#deploy_image=${image}-${platform}-signed # TODO: rm
 partition_map?=${CURDIR}/${configs_dir}/${machine_family}/scripts/partition_map.cfg
 factory_image?=${build_dir}/output/bin/factoryimage.gz
 
@@ -52,23 +51,11 @@ factory_image?=${build_dir}/output/bin/factoryimage.gz
 openocd?=openocd
 OPENOCD_SCRIPTS=${CURDIR}/build/tools/openocd
 openocd_cfg=${CURDIR}/${configs_dir}/${machine_family}/scripts/${machine_family}.cfg
-cfg?=${CURDIR}/build/configs/${machine}/tools/openocd/  
-#TODO
 cfg=${CURDIR}/build/configs/${machine_family}/scripts/${machine_family}.cfg
-cfg?=${configs_dir}/${machine}/tools/openocd/
-cfg=${configs_dir}/${machine_family}/scripts/${machine_family}.cfg
-#openocd=/usr/bin/openocd -d
-#openocd=openocd -d
 
 
-#sdk?=${HOME}/Downloads/artik-ide-linux-x64-installer-V1.3-1020.tar.gz
-#signer?=${HOME}/ARTIK/SDK/A053/v1.6/source/tinyara/build/configs/artik05x/tools/codesigner/artik05x_codesigner
 signer_url?=https://developer.artik.io/downloads/artik-053s/download#
 signer_archive?=${HOME}/Downloads/ARTIK053S.zip
-
-
-#signer?=${CURDIR}/build/configs/artik05x/tools/codesigner/artik05x_codesigner
-#signer?=${CURDIR}/${configs_dir}/artik05x/tools/codesigner/artik05x_AppCodesigner
 signer?=${extra_dir}/ARTIK053/artik05x_codesigner
 prep_files+=${signer}
 
@@ -79,27 +66,9 @@ wlanfw?=${CURDIR}/build/configs/${machine}/bin/wlanfw.bin
 os?=${CURDIR}/${deploy_image}
 
 
-#{toolchain #TODO: remove
-gcc_package?=gcc-arm-none-eabi-4_9-2015q3
-XPATH=${HOME}/mnt/${gcc_package}/bin
-export XPATH
-#}toolchain
 
-#{ generic
-
-# board usb
 configure?=${os_dir}/tools/configure.sh
-
 image_type?=minimal
-#image_type?=nettest
-#image_type=devel
-#image_type=extra
-#image_type=typical
-#image_type=onboard
-#image_type?=devel
-#image_type?=nettest
-#image_type?=tash
-#image_type?=minimal
 image_type?=hello
 
 
@@ -112,12 +81,9 @@ all+=${image} ${config} ${defconfig} ${base_defconfig}
 
 
 build_dir?=build/output/bin/
-#image_type?=tash
-
 
 base_image_type?=minimal
 base_image_type?=nsh
-#image_type?=devel
 
 base_defconfig?=${configs_dir}/${machine}/${base_image_type}/defconfig
 defconfig?=${configs_dir}/${machine}/${image_type}/defconfig
