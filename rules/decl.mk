@@ -41,7 +41,8 @@ build_dir?=${os_dir}
 tmp_dir?=${CURDIR}/tmp
 export make
 apps_dir?=apps
-
+machine?=qemu
+export machine
 base_image_type?=minimal
 config_dir?=${build_dir}/configs
 base_defconfig?=${configs_dir}/${machine}/${base_image_type}/defconfig
