@@ -189,22 +189,6 @@ devel/test: devel/start
 -include rules/kconfig-frontends/rules.mk
 #-include rules/iotivity-constrained/rules.mk
 
-
-#contents_rules+=devel/contents/wifi
-
-devel/contents/wifi: ${contents_dir}/mnt/wifi/slsiwifi.conf
-	cat $<
-
-#TODO: update here with WiFi creds
-devel_wifi_ssid?="private"
-devel_wifi_pass?="password"
-
-${contents_dir}/mnt/wifi/slsiwifi.conf: ${contents_dir} ${devel_self}
-	@mkdir -p ${@D}
-	echo 'join ${devel_wifi_ssid} ${devel_wifi_pass}' > $@
-
-
-
 ${contents_dir}:
 	mkdir -p $@
 
@@ -237,9 +221,10 @@ devel/contents/example: ${contents_dir}/webthing-node
 defconfigs?=$(wildcard build/configs/*/${base_image_type}/defconfig)
 
 devel/machine/%:
-	${MAKE} machine=${@F} distclean
-	${MAKE} machine=${@F} menuconfig all
-	${MAKE} machine=${@F} devel/save devel/update devel/commit
+	${MAKE} -e machine=${@F} help
+	${MAKE} -e machine=${@F} distclean
+	${MAKE} -e machine=${@F} menuconfig all
+	${MAKE} -e machine=${@F} devel/save devel/update devel/commit
 
 devel/machines: ${defconfigs}
 	ls $^
