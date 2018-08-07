@@ -39,8 +39,10 @@ default: rule/default
 -include rules/local.tmp.mk
 -include rules/config.mk
 
-# Default
-os?=nuttx
+# Declaration fragments
+-include rules/devel/decl.mk
+-include rules/local.tmp.mk
+-include rules/config.mk
 
 extra_dir?=/tmp/${USER}${CURDIR}
 export extra_dir
@@ -48,7 +50,9 @@ export extra_dir
 tmp_dir?=${CURDIR}/tmp
 export tmp_dir
 
-# Declaration fragments
+# Default
+os?=nuttx
+
 kernel?=${os}
 include rules/./${kernel}/decl.mk
 
@@ -67,3 +71,5 @@ include rules/${toolchain}/rules.mk
 -include rules/extra.mk
 -include rules/setup.mk
 include rules/rules.mk
+-include rules/devel/rules.mk
+
