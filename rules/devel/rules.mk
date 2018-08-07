@@ -236,6 +236,9 @@ devel/machines: ${defconfigs}
  ${MAKE} devel/machine/$${machine} ; \
 done
 
+#TODO
+demo: devel/demo
+
 .PHONY: devel/commit
 
 #} devel
