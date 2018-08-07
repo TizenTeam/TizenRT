@@ -36,9 +36,6 @@
 default: rule/default
 	@echo "# Check README for more details"
 
--include rules/local.tmp.mk
--include rules/config.mk
-
 # Declaration fragments
 -include rules/devel/decl.mk
 -include rules/local.tmp.mk
