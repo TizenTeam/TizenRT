@@ -32,10 +32,6 @@
 #
 ############################################################################
 
-
-#default: rule/default
-#	@echo "# $@: $^"
-
 # TODO: Overide here if needed
 platform?=artik
 machine?=${platform}053
@@ -48,20 +44,3 @@ os?=tinyara
 platform?=qemu
 machine?=${platform}
 base_image_type?=tc_64k
-
-devel/demo:
-	exit 1
-
-# More work in progress rules can be shared in
--include rules/devel/decl.mk
-image_type=devel
-#base_image_type=nettest
-
-# which can contain extra rules ie: include rules/iotjs/rules.mk
-
-
-
-demo: devel/demo
-
--include rules/devel/rules.mk
-#} devel
