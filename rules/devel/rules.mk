@@ -36,60 +36,6 @@ webthing_project ?= webthing-iotjs
 webthing_rules_dir ?= ${CURDIR}/rules/webthing
 iotjs_main ?= ${webthing_rules_dir}/index.js
 
-
-#default: rule/default
-#	@echo "# $@: $^"
-devel_self?=rules/devel.mk
-configs_dir?=build/configs
-
-defconfig?=${configs_dir}/${machine}/devel/defconfig
-# TODO: Override here if needed:
-platform?=artik
-machine?=${platform}055s
-base_image_type?=nettest
-
-# Default:
-os?=tinyara
-platform?=qemu
-base_image_type?=tc_64k
-base_defconfig?=${configs_dir}/${machine}/${base_image_type}/defconfig
-defconfigs?=$(wildcard build/configs/*/${base_image_type}/defconfig)
-
-# Where to download and install tools or extra files:
-extra_dir?=${HOME}/usr/local/opt/${os}/extra
-
-# make sure user belongs to sudoers
-sudo?=sudo
-export sudo
-
-# Overload external dep to be pulled
-#TODO: upstream neededchanges and set to master or released
-#iotjs_url=https://github.com/rzr/iotjs
-#iotjs_branch=master
-iotjs_url=https://github.com/tizenteam/iotjs
-iotjs_branch=sandbox/rzr/tizenrt/master
-#iotjs_url=file://${HOME}/mnt/iotjs
-
-#include rules/iotjs/rules.mk
-#contents_rules+=devel/iotjs/contents
-#contents_rules+=devel/contents/example
-
-
-#{ devel
-#image_type=iotivity
-#base_image_type=minimal
-base_image_type=nettest
-
-#prep_files+=${private_dir}/config.js
-#prep_files+=external/iotjs/profiles/default.profile
-#prep_files+=external/iotjs/Kconfig.runtime
-#prep_files+=external/iotjs.Kconfig
-contents_dir?=tools/fs/contents
-prep_files+=${contents_dir}
-
-devel_js_minifier?=slimit
-#devel_js_minifier?=yui-compressor
-
 devel/help:
 	@echo "# make demo "
 	@echo "# make demo tty=/dev/ttyUSB2"
@@ -176,7 +122,8 @@ devel/del:
 	git status
 	rm -rf ${configs_dir}/${machine}/devel
 	ls ${configs_dir}/${machine}/
-	git commit -sm "WIP: devel: Del (${machine})" "${configs_dir}/${machine}/"
+	git status \
+|| git commit -sm "WIP: devel: Del (${machine})" "${configs_dir}/${machine}/"
 	echo "TODO: check ${local_mk}"
 
 devel/save: os/.config
@@ -237,7 +184,9 @@ ${contents_dir}/example/index.js: ${iotjs_main} ${contents_dir}
 devel/machine/%:
 	${MAKE} -e machine=${@F} help
 	${MAKE} -e machine=${@F} distclean
-	${MAKE} -e machine=${@F} menuconfig all
+	${MAKE} -e machine=${@F} devel/del
+	${MAKE} -e machine=${@F} menuconfig
+	${MAKE} -e machine=${@F} all
 	${MAKE} -e machine=${@F} devel/save devel/update devel/commit
 
 devel/machines: ${defconfigs}
