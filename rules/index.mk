@@ -59,14 +59,18 @@ include rules/./${platform}/decl.mk
 toolchain?=gcc-arm-embedded
 include rules/${toolchain}/decl.mk
 
+-include rules/iotjs/decl.mk
+-include rules/webthing/decl.mk
 include rules/decl.mk
 
 # Rules fragments
 include rules/${platform}/rules.mk
 include rules/${kernel}/rules.mk
 include rules/${toolchain}/rules.mk
+include rules/rules.mk
 -include rules/extra.mk
 -include rules/setup.mk
-include rules/rules.mk
+-include rules/iotjs/rules.mk
+-include rules/webthing/rules.mk
 -include rules/devel/rules.mk
 
