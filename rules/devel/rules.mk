@@ -77,11 +77,6 @@ devel/backup: ${CURDIR}/${private_dir}
 	mkdir -p ${HOME}/backup/$</
 	rsync -avx $</ ${HOME}/backup/${<}
 
-
-#external/iotjs/profiles/%:
-#	ls $@ || ${make} iotjs/import
-#	ls $@
-
 app/%: apps/examples/hello
 	@echo "TODO: $@: from $^"
 
