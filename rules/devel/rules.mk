@@ -62,7 +62,7 @@ devel/demo: ${prep_files}
 #	grep IOTJS os/.config
 #	grep NETCAT os/.config
 	grep 'BAUD=' os/.config 
-#	${make} -e devel/contents
+	${make} -e devel/contents/example
 	${make} -e deploy
 	${make} -e run 
 #	${make} console/screen
