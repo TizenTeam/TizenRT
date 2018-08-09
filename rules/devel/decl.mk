@@ -66,7 +66,7 @@ export sudo
 #iotjs_branch=sandbox/rzr/tizenrt/master
 #iotjs_url=file://${HOME}/mnt/iotjs
 
-include rules/iotjs/rules.mk
+-include rules/iotjs/rules.mk
 #contents_rules+=devel/iotjs/contents
 #contents_rules+=devel/contents/example
 
