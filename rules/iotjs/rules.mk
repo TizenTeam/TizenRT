@@ -87,8 +87,6 @@ iotjs/download: ${iotjs_dir}/.git
 iotjs/release:
 	${make} iotjs_branch="${iotjs_tag}" iotjs/del iotjs/download iotjs/commit
 
-
-
 iotjs/commit: ${iotjs_dir}/.git
 	cd "${iotjs_dir}" && git describe --tag ${iotjs_branch}
 	-cd "${<D}" && git log --pretty='%cd' ${iotjs_branch} --date=short "HEAD~1..HEAD" ||:
