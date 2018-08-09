@@ -16,39 +16,17 @@
 #ifndef JRT_H
 #define JRT_H
 
+#if !defined (_XOPEN_SOURCE) || _XOPEN_SOURCE < 500
+#undef _XOPEN_SOURCE
+/* Required macro for sleep functions (nanosleep or usleep) */
+#define _XOPEN_SOURCE 500
+#endif
+
 #include <stdio.h>
 #include <string.h>
 
 #include "jerryscript-port.h"
 #include "jrt-types.h"
-
-/*
- * Attributes
- */
-#define __noreturn __attribute__((noreturn))
-#define __attr_noinline___ __attribute__((noinline))
-#define __attr_return_value_should_be_checked___ __attribute__((warn_unused_result))
-#define __attr_hot___ __attribute__((hot))
-#ifndef __attr_always_inline___
-#define __attr_always_inline___ __attribute__((always_inline))
-#endif /* !__attr_always_inline___ */
-#ifndef __attr_const___
-#define __attr_const___ __attribute__((const))
-#endif /* !__attr_const___ */
-#ifndef __attr_pure___
-#define __attr_pure___ __attribute__((pure))
-#endif /* !__attr_pure___ */
-
-/*
- * Conditions' likeliness, unlikeliness.
- */
-#ifdef __GNUC__
-#define likely(x)       __builtin_expect(!!(x), 1)
-#define unlikely(x)     __builtin_expect(!!(x), 0)
-#else /* !__GNUC__ */
-#define likely(x)       (x)
-#define unlikely(x)     (x)
-#endif /* __GNUC__ */
 
 /*
  * Normally compilers store const(ant)s in ROM. Thus saving RAM.
@@ -85,13 +63,15 @@
   enum { JERRY_STATIC_ASSERT_GLUE (static_assertion_failed_, __LINE__, msg) = 1 / (!!(x)) }
 
 #ifndef JERRY_NDEBUG
-void __noreturn jerry_assert_fail (const char *assertion, const char *file, const char *function, const uint32_t line);
-void __noreturn jerry_unreachable (const char *file, const char *function, const uint32_t line);
+void JERRY_ATTR_NORETURN
+jerry_assert_fail (const char *assertion, const char *file, const char *function, const uint32_t line);
+void JERRY_ATTR_NORETURN
+jerry_unreachable (const char *file, const char *function, const uint32_t line);
 
 #define JERRY_ASSERT(x) \
   do \
   { \
-    if (unlikely (!(x))) \
+    if (JERRY_UNLIKELY (!(x))) \
     { \
       jerry_assert_fail (#x, __FILE__, __func__, __LINE__); \
     } \
@@ -114,15 +94,22 @@ void __noreturn jerry_unreachable (const char *file, const char *function, const
 
 #ifdef __GNUC__
 #define JERRY_UNREACHABLE() __builtin_unreachable ()
-#else /* !__GNUC__ */
-#define JERRY_UNREACHABLE()
 #endif /* __GNUC__ */
+
+#ifdef _MSC_VER
+#define JERRY_UNREACHABLE()  _assume (0)
+#endif /* _MSC_VER */
+
+#ifndef JERRY_UNREACHABLE
+#define JERRY_UNREACHABLE()
+#endif /* !JERRY_UNREACHABLE */
+
 #endif /* !JERRY_NDEBUG */
 
 /**
  * Exit on fatal error
  */
-void __noreturn jerry_fatal (jerry_fatal_code_t code);
+void JERRY_ATTR_NORETURN jerry_fatal (jerry_fatal_code_t code);
 
 /*
  * Logging

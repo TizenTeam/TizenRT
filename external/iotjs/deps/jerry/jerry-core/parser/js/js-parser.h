@@ -84,6 +84,9 @@ typedef enum
   PARSER_ERR_LEFT_BRACE_EXPECTED,                     /**< left brace expected */
   PARSER_ERR_RIGHT_PAREN_EXPECTED,                    /**< right paren expected */
   PARSER_ERR_RIGHT_SQUARE_EXPECTED,                   /**< right square expected */
+#ifndef CONFIG_DISABLE_ES2015_TEMPLATE_STRINGS
+  PARSER_ERR_RIGHT_BRACE_EXPECTED,                    /**< right brace expected */
+#endif /* !CONFIG_DISABLE_ES2015_TEMPLATE_STRINGS */
   PARSER_ERR_COLON_EXPECTED,                          /**< colon expected */
   PARSER_ERR_COLON_FOR_CONDITIONAL_EXPECTED,          /**< colon expected for conditional expression */
   PARSER_ERR_SEMICOLON_EXPECTED,                      /**< semicolon expected */
@@ -128,10 +131,13 @@ typedef struct
 } parser_error_location_t;
 
 /* Note: source must be a valid UTF-8 string */
-ecma_value_t parser_parse_script (const uint8_t *source_p, size_t size, bool is_strict,
-                                  ecma_compiled_code_t **bytecode_data_p);
+ecma_value_t parser_parse_script (const uint8_t *arg_list_p, size_t arg_list_size,
+                                  const uint8_t *source_p, size_t source_size,
+                                  bool is_strict, ecma_compiled_code_t **bytecode_data_p);
 
+#ifdef JERRY_ENABLE_ERROR_MESSAGES
 const char *parser_error_to_string (parser_error_t);
+#endif /* JERRY_ENABLE_ERROR_MESSAGES */
 
 /**
  * @}

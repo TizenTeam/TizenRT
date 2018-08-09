@@ -23,6 +23,10 @@
 #include "js-parser.h"
 #include "vm.h"
 
+#ifdef JERRY_ENABLE_LINE_INFO
+#include "jcontext.h"
+#endif /* JERRY_ENABLE_LINE_INFO */
+
 /** \addtogroup ecma ECMA
  * @{
  *
@@ -49,7 +53,7 @@ ecma_op_eval (ecma_string_t *code_p, /**< code string */
   lit_utf8_size_t chars_num = ecma_string_get_size (code_p);
   if (chars_num == 0)
   {
-    ret_value = ecma_make_simple_value (ECMA_SIMPLE_VALUE_UNDEFINED);
+    ret_value = ECMA_VALUE_UNDEFINED;
   }
   else
   {
@@ -81,14 +85,20 @@ ecma_op_eval_chars_buffer (const lit_utf8_byte_t *code_p, /**< code characters b
                            bool is_direct, /**< is eval called directly (ECMA-262 v5, 15.1.2.1.1) */
                            bool is_called_from_strict_mode_code) /**< is eval is called from strict mode code */
 {
-#if JERRY_JS_PARSER
+#ifndef JERRY_DISABLE_JS_PARSER
   JERRY_ASSERT (code_p != NULL);
 
   ecma_compiled_code_t *bytecode_data_p;
 
   bool is_strict_call = (is_direct && is_called_from_strict_mode_code);
 
-  ecma_value_t parse_status = parser_parse_script (code_p,
+#ifdef JERRY_ENABLE_LINE_INFO
+  JERRY_CONTEXT (resource_name) = ecma_make_magic_string_value (LIT_MAGIC_STRING__EMPTY);
+#endif /* JERRY_ENABLE_LINE_INFO */
+
+  ecma_value_t parse_status = parser_parse_script (NULL,
+                                                   0,
+                                                   code_p,
                                                    code_buffer_size,
                                                    is_strict_call,
                                                    &bytecode_data_p);
@@ -99,14 +109,14 @@ ecma_op_eval_chars_buffer (const lit_utf8_byte_t *code_p, /**< code characters b
   }
 
   return vm_run_eval (bytecode_data_p, is_direct);
-#else /* !JERRY_JS_PARSER */
+#else /* JERRY_DISABLE_JS_PARSER */
   JERRY_UNUSED (code_p);
   JERRY_UNUSED (code_buffer_size);
   JERRY_UNUSED (is_direct);
   JERRY_UNUSED (is_called_from_strict_mode_code);
 
   return ecma_raise_syntax_error (ECMA_ERR_MSG ("The parser has been disabled."));
-#endif /* JERRY_JS_PARSER */
+#endif /* !JERRY_DISABLE_JS_PARSER */
 } /* ecma_op_eval_chars_buffer */
 
 /**

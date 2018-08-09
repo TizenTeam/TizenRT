@@ -162,7 +162,7 @@ ecma_op_array_object_set_length (ecma_object_t *object_p, /**< the array object 
   {
     ecma_value_t compared_num_val = ecma_op_to_number (new_value);
 
-    if (ECMA_IS_VALUE_ERROR (completion))
+    if (ECMA_IS_VALUE_ERROR (compared_num_val))
     {
       return compared_num_val;
     }
@@ -202,7 +202,7 @@ ecma_op_array_object_set_length (ecma_object_t *object_p, /**< the array object 
         return ecma_reject (is_throw);
       }
     }
-    return ecma_make_simple_value (ECMA_SIMPLE_VALUE_TRUE);
+    return ECMA_VALUE_TRUE;
   }
   else if (!ecma_is_property_writable (ext_object_p->u.array.length_prop))
   {
@@ -227,7 +227,7 @@ ecma_op_array_object_set_length (ecma_object_t *object_p, /**< the array object 
 
   if (current_len_uint32 == new_len_uint32)
   {
-    return ecma_make_simple_value (ECMA_SIMPLE_VALUE_TRUE);
+    return ECMA_VALUE_TRUE;
   }
   return ecma_reject (is_throw);
 } /* ecma_op_array_object_set_length */
@@ -326,7 +326,7 @@ ecma_op_array_object_define_own_property (ecma_object_t *object_p, /**< the arra
     ext_object_p->u.array.length = index + 1;
   }
 
-  return ecma_make_simple_value (ECMA_SIMPLE_VALUE_TRUE);
+  return ECMA_VALUE_TRUE;
 } /* ecma_op_array_object_define_own_property */
 
 /**
@@ -353,9 +353,9 @@ ecma_op_array_list_lazy_property_names (ecma_object_t *obj_p, /**< a String obje
 
   ecma_collection_header_t *for_non_enumerable_p = separate_enumerable ? non_enum_collection_p : main_collection_p;
 
-  ecma_string_t *length_str_p = ecma_new_ecma_length_string ();
-  ecma_append_to_values_collection (for_non_enumerable_p, ecma_make_string_value (length_str_p), true);
-  ecma_deref_ecma_string (length_str_p);
+  ecma_append_to_values_collection (for_non_enumerable_p,
+                                    ecma_make_magic_string_value (LIT_MAGIC_STRING_LENGTH),
+                                    0);
 } /* ecma_op_array_list_lazy_property_names */
 
 /**

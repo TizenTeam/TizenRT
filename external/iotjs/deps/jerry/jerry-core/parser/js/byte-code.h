@@ -200,7 +200,7 @@
 /* Stack consumption of opcodes with context. */
 
 /* PARSER_FOR_IN_CONTEXT_STACK_ALLOCATION must be <= 4 */
-#define PARSER_FOR_IN_CONTEXT_STACK_ALLOCATION 3
+#define PARSER_FOR_IN_CONTEXT_STACK_ALLOCATION 4
 /* PARSER_WITH_CONTEXT_STACK_ALLOCATION must be <= 4 */
 #define PARSER_WITH_CONTEXT_STACK_ALLOCATION 2
 /* PARSER_TRY_CONTEXT_STACK_ALLOCATION must be <= 3 */
@@ -272,11 +272,11 @@
   CBC_OPCODE (CBC_PUSH_THIS_LITERAL, CBC_HAS_LITERAL_ARG, 2, \
               VM_OC_PUSH_TWO | VM_OC_GET_THIS_LITERAL) \
   CBC_OPCODE (CBC_PUSH_NUMBER_0, CBC_NO_FLAG, 1, \
-              VM_OC_PUSH_NUMBER_0 | VM_OC_PUT_STACK) \
+              VM_OC_PUSH_0 | VM_OC_PUT_STACK) \
   CBC_OPCODE (CBC_PUSH_NUMBER_POS_BYTE, CBC_HAS_BYTE_ARG, 1, \
-              VM_OC_PUSH_NUMBER_POS_BYTE | VM_OC_PUT_STACK) \
+              VM_OC_PUSH_POS_BYTE | VM_OC_PUT_STACK) \
   CBC_OPCODE (CBC_PUSH_NUMBER_NEG_BYTE, CBC_HAS_BYTE_ARG, 1, \
-              VM_OC_PUSH_NUMBER_NEG_BYTE | VM_OC_PUT_STACK) \
+              VM_OC_PUSH_NEG_BYTE | VM_OC_PUT_STACK) \
   CBC_OPCODE (CBC_PUSH_PROP, CBC_NO_FLAG, -1, \
               VM_OC_PROP_GET | VM_OC_GET_STACK_STACK | VM_OC_PUT_STACK) \
   CBC_OPCODE (CBC_PUSH_PROP_LITERAL, CBC_HAS_LITERAL_ARG, 0, \
@@ -317,6 +317,8 @@
               VM_OC_RET) \
   CBC_OPCODE (CBC_RETURN_WITH_LITERAL, CBC_HAS_LITERAL_ARG, 0, \
               VM_OC_RET | VM_OC_GET_LITERAL) \
+  CBC_OPCODE (CBC_SET_LITERAL_PROPERTY, CBC_HAS_LITERAL_ARG | CBC_HAS_LITERAL_ARG2, 0, \
+              VM_OC_SET_PROPERTY | VM_OC_GET_LITERAL_LITERAL) \
   CBC_OPCODE (CBC_BREAKPOINT_ENABLED, CBC_NO_FLAG, 0, \
               VM_OC_BREAKPOINT_ENABLED) \
   CBC_OPCODE (CBC_BREAKPOINT_DISABLED, CBC_NO_FLAG, 0, \
@@ -539,6 +541,16 @@
   /* Basic opcodes. */ \
   CBC_OPCODE (CBC_EXT_DEBUGGER, CBC_NO_FLAG, 0, \
               VM_OC_NONE) \
+  CBC_OPCODE (CBC_EXT_PUSH_LITERAL_PUSH_NUMBER_0, CBC_HAS_LITERAL_ARG, 2, \
+              VM_OC_PUSH_LIT_0 | VM_OC_GET_LITERAL) \
+  CBC_OPCODE (CBC_EXT_PUSH_LITERAL_PUSH_NUMBER_POS_BYTE, CBC_HAS_LITERAL_ARG | CBC_HAS_BYTE_ARG, 2, \
+              VM_OC_PUSH_LIT_POS_BYTE | VM_OC_GET_LITERAL) \
+  CBC_OPCODE (CBC_EXT_PUSH_LITERAL_PUSH_NUMBER_NEG_BYTE, CBC_HAS_LITERAL_ARG | CBC_HAS_BYTE_ARG, 2, \
+              VM_OC_PUSH_LIT_NEG_BYTE | VM_OC_GET_LITERAL) \
+  CBC_OPCODE (CBC_EXT_RESOURCE_NAME, CBC_NO_FLAG, 0, \
+              VM_OC_RESOURCE_NAME) \
+  CBC_OPCODE (CBC_EXT_LINE, CBC_NO_FLAG, 0, \
+              VM_OC_LINE) \
   \
   /* Binary compound assignment opcodes with pushing the result. */ \
   CBC_EXT_BINARY_LVALUE_OPERATION (CBC_EXT_ASSIGN_ADD, \
@@ -637,9 +649,7 @@ typedef struct
   uint16_t ident_end;               /**< end position of the identifier group */
   uint16_t const_literal_end;       /**< end position of the const literal group */
   uint16_t literal_end;             /**< end position of the literal group */
-#ifdef JERRY_CPOINTER_32_BIT
   uint16_t padding;                 /**< an unused value */
-#endif
 } cbc_uint16_arguments_t;
 
 /**
@@ -652,8 +662,11 @@ typedef enum
   CBC_CODE_FLAGS_UINT16_ARGUMENTS = (1u << 2), /**< compiled code data is cbc_uint16_arguments_t */
   CBC_CODE_FLAGS_STRICT_MODE = (1u << 3), /**< strict mode is enabled */
   CBC_CODE_FLAGS_ARGUMENTS_NEEDED = (1u << 4), /**< arguments object must be constructed */
-  CBC_CODE_FLAGS_LEXICAL_ENV_NOT_NEEDED = (1u << 5), /**< no need to create a lexical environment */
-  CBC_CODE_FLAGS_DEBUGGER_IGNORE = (1u << 6), /**< this function should be ignored by debugger */
+  CBC_CODE_FLAGS_NON_STRICT_ARGUMENTS_NEEDED = (1u << 5), /**< non-strict arguments object must be constructed */
+  CBC_CODE_FLAGS_LEXICAL_ENV_NOT_NEEDED = (1u << 6), /**< no need to create a lexical environment */
+  CBC_CODE_FLAGS_ARROW_FUNCTION = (1u << 7), /**< this function is an arrow function */
+  CBC_CODE_FLAGS_STATIC_FUNCTION = (1u << 8), /**< this function is a static snapshot function */
+  CBC_CODE_FLAGS_DEBUGGER_IGNORE = (1u << 9), /**< this function should be ignored by debugger */
 } cbc_code_flags;
 
 #define CBC_OPCODE(arg1, arg2, arg3, arg4) arg1,

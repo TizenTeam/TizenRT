@@ -17,6 +17,7 @@
  * Jerry libc's common functions implementation
  */
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -55,9 +56,9 @@ CALL_PRAGMA (GCC optimize ("-fno-tree-loop-distribute-patterns"))
  *
  * @return @a s
  */
-void * __attr_used___
-memset (void *s,  /**< area to set values in */
-        int c,    /**< value to set */
+void * __attr_weak___ __attr_used___
+memset (void *s, /**< area to set values in */
+        int c, /**< value to set */
         size_t n) /**< area size */
 {
   uint8_t *area_p = (uint8_t *) s;
@@ -76,7 +77,7 @@ memset (void *s,  /**< area to set values in */
  *         <0, if first area's content is lexicographically less, than second area's content;
  *         >0, otherwise
  */
-int
+int __attr_weak___
 memcmp (const void *s1, /**< first area */
         const void *s2, /**< second area */
         size_t n) /**< area size */
@@ -96,8 +97,10 @@ memcmp (const void *s1, /**< first area */
 
 /**
  * memcpy
+ *
+ * @return the dest pointer's value
  */
-void *  __attr_used___
+void * __attr_weak___ __attr_used___
 memcpy (void *s1, /**< destination */
         const void *s2, /**< source */
         size_t n) /**< bytes number */
@@ -136,7 +139,7 @@ memcpy (void *s1, /**< destination */
  *
  * @return the dest pointer's value
  */
-void * __attr_used___
+void * __attr_weak___ __attr_used___
 memmove (void *s1, /**< destination */
          const void *s2, /**< source */
          size_t n) /**< bytes number */
@@ -173,10 +176,15 @@ CALL_PRAGMA (GCC pop_options)
 CALL_PRAGMA (GCC diagnostic pop)
 #endif /* __GNUC__ */
 
-/** Compare two strings. return an integer less than, equal to, or greater than zero
-     if s1 is found, respectively, to be less than, to match, or be greater than s2.  */
-int
-strcmp (const char *s1, const char *s2)
+/**
+ * Compare two strings.
+ *
+ * @return an integer less than, equal to, or greater than zero if s1 is found, respectively,
+ *         to be less than, to match, or be greater than s2.
+ */
+int __attr_weak___
+strcmp (const char *s1, /**< first string */
+        const char *s2) /**< second string */
 {
   while (1)
   {
@@ -191,11 +199,16 @@ strcmp (const char *s1, const char *s2)
   }
 } /* strcmp */
 
-/** Compare two strings. return an integer less than, equal to, or greater than zero
-     if the first n character of s1 is found, respectively, to be less than, to match,
-     or be greater than the first n character of s2.  */
-int
-strncmp (const char *s1, const char *s2, size_t n)
+/**
+ * Compare two strings.
+ *
+ * @return an integer less than, equal to, or greater than zero if the first n character of s1 is found, respectively,
+ *         to be less than, to match, or be greater than the first n character of s2.
+ */
+int __attr_weak___
+strncmp (const char *s1, /**< first string */
+         const char *s2, /**< second string */
+         size_t n) /**< maximum number of characters to compare */
 {
   while (n--)
   {
@@ -212,11 +225,19 @@ strncmp (const char *s1, const char *s2, size_t n)
   return 0;
 } /* strncmp */
 
-/** Copy a string. At most n bytes of src are copied.  Warning: If there is no
-     null byte among the first n bytes of src, the string placed in dest will not be null-terminated.
-     @return a pointer to the destination string dest.  */
-char * __attr_used___
-strncpy (char *dest, const char *src, size_t n)
+/**
+ * Copy a string. At most n bytes of src are copied.
+ *
+ * Note:
+ *      If there is no null byte among the first n bytes of src, the string
+ *      placed in dest will not be null-terminated.
+ *
+ * @return a pointer to the destination string dest.
+ */
+char * __attr_weak___ __attr_used___
+strncpy (char *dest, /**< destination string */
+         const char *src, /**< source string */
+         size_t n) /**< maximum number of characters to copy */
 {
   while (n--)
   {
@@ -232,9 +253,13 @@ strncpy (char *dest, const char *src, size_t n)
   return dest;
 } /* strncpy */
 
-/** Calculate the length of a string.  */
-size_t
-strlen (const char *s)
+/**
+ * Calculate the length of a string.
+ *
+ * @return the length.
+ */
+size_t __attr_weak___
+strlen (const char *s) /**< string */
 {
   size_t i = 0;
   while (s[i])
@@ -253,7 +278,7 @@ strlen (const char *s)
  *
  * @return integer in range [0; RAND_MAX]
  */
-int
+int __attr_weak___
 rand (void)
 {
   uint32_t intermediate = libc_random_gen_state[0] ^ (libc_random_gen_state[0] << 11);
@@ -272,11 +297,88 @@ rand (void)
 /**
  * Initialize pseudo-random number generator with the specified seed value
  */
-void
+void __attr_weak___
 srand (unsigned int seed) /**< new seed */
 {
-  libc_random_gen_state[0] =
-  libc_random_gen_state[1] =
-  libc_random_gen_state[2] =
-  libc_random_gen_state[3] = seed;
+  libc_random_gen_state[0] = (uint32_t) ((seed * 14316555781)
+                                         + (seed * 1183186591)
+                                         + (seed * 622729787)
+                                         + (seed * 338294347));
+
+  libc_random_gen_state[1] = 842502087;
+  libc_random_gen_state[2] = 3579807591;
+  libc_random_gen_state[3] = 273326509;
 } /* srand */
+
+/**
+ * Convert a string to a long integer.
+ *
+ * The function first discards leading whitespace characters. Then takes an
+ * optional sign followed by as many digits as possible and interprets them as a
+ * numerical value. Additional characters after those that form the number are
+ * ignored.
+ *
+ * Note:
+ *      If base is not 10, the behaviour is undefined.
+ *      If the value read is out-of-range, the behaviour is undefined.
+ *      The implementation never sets errno.
+ *
+ * @return the integer value of str.
+ */
+long int __attr_weak___
+strtol (const char *nptr, /**< string representation of an integer number */
+        char **endptr, /**< [out] the address of the first non-number character */
+        int base) /**< numerical base or radix (MUST be 10) */
+{
+  assert (base == 10);
+  (void) base; /* Unused. */
+
+  const char *str = nptr;
+
+  /* Skip leading whitespaces. */
+  while (*str == ' ' || *str == '\t' || *str == '\r' || *str == '\n')
+  {
+    str++;
+  }
+
+  bool digits = false;
+  bool positive = true;
+  long int num = 0;
+
+  /* Process optional sign. */
+  if (*str == '-')
+  {
+    positive = false;
+    str++;
+  }
+  else if (*str == '+')
+  {
+    str++;
+  }
+
+  /* Process base-10 digits. */
+  while (*str >= '0' && *str <= '9')
+  {
+    num = num * 10 + (*str - '0');
+    digits = true;
+    str++;
+  }
+
+  /* Set endptr and return result*/
+  if (digits)
+  {
+    if (endptr)
+    {
+      *endptr = (char *) str;
+    }
+    return positive ? num : -num;
+  }
+  else
+  {
+    if (endptr)
+    {
+      *endptr = (char *) nptr;
+    }
+    return 0L;
+  }
+} /* strtol */

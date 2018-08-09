@@ -18,11 +18,16 @@
 
 #include "uv.h"
 
+typedef struct {
+  bool wait_source;
+  bool context_reset;
+  uint16_t port;
+} DebuggerConfig;
 
 typedef struct {
-  bool memstat;
-  bool show_opcode;
-  bool debugger;
+  uint32_t memstat : 1;
+  uint32_t show_opcode : 1;
+  DebuggerConfig* debugger;
 } Config;
 
 typedef enum {
@@ -48,10 +53,13 @@ typedef struct {
 
   // Run config
   Config config;
-} IOTJS_VALIDATED_STRUCT(iotjs_environment_t);
+
+  // Exitcode
+  uint8_t exitcode;
+} iotjs_environment_t;
 
 
-const iotjs_environment_t* iotjs_environment_get();
+iotjs_environment_t* iotjs_environment_get();
 void iotjs_environment_release();
 
 bool iotjs_environment_parse_command_line_arguments(iotjs_environment_t* env,
@@ -65,10 +73,9 @@ uv_loop_t* iotjs_environment_loop(const iotjs_environment_t* env);
 void iotjs_environment_set_loop(iotjs_environment_t* env, uv_loop_t* loop);
 
 const Config* iotjs_environment_config(const iotjs_environment_t* env);
+const DebuggerConfig* iotjs_environment_dconfig(const iotjs_environment_t* env);
 
-void iotjs_environment_go_state_running_main(iotjs_environment_t* env);
-void iotjs_environment_go_state_running_loop(iotjs_environment_t* env);
-void iotjs_environment_go_state_exiting(iotjs_environment_t* env);
-
+void iotjs_environment_set_state(iotjs_environment_t* env, State s);
+bool iotjs_environment_is_exiting(iotjs_environment_t* env);
 
 #endif /* IOTJS_ENV_H */

@@ -61,7 +61,7 @@ ecma_builtin_global_object_eval (ecma_value_t this_arg, /**< this argument */
                                  ecma_value_t x) /**< routine's first argument */
 {
   JERRY_UNUSED (this_arg);
-  ecma_value_t ret_value = ecma_make_simple_value (ECMA_SIMPLE_VALUE_EMPTY);
+  ecma_value_t ret_value = ECMA_VALUE_EMPTY;
 
   bool is_direct_eval = vm_is_direct_eval_form_call ();
 
@@ -107,7 +107,7 @@ ecma_builtin_global_object_parse_int (ecma_value_t this_arg, /**< this argument 
                                       ecma_value_t radix) /**< routine's second argument */
 {
   JERRY_UNUSED (this_arg);
-  ecma_value_t ret_value = ecma_make_simple_value (ECMA_SIMPLE_VALUE_EMPTY);
+  ecma_value_t ret_value = ECMA_VALUE_EMPTY;
 
   /* 1. */
   ECMA_TRY_CATCH (string_var, ecma_op_to_string (string), ret_value);
@@ -190,17 +190,16 @@ ecma_builtin_global_object_parse_int (ecma_value_t this_arg, /**< this argument 
       if (ecma_is_value_empty (ret_value))
       {
         /* 10. */
-        if (strip_prefix)
+        if (strip_prefix
+            && ((end_p - start_p) >= 2)
+            && (current == LIT_CHAR_0))
         {
-          if (end_p - start_p >= 2 && current == LIT_CHAR_0)
+          ecma_char_t next = *string_curr_p;
+          if (next == LIT_CHAR_LOWERCASE_X || next == LIT_CHAR_UPPERCASE_X)
           {
-            ecma_char_t next = *string_curr_p;
-            if (next == LIT_CHAR_LOWERCASE_X || next == LIT_CHAR_UPPERCASE_X)
-            {
-              /* Skip the 'x' or 'X' characters. */
-              start_p = ++string_curr_p;
-              rad = 16;
-            }
+            /* Skip the 'x' or 'X' characters. */
+            start_p = ++string_curr_p;
+            rad = 16;
           }
         }
 
@@ -264,13 +263,10 @@ ecma_builtin_global_object_parse_int (ecma_value_t this_arg, /**< this argument 
           {
             current_number =  (ecma_number_t) current_char - LIT_CHAR_UPPERCASE_A + 10;
           }
-          else if (lit_char_is_decimal_digit (current_char))
-          {
-            current_number =  (ecma_number_t) current_char - LIT_CHAR_0;
-          }
           else
           {
-            JERRY_UNREACHABLE ();
+            JERRY_ASSERT (lit_char_is_decimal_digit (current_char));
+            current_number =  (ecma_number_t) current_char - LIT_CHAR_0;
           }
 
           value += current_number * multiplier;
@@ -318,7 +314,7 @@ ecma_builtin_global_object_parse_float (ecma_value_t this_arg, /**< this argumen
                                         ecma_value_t string) /**< routine's first argument */
 {
   JERRY_UNUSED (this_arg);
-  ecma_value_t ret_value = ecma_make_simple_value (ECMA_SIMPLE_VALUE_EMPTY);
+  ecma_value_t ret_value = ECMA_VALUE_EMPTY;
 
   /* 1. */
   ECMA_TRY_CATCH (string_var, ecma_op_to_string (string), ret_value);
@@ -537,14 +533,13 @@ ecma_builtin_global_object_is_nan (ecma_value_t this_arg, /**< this argument */
                                    ecma_value_t arg) /**< routine's first argument */
 {
   JERRY_UNUSED (this_arg);
-  ecma_value_t ret_value = ecma_make_simple_value (ECMA_SIMPLE_VALUE_EMPTY);
+  ecma_value_t ret_value = ECMA_VALUE_EMPTY;
 
   ECMA_OP_TO_NUMBER_TRY_CATCH (arg_num, arg, ret_value);
 
   bool is_nan = ecma_number_is_nan (arg_num);
 
-  ret_value = ecma_make_simple_value (is_nan ? ECMA_SIMPLE_VALUE_TRUE
-                                             : ECMA_SIMPLE_VALUE_FALSE);
+  ret_value = is_nan ? ECMA_VALUE_TRUE : ECMA_VALUE_FALSE;
 
   ECMA_OP_TO_NUMBER_FINALIZE (arg_num);
 
@@ -565,15 +560,14 @@ ecma_builtin_global_object_is_finite (ecma_value_t this_arg, /**< this argument 
                                       ecma_value_t arg) /**< routine's first argument */
 {
   JERRY_UNUSED (this_arg);
-  ecma_value_t ret_value = ecma_make_simple_value (ECMA_SIMPLE_VALUE_EMPTY);
+  ecma_value_t ret_value = ECMA_VALUE_EMPTY;
 
   ECMA_OP_TO_NUMBER_TRY_CATCH (arg_num, arg, ret_value);
 
   bool is_finite = !(ecma_number_is_nan (arg_num)
                      || ecma_number_is_infinity (arg_num));
 
-  ret_value = ecma_make_simple_value (is_finite ? ECMA_SIMPLE_VALUE_TRUE
-                                                : ECMA_SIMPLE_VALUE_FALSE);
+  ret_value = is_finite ? ECMA_VALUE_TRUE : ECMA_VALUE_FALSE;
 
   ECMA_OP_TO_NUMBER_FINALIZE (arg_num);
 
@@ -593,7 +587,7 @@ ecma_builtin_global_object_character_is_in (uint32_t character, /**< character *
   return (bitset[character >> 3] & (1u << (character & 0x7))) != 0;
 } /* ecma_builtin_global_object_character_is_in */
 
-/*
+/**
  * Unescaped URI characters bitset:
  *   One bit for each character between 0 - 127.
  *   Bit is set if the character is in the unescaped URI set.
@@ -604,7 +598,7 @@ static const uint8_t unescaped_uri_set[16] =
   0xff, 0xff, 0xff, 0x87, 0xfe, 0xff, 0xff, 0x47
 };
 
-/*
+/**
  * Unescaped URI component characters bitset:
  *   One bit for each character between 0 - 127.
  *   Bit is set if the character is in the unescaped component URI set.
@@ -615,17 +609,10 @@ static const uint8_t unescaped_uri_component_set[16] =
   0xfe, 0xff, 0xff, 0x87, 0xfe, 0xff, 0xff, 0x47
 };
 
-/*
+/**
  * Format is a percent sign followed by two hex digits.
  */
 #define URI_ENCODED_BYTE_SIZE (3)
-
-/*
- * These two types shows whether the byte is present in
- * the original stream or decoded from a %xx sequence.
- */
-#define URI_DECODE_ORIGINAL_BYTE 0
-#define URI_DECODE_DECODED_BYTE 1
 
 /**
  * Helper function to decode URI.
@@ -638,7 +625,7 @@ ecma_builtin_global_object_decode_uri_helper (ecma_value_t uri, /**< uri argumen
                                               const uint8_t *reserved_uri_bitset) /**< reserved characters bitset */
 {
   JERRY_UNUSED (uri);
-  ecma_value_t ret_value = ecma_make_simple_value (ECMA_SIMPLE_VALUE_EMPTY);
+  ecma_value_t ret_value = ECMA_VALUE_EMPTY;
 
   ECMA_TRY_CATCH (string,
                   ecma_op_to_string (uri),
@@ -915,7 +902,7 @@ static ecma_value_t
 ecma_builtin_global_object_encode_uri_helper (ecma_value_t uri, /**< uri argument */
                                               const uint8_t *unescaped_uri_bitset_p) /**< unescaped bitset */
 {
-  ecma_value_t ret_value = ecma_make_simple_value (ECMA_SIMPLE_VALUE_EMPTY);
+  ecma_value_t ret_value = ECMA_VALUE_EMPTY;
 
   ECMA_TRY_CATCH (string,
                   ecma_op_to_string (uri),
@@ -1102,17 +1089,17 @@ ecma_builtin_global_object_encode_uri_component (ecma_value_t this_arg, /**< thi
 
 #ifndef CONFIG_DISABLE_ANNEXB_BUILTIN
 
-/*
+/**
  * Maximum value of a byte.
  */
 #define ECMA_ESCAPE_MAXIMUM_BYTE_VALUE (255)
 
-/*
+/**
  * Format is a percent sign followed by lowercase u and four hex digits.
  */
 #define ECMA_ESCAPE_ENCODED_UNICODE_CHARACTER_SIZE (6)
 
-/*
+/**
  * Escape characters bitset:
  *   One bit for each character between 0 - 127.
  *   Bit is set if the character does not need to be converted to %xx form.
@@ -1138,7 +1125,7 @@ ecma_builtin_global_object_escape (ecma_value_t this_arg, /**< this argument */
                                    ecma_value_t arg) /**< routine's first argument */
 {
   JERRY_UNUSED (this_arg);
-  ecma_value_t ret_value = ecma_make_simple_value (ECMA_SIMPLE_VALUE_EMPTY);
+  ecma_value_t ret_value = ECMA_VALUE_EMPTY;
 
   ECMA_TRY_CATCH (string,
                   ecma_op_to_string (arg),
@@ -1259,7 +1246,7 @@ ecma_builtin_global_object_unescape (ecma_value_t this_arg, /**< this argument *
                                      ecma_value_t arg) /**< routine's first argument */
 {
   JERRY_UNUSED (this_arg);
-  ecma_value_t ret_value = ecma_make_simple_value (ECMA_SIMPLE_VALUE_EMPTY);
+  ecma_value_t ret_value = ECMA_VALUE_EMPTY;
 
   /* 1. */
   ECMA_TRY_CATCH (string, ecma_op_to_string (arg), ret_value);
@@ -1315,6 +1302,12 @@ ecma_builtin_global_object_unescape (ecma_value_t this_arg, /**< this argument *
       /* Found hexadecimal digit in escape sequence. */
       hex_digits = (ecma_char_t) (hex_digits * 16 + (ecma_char_t) lit_char_hex_to_int (chr));
       status++;
+    }
+    else
+    {
+      /* Previously found hexadecimal digit in escape sequence but it's not valid '%xy' pattern
+       * so essentially it was only a simple character. */
+      status = 0;
     }
 
     /* 11-17. Found valid '%uwxyz' or '%xy' escape. */

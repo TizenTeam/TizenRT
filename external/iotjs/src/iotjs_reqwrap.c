@@ -17,40 +17,33 @@
 #include "iotjs_reqwrap.h"
 
 
-void iotjs_reqwrap_initialize(iotjs_reqwrap_t* reqwrap,
-                              const iotjs_jval_t* jcallback,
+void iotjs_reqwrap_initialize(iotjs_reqwrap_t* reqwrap, jerry_value_t jcallback,
                               uv_req_t* request) {
-  IOTJS_VALIDATED_STRUCT_CONSTRUCTOR(iotjs_reqwrap_t, reqwrap);
-  IOTJS_ASSERT(iotjs_jval_is_function(jcallback));
-  _this->jcallback = iotjs_jval_create_copied(jcallback);
-  _this->request = request;
-  _this->request->data = reqwrap;
+  reqwrap->jcallback = jerry_acquire_value(jcallback);
+  reqwrap->request = request;
+  reqwrap->request->data = reqwrap;
 }
 
 
 void iotjs_reqwrap_destroy(iotjs_reqwrap_t* reqwrap) {
-  IOTJS_VALIDATED_STRUCT_DESTRUCTOR(iotjs_reqwrap_t, reqwrap);
-  iotjs_jval_destroy(&_this->jcallback);
+  jerry_release_value(reqwrap->jcallback);
 }
 
 
 static void iotjs_reqwrap_validate(iotjs_reqwrap_t* reqwrap) {
-  IOTJS_VALIDATED_STRUCT_METHOD(iotjs_reqwrap_t, reqwrap);
-  IOTJS_ASSERT(_this->request->data == reqwrap);
+  IOTJS_ASSERT(reqwrap->request->data == reqwrap);
 }
 
 
-const iotjs_jval_t* iotjs_reqwrap_jcallback(iotjs_reqwrap_t* reqwrap) {
-  IOTJS_VALIDATED_STRUCT_METHOD(iotjs_reqwrap_t, reqwrap);
+jerry_value_t iotjs_reqwrap_jcallback(iotjs_reqwrap_t* reqwrap) {
   iotjs_reqwrap_validate(reqwrap);
-  return &_this->jcallback;
+  return reqwrap->jcallback;
 }
 
 
 uv_req_t* iotjs_reqwrap_req(iotjs_reqwrap_t* reqwrap) {
-  IOTJS_VALIDATED_STRUCT_METHOD(iotjs_reqwrap_t, reqwrap);
   iotjs_reqwrap_validate(reqwrap);
-  return _this->request;
+  return reqwrap->request;
 }
 
 

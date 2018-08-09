@@ -22,6 +22,7 @@
 #include "ecma-helpers.h"
 #include "ecma-try-catch-macro.h"
 #include "lit-char-helpers.h"
+#include "math.h"
 
 #ifndef CONFIG_DISABLE_DATE_BUILTIN
 
@@ -79,7 +80,7 @@ static ecma_value_t
 ecma_date_construct_helper (const ecma_value_t *args, /**< arguments passed to the Date constructor */
                             ecma_length_t args_len) /**< number of arguments */
 {
-  ecma_value_t ret_value = ecma_make_simple_value (ECMA_SIMPLE_VALUE_EMPTY);
+  ecma_value_t ret_value = ECMA_VALUE_EMPTY;
   ecma_number_t prim_value = ecma_number_make_nan ();
 
   ECMA_TRY_CATCH (year_value, ecma_op_to_number (args[0]), ret_value);
@@ -181,7 +182,7 @@ ecma_builtin_date_parse (ecma_value_t this_arg, /**< this argument */
                          ecma_value_t arg) /**< string */
 {
   JERRY_UNUSED (this_arg);
-  ecma_value_t ret_value = ecma_make_simple_value (ECMA_SIMPLE_VALUE_EMPTY);
+  ecma_value_t ret_value = ECMA_VALUE_EMPTY;
   ecma_number_t date_num = ecma_number_make_nan ();
 
   /* Date Time String fromat (ECMA-262 v5, 15.9.1.15) */
@@ -263,40 +264,44 @@ ecma_builtin_date_parse (ecma_value_t this_arg, /**< this argument */
           hours = ECMA_NUMBER_ZERO;
         }
 
-        /* eat up ':' */
-        date_str_curr_p++;
-
-        minutes = ecma_date_parse_date_chars (&date_str_curr_p, date_str_end_p, 2);
-
-        if (minutes < 0 || minutes > 59)
-        {
-          minutes = ecma_number_make_nan ();
-        }
-
-        /* 4.2 read seconds if any */
         if (date_str_curr_p < date_str_end_p
             && *date_str_curr_p == ':')
         {
           /* eat up ':' */
           date_str_curr_p++;
-          seconds = ecma_date_parse_date_chars (&date_str_curr_p, date_str_end_p, 2);
 
-          if (seconds < 0 || seconds > 59)
+          minutes = ecma_date_parse_date_chars (&date_str_curr_p, date_str_end_p, 2);
+
+          if (minutes < 0 || minutes > 59)
           {
-            seconds = ecma_number_make_nan ();
+            minutes = ecma_number_make_nan ();
           }
 
-          /* 4.3 read milliseconds if any */
+          /* 4.2 read seconds if any */
           if (date_str_curr_p < date_str_end_p
-              && *date_str_curr_p == '.')
+              && *date_str_curr_p == ':')
           {
-            /* eat up '.' */
+            /* eat up ':' */
             date_str_curr_p++;
-            milliseconds = ecma_date_parse_date_chars (&date_str_curr_p, date_str_end_p, 3);
+            seconds = ecma_date_parse_date_chars (&date_str_curr_p, date_str_end_p, 2);
 
-            if (milliseconds < 0)
+            if (seconds < 0 || seconds > 59)
             {
-              milliseconds = ecma_number_make_nan ();
+              seconds = ecma_number_make_nan ();
+            }
+
+            /* 4.3 read milliseconds if any */
+            if (date_str_curr_p < date_str_end_p
+                && *date_str_curr_p == '.')
+            {
+              /* eat up '.' */
+              date_str_curr_p++;
+              milliseconds = ecma_date_parse_date_chars (&date_str_curr_p, date_str_end_p, 3);
+
+              if (milliseconds < 0)
+              {
+                milliseconds = ecma_number_make_nan ();
+              }
             }
           }
         }
@@ -399,7 +404,7 @@ ecma_builtin_date_utc (ecma_value_t this_arg, /**< this argument */
                        ecma_length_t args_number) /**< number of arguments */
 {
   JERRY_UNUSED (this_arg);
-  ecma_value_t ret_value = ecma_make_simple_value (ECMA_SIMPLE_VALUE_EMPTY);
+  ecma_value_t ret_value = ECMA_VALUE_EMPTY;
 
   if (args_number < 2)
   {
@@ -433,7 +438,7 @@ static ecma_value_t
 ecma_builtin_date_now (ecma_value_t this_arg) /**< this argument */
 {
   JERRY_UNUSED (this_arg);
-  return ecma_make_number_value (DOUBLE_TO_ECMA_NUMBER_T (jerry_port_get_current_time ()));
+  return ecma_make_number_value (floor (DOUBLE_TO_ECMA_NUMBER_T (jerry_port_get_current_time ())));
 } /* ecma_builtin_date_now */
 
 /**
@@ -450,10 +455,10 @@ ecma_builtin_date_dispatch_call (const ecma_value_t *arguments_list_p, /**< argu
 {
   JERRY_UNUSED (arguments_list_p);
   JERRY_UNUSED (arguments_list_len);
-  ecma_value_t ret_value = ecma_make_simple_value (ECMA_SIMPLE_VALUE_EMPTY);
+  ecma_value_t ret_value = ECMA_VALUE_EMPTY;
 
   ECMA_TRY_CATCH (now_val,
-                  ecma_builtin_date_now (ecma_make_simple_value (ECMA_SIMPLE_VALUE_UNDEFINED)),
+                  ecma_builtin_date_now (ECMA_VALUE_UNDEFINED),
                   ret_value);
 
   ret_value = ecma_date_value_to_string (ecma_get_number_from_value (now_val));
@@ -475,7 +480,7 @@ ecma_value_t
 ecma_builtin_date_dispatch_construct (const ecma_value_t *arguments_list_p, /**< arguments list */
                                       ecma_length_t arguments_list_len) /**< number of arguments */
 {
-  ecma_value_t ret_value = ecma_make_simple_value (ECMA_SIMPLE_VALUE_EMPTY);
+  ecma_value_t ret_value = ECMA_VALUE_EMPTY;
   ecma_number_t prim_value_num = ECMA_NUMBER_ZERO;
 
   ecma_object_t *prototype_obj_p = ecma_builtin_get (ECMA_BUILTIN_ID_DATE_PROTOTYPE);

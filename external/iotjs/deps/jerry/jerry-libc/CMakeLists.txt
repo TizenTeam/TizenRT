@@ -16,29 +16,10 @@ cmake_minimum_required (VERSION 2.8.12)
 set(JERRY_LIBC_NAME jerry-libc)
 project (${JERRY_LIBC_NAME} C ASM)
 
-# Optional features
-set(FEATURE_INIT_FINI OFF CACHE BOOL "Enable init/fini arrays?")
-
-# Status messages
-message(STATUS "FEATURE_INIT_FINI         " ${FEATURE_INIT_FINI})
-
 # Checks the optional features
 # Enable init/fini arrays
 if(FEATURE_INIT_FINI)
   set(DEFINES_LIBC ${DEFINES_LIBC} ENABLE_INIT_FINI)
-endif()
-
-# Architecture-specific configuration
-if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
-  set(DEFINES_LIBC ${DEFINES_LIBC} __TARGET_HOST_x64)
-elseif(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "armv7l")
-  set(DEFINES_LIBC ${DEFINES_LIBC} __TARGET_HOST_ARMv7 __TARGET_HOST_ARMv7_HARD_FLOAT)
-elseif(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "armv7l-el")
-  set(DEFINES_LIBC ${DEFINES_LIBC} __TARGET_HOST_ARMv7 __TARGET_HOST_ARMv7_SOFT_FLOAT)
-elseif(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "i686")
-  set(DEFINES_LIBC ${DEFINES_LIBC} __TARGET_HOST_x86)
-else()
-  message(FATAL_ERROR "Machine architecture ${CMAKE_SYSTEM_PROCESSOR} isn't supported")
 endif()
 
 # Include directories
@@ -53,7 +34,7 @@ if(DEFINED PLATFORM AND ((PLATFORM STREQUAL "LINUX") OR (PLATFORM STREQUAL "DARW
   file(GLOB TARGET_SPECIFIC_LIBC_SOURCE target/posix/*.c target/posix/*.S)
 endif()
 
-add_library(${JERRY_LIBC_NAME} STATIC ${SOURCE_LIBC} ${TARGET_SPECIFIC_LIBC_SOURCE})
+add_library(${JERRY_LIBC_NAME} ${SOURCE_LIBC} ${TARGET_SPECIFIC_LIBC_SOURCE})
 
 target_compile_definitions(${JERRY_LIBC_NAME} PRIVATE ${DEFINES_LIBC})
 target_include_directories(${JERRY_LIBC_NAME} PRIVATE ${INCLUDE_LIBC})

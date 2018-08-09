@@ -41,7 +41,7 @@
  *
  * @return time value for day number
  */
-inline ecma_number_t __attr_always_inline___
+inline ecma_number_t JERRY_ATTR_ALWAYS_INLINE
 ecma_date_day (ecma_number_t time) /**< time value */
 {
   JERRY_ASSERT (!ecma_number_is_nan (time));
@@ -57,7 +57,7 @@ ecma_date_day (ecma_number_t time) /**< time value */
  *
  * @return time value within the day
  */
-inline ecma_number_t __attr_always_inline___
+inline ecma_number_t JERRY_ATTR_ALWAYS_INLINE
 ecma_date_time_within_day (ecma_number_t time) /**< time value */
 {
   JERRY_ASSERT (!ecma_number_is_nan (time));
@@ -92,7 +92,7 @@ ecma_date_day_from_year (ecma_number_t year) /**< year value */
  *
  * @return  time value of the start of a year
  */
-static inline ecma_number_t __attr_always_inline___
+static inline ecma_number_t JERRY_ATTR_ALWAYS_INLINE
 ecma_date_time_from_year (ecma_number_t year) /**< year value */
 {
   JERRY_ASSERT (!ecma_number_is_nan (year));
@@ -309,7 +309,7 @@ ecma_date_week_day (ecma_number_t time) /**< time value */
  *
  * @return local time zone adjustment
  */
-static inline ecma_number_t __attr_always_inline___
+static inline ecma_number_t JERRY_ATTR_ALWAYS_INLINE
 ecma_date_local_tza (jerry_time_zone_t *tz) /**< time zone information */
 {
   return tz->offset * -ECMA_DATE_MS_PER_MINUTE;
@@ -323,7 +323,7 @@ ecma_date_local_tza (jerry_time_zone_t *tz) /**< time zone information */
  *
  * @return daylight saving time adjustment
  */
-static inline ecma_number_t __attr_always_inline___
+static inline ecma_number_t JERRY_ATTR_ALWAYS_INLINE
 ecma_date_daylight_saving_ta (jerry_time_zone_t *tz, /**< time zone information */
                               ecma_number_t time) /**< time value */
 {
@@ -344,7 +344,7 @@ ecma_date_daylight_saving_ta (jerry_time_zone_t *tz, /**< time zone information 
  *
  * @return local time
  */
-inline ecma_number_t __attr_always_inline___
+inline ecma_number_t JERRY_ATTR_ALWAYS_INLINE
 ecma_date_local_time_zone (ecma_number_t time) /**< time value */
 {
   jerry_time_zone_t tz;
@@ -610,7 +610,7 @@ ecma_date_time_clip (ecma_number_t time) /**< time value */
  *
  * @return timezone offset
  */
-inline ecma_number_t __attr_always_inline___
+inline ecma_number_t JERRY_ATTR_ALWAYS_INLINE
 ecma_date_timezone_offset (ecma_number_t time) /**< time value */
 {
   JERRY_ASSERT (!ecma_number_is_nan (time));
@@ -639,7 +639,7 @@ ecma_date_to_string_format (ecma_number_t datetime_number, /**< datetime */
   };
 
   const uint32_t date_buffer_length = 34;
-  lit_utf8_byte_t date_buffer[date_buffer_length];
+  JERRY_VLA (lit_utf8_byte_t, date_buffer, date_buffer_length);
 
   lit_utf8_byte_t *dest_p = date_buffer;
 
@@ -740,8 +740,10 @@ ecma_date_to_string_format (ecma_number_t datetime_number, /**< datetime */
         number_length = 2;
         break;
       }
-      case LIT_CHAR_UPPERCASE_Z: /* Time zone seconds part. */
+      default:
       {
+        JERRY_ASSERT (*format_p == LIT_CHAR_UPPERCASE_Z); /* Time zone seconds part. */
+
         int32_t time_zone = (int32_t) ecma_date_local_time_zone (datetime_number);
 
         if (time_zone < 0)
@@ -751,11 +753,6 @@ ecma_date_to_string_format (ecma_number_t datetime_number, /**< datetime */
 
         number = time_zone % (int32_t) ECMA_DATE_MS_PER_HOUR;
         number_length = 2;
-        break;
-      }
-      default:
-      {
-        JERRY_UNREACHABLE ();
         break;
       }
     }

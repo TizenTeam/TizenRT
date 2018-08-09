@@ -19,18 +19,24 @@ project (${JERRY_EXT_NAME} C)
 # Include directories
 set(INCLUDE_EXT "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
+if(FEATURE_INIT_FINI)
+  set(DEFINES_EXT ${DEFINES_EXT} ENABLE_INIT_FINI)
+endif()
+
 # Source directories
 file(GLOB SOURCE_EXT_ARG      arg/*.c)
+file(GLOB SOURCE_EXT_MODULE   module/*.c)
 file(GLOB SOURCE_EXT_HANDLER  handler/*.c)
 
 set(SOURCE_EXT
     ${SOURCE_EXT_ARG}
+    ${SOURCE_EXT_MODULE}
     ${SOURCE_EXT_HANDLER})
 
-add_library(${JERRY_EXT_NAME} STATIC ${SOURCE_EXT})
+add_library(${JERRY_EXT_NAME} ${SOURCE_EXT})
 
 target_include_directories(${JERRY_EXT_NAME} PUBLIC ${INCLUDE_EXT})
-
+target_compile_definitions(${JERRY_EXT_NAME} PUBLIC ${DEFINES_EXT})
 target_link_libraries(${JERRY_EXT_NAME} jerry-core)
 
 install(TARGETS ${JERRY_EXT_NAME} DESTINATION lib)

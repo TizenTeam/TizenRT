@@ -15,7 +15,11 @@
 
 #include "js-parser-internal.h"
 
-#if JERRY_JS_PARSER
+#ifndef CONFIG_DISABLE_ES2015_TEMPLATE_STRINGS
+#include "lit-char-helpers.h"
+#endif /* !CONFIG_DISABLE_ES2015_TEMPLATE_STRINGS */
+
+#ifndef JERRY_DISABLE_JS_PARSER
 
 /** \addtogroup parser Parser
  * @{
@@ -56,21 +60,19 @@ parser_push_result (parser_context_t *context_p) /**< context */
   {
     JERRY_ASSERT (CBC_SAME_ARGS (context_p->last_cbc_opcode, context_p->last_cbc_opcode + 1));
 
-    if (context_p->last_cbc_opcode == CBC_POST_INCR
-        || context_p->last_cbc_opcode == CBC_POST_DECR)
+    if ((context_p->last_cbc_opcode == CBC_POST_INCR
+         || context_p->last_cbc_opcode == CBC_POST_DECR)
+        && context_p->stack_depth >= context_p->stack_limit)
     {
-      if (context_p->stack_depth >= context_p->stack_limit)
+      /* Stack limit is increased for CBC_POST_INCR_PUSH_RESULT
+       * and CBC_POST_DECR_PUSH_RESULT opcodes. Needed by vm.c. */
+      JERRY_ASSERT (context_p->stack_depth == context_p->stack_limit);
+
+      context_p->stack_limit++;
+
+      if (context_p->stack_limit > PARSER_MAXIMUM_STACK_LIMIT)
       {
-        /* Stack limit is increased for CBC_POST_INCR_PUSH_RESULT
-         * and CBC_POST_DECR_PUSH_RESULT opcodes. Needed by vm.c. */
-        JERRY_ASSERT (context_p->stack_depth == context_p->stack_limit);
-
-        context_p->stack_limit++;
-
-        if (context_p->stack_limit > PARSER_MAXIMUM_STACK_LIMIT)
-        {
-          parser_raise_error (context_p, PARSER_ERR_STACK_LIMIT_REACHED);
-        }
+        parser_raise_error (context_p, PARSER_ERR_STACK_LIMIT_REACHED);
       }
     }
 
@@ -393,11 +395,6 @@ parser_parse_object_literal (parser_context_t *context_p) /**< context */
         item_type = PARSER_OBJECT_PROPERTY_SETTER;
       }
 
-      if (context_p->status_flags & PARSER_INSIDE_WITH)
-      {
-        status_flags |= PARSER_RESOLVE_THIS_FOR_CALLS;
-      }
-
       lexer_expect_object_literal_id (context_p, true);
       literal_index = context_p->lit_object.index;
 
@@ -433,7 +430,15 @@ parser_parse_object_literal (parser_context_t *context_p) /**< context */
       lexer_next_token (context_p);
       parser_parse_expression (context_p, PARSE_EXPR_NO_COMMA);
 
-      parser_emit_cbc_literal (context_p, CBC_SET_PROPERTY, literal_index);
+      if (context_p->last_cbc_opcode == CBC_PUSH_LITERAL)
+      {
+        context_p->last_cbc_opcode = CBC_SET_LITERAL_PROPERTY;
+        context_p->last_cbc.value = literal_index;
+      }
+      else
+      {
+        parser_emit_cbc_literal (context_p, CBC_SET_PROPERTY, literal_index);
+      }
     }
 
     if (context_p->token.type == LEXER_RIGHT_BRACE)
@@ -453,6 +458,243 @@ parser_parse_object_literal (parser_context_t *context_p) /**< context */
 
   parser_stack_pop_uint8 (context_p);
 } /* parser_parse_object_literal */
+
+/**
+ * Parse function literal.
+ */
+static void
+parser_parse_function_expression (parser_context_t *context_p, /**< context */
+                                  uint32_t status_flags) /**< function status flags */
+{
+  int literals = 0;
+  uint16_t literal1 = 0;
+  uint16_t literal2 = 0;
+  uint16_t function_literal_index;
+
+  if (context_p->last_cbc_opcode == CBC_PUSH_LITERAL)
+  {
+    literals = 1;
+    literal1 = context_p->last_cbc.literal_index;
+    context_p->last_cbc_opcode = PARSER_CBC_UNAVAILABLE;
+  }
+  else if (context_p->last_cbc_opcode == CBC_PUSH_TWO_LITERALS)
+  {
+    literals = 2;
+    literal1 = context_p->last_cbc.literal_index;
+    literal2 = context_p->last_cbc.value;
+    context_p->last_cbc_opcode = PARSER_CBC_UNAVAILABLE;
+  }
+  else
+  {
+    parser_flush_cbc (context_p);
+  }
+
+  function_literal_index = lexer_construct_function_object (context_p, status_flags);
+
+  JERRY_ASSERT (context_p->last_cbc_opcode == PARSER_CBC_UNAVAILABLE);
+
+  if (literals == 1)
+  {
+    context_p->last_cbc_opcode = CBC_PUSH_TWO_LITERALS;
+    context_p->last_cbc.literal_index = literal1;
+    context_p->last_cbc.value = function_literal_index;
+  }
+  else if (literals == 2)
+  {
+    context_p->last_cbc_opcode = CBC_PUSH_THREE_LITERALS;
+    context_p->last_cbc.literal_index = literal1;
+    context_p->last_cbc.value = literal2;
+    context_p->last_cbc.third_literal_index = function_literal_index;
+  }
+  else
+  {
+    parser_emit_cbc_literal (context_p,
+                             CBC_PUSH_LITERAL,
+                             function_literal_index);
+  }
+
+  context_p->last_cbc.literal_type = LEXER_FUNCTION_LITERAL;
+  context_p->last_cbc.literal_object_type = LEXER_LITERAL_OBJECT_ANY;
+} /* parser_parse_function_expression */
+
+#ifndef CONFIG_DISABLE_ES2015_ARROW_FUNCTION
+
+/**
+ * Checks whether the bracketed expression is an argument list of an arrow function.
+ *
+ * @return true - if an arrow function is found
+ *         false - otherwise
+ */
+static bool
+parser_check_arrow_function (parser_context_t *context_p) /**< context */
+{
+  lexer_range_t range;
+
+  range.source_p = context_p->token.lit_location.char_p;
+  range.line = context_p->token.line;
+  range.column = context_p->token.column;
+
+  lexer_next_token (context_p);
+
+  bool is_arrow_function = true;
+
+  while (true)
+  {
+    if (context_p->token.type == LEXER_RIGHT_PAREN)
+    {
+      break;
+    }
+
+    if (context_p->token.type == LEXER_COMMA)
+    {
+      lexer_next_token (context_p);
+
+      if (context_p->token.type == LEXER_LITERAL
+          && context_p->token.lit_location.type == LEXER_IDENT_LITERAL)
+      {
+        lexer_next_token (context_p);
+        continue;
+      }
+    }
+
+    is_arrow_function = false;
+    break;
+  }
+
+  if (is_arrow_function)
+  {
+    lexer_next_token (context_p);
+
+    if (context_p->token.type != LEXER_ARROW)
+    {
+      is_arrow_function = false;
+    }
+  }
+
+  context_p->source_p = range.source_p;
+  context_p->line = range.line;
+  context_p->column = range.column;
+
+  /* Re-parse the original identifier. */
+  lexer_next_token (context_p);
+
+  if (is_arrow_function)
+  {
+    parser_parse_function_expression (context_p,
+                                      PARSER_IS_FUNCTION | PARSER_IS_ARROW_FUNCTION | PARSER_ARROW_PARSE_ARGS);
+    return true;
+  }
+
+  return false;
+} /* parser_check_arrow_function */
+
+#endif /* !CONFIG_DISABLE_ES2015_ARROW_FUNCTION */
+
+#ifndef CONFIG_DISABLE_ES2015_TEMPLATE_STRINGS
+
+/**
+ * Parse template literal.
+ */
+static void
+parser_parse_template_literal (parser_context_t *context_p) /**< context */
+{
+  bool is_empty_head = true;
+
+  if (context_p->token.lit_location.length > 0)
+  {
+    is_empty_head = false;
+
+    lexer_construct_literal_object (context_p,
+                                    &context_p->token.lit_location,
+                                    context_p->token.lit_location.type);
+
+    parser_emit_cbc_literal_from_token (context_p, CBC_PUSH_LITERAL);
+  }
+
+  lexer_next_token (context_p);
+  parser_parse_expression (context_p, PARSE_EXPR);
+
+  if (context_p->token.type != LEXER_RIGHT_BRACE)
+  {
+    parser_raise_error (context_p, PARSER_ERR_RIGHT_BRACE_EXPECTED);
+  }
+
+  if (!is_empty_head)
+  {
+    if (context_p->last_cbc_opcode == CBC_PUSH_TWO_LITERALS)
+    {
+      context_p->last_cbc_opcode = CBC_ADD_TWO_LITERALS;
+    }
+    else if (context_p->last_cbc_opcode == CBC_PUSH_LITERAL)
+    {
+      context_p->last_cbc_opcode = CBC_ADD_RIGHT_LITERAL;
+    }
+    else
+    {
+      parser_emit_cbc (context_p, CBC_ADD);
+    }
+  }
+
+  context_p->source_p--;
+  context_p->column--;
+  lexer_parse_string (context_p);
+
+  if (is_empty_head || context_p->token.lit_location.length > 0)
+  {
+    lexer_construct_literal_object (context_p,
+                                    &context_p->token.lit_location,
+                                    context_p->token.lit_location.type);
+
+    if (context_p->last_cbc_opcode == CBC_PUSH_LITERAL)
+    {
+      context_p->last_cbc_opcode = CBC_ADD_TWO_LITERALS;
+      context_p->last_cbc.value = context_p->lit_object.index;
+      context_p->last_cbc.literal_type = context_p->token.lit_location.type;
+      context_p->last_cbc.literal_object_type = context_p->lit_object.type;
+    }
+    else
+    {
+      parser_emit_cbc_literal_from_token (context_p, CBC_ADD_RIGHT_LITERAL);
+    }
+  }
+
+  while (context_p->source_p[-1] != LIT_CHAR_GRAVE_ACCENT)
+  {
+    lexer_next_token (context_p);
+    parser_parse_expression (context_p, PARSE_EXPR);
+
+    if (context_p->token.type != LEXER_RIGHT_BRACE)
+    {
+      parser_raise_error (context_p, PARSER_ERR_RIGHT_BRACE_EXPECTED);
+    }
+
+    if (context_p->last_cbc_opcode == CBC_PUSH_LITERAL)
+    {
+      context_p->last_cbc_opcode = CBC_ADD_RIGHT_LITERAL;
+    }
+    else
+    {
+      parser_emit_cbc (context_p, CBC_ADD);
+    }
+
+    context_p->source_p--;
+    context_p->column--;
+    lexer_parse_string (context_p);
+
+    if (context_p->token.lit_location.length > 0)
+    {
+      lexer_construct_literal_object (context_p,
+                                      &context_p->token.lit_location,
+                                      context_p->token.lit_location.type);
+
+      parser_emit_cbc_literal_from_token (context_p, CBC_ADD_RIGHT_LITERAL);
+    }
+  }
+
+  return;
+} /* parser_parse_template_literal */
+
+#endif /* !CONFIG_DISABLE_ES2015_TEMPLATE_STRINGS */
 
 /**
  * Parse and record unary operators, and parse the primary literal.
@@ -501,9 +743,51 @@ parser_parse_unary_expression (parser_context_t *context_p, /**< context */
   /* Parse primary expression. */
   switch (context_p->token.type)
   {
+#ifndef CONFIG_DISABLE_ES2015_TEMPLATE_STRINGS
+    case LEXER_TEMPLATE_LITERAL:
+    {
+      if (context_p->source_p[-1] != LIT_CHAR_GRAVE_ACCENT)
+      {
+        parser_parse_template_literal (context_p);
+        break;
+      }
+
+      /* The string is a normal string literal. */
+      /* FALLTHRU */
+    }
+#endif /* !CONFIG_DISABLE_ES2015_TEMPLATE_STRINGS */
     case LEXER_LITERAL:
     {
-      cbc_opcode_t opcode = CBC_PUSH_LITERAL;
+#ifndef CONFIG_DISABLE_ES2015_ARROW_FUNCTION
+      if (context_p->token.lit_location.type == LEXER_IDENT_LITERAL)
+      {
+        switch (lexer_check_arrow (context_p))
+        {
+          case LEXER_COMMA:
+          case LEXER_RIGHT_PAREN:
+          {
+            if (context_p->stack_top_uint8 == LEXER_LEFT_PAREN
+                && parser_check_arrow_function (context_p))
+            {
+              (*grouping_level_p)--;
+              parser_stack_pop_uint8 (context_p);
+              return;
+            }
+            break;
+          }
+          case LEXER_ARROW:
+          {
+            parser_parse_function_expression (context_p,
+                                              PARSER_IS_FUNCTION | PARSER_IS_ARROW_FUNCTION);
+            return;
+          }
+          default:
+          {
+            break;
+          }
+        }
+      }
+#endif /* !CONFIG_DISABLE_ES2015_ARROW_FUNCTION */
 
       if (context_p->token.lit_location.type == LEXER_IDENT_LITERAL
           || context_p->token.lit_location.type == LEXER_STRING_LITERAL)
@@ -530,16 +814,12 @@ parser_parse_unary_expression (parser_context_t *context_p, /**< context */
         {
           JERRY_ASSERT (context_p->lit_object.index <= CBC_PUSH_NUMBER_BYTE_RANGE_END);
 
-          if (context_p->lit_object.index == 0)
-          {
-            parser_emit_cbc (context_p, CBC_PUSH_NUMBER_0);
-            break;
-          }
-
           parser_emit_cbc_push_number (context_p, is_negative_number);
           break;
         }
       }
+
+      cbc_opcode_t opcode = CBC_PUSH_LITERAL;
 
       if (context_p->lit_object.type != LEXER_LITERAL_OBJECT_EVAL)
       {
@@ -573,62 +853,8 @@ parser_parse_unary_expression (parser_context_t *context_p, /**< context */
     }
     case LEXER_KEYW_FUNCTION:
     {
-      int literals = 0;
-      uint16_t literal1 = 0;
-      uint16_t literal2 = 0;
-      uint16_t function_literal_index;
-
-      if (context_p->last_cbc_opcode == CBC_PUSH_LITERAL)
-      {
-        literals = 1;
-        literal1 = context_p->last_cbc.literal_index;
-        context_p->last_cbc_opcode = PARSER_CBC_UNAVAILABLE;
-      }
-      else if (context_p->last_cbc_opcode == CBC_PUSH_TWO_LITERALS)
-      {
-        literals = 2;
-        literal1 = context_p->last_cbc.literal_index;
-        literal2 = context_p->last_cbc.value;
-        context_p->last_cbc_opcode = PARSER_CBC_UNAVAILABLE;
-      }
-      else
-      {
-        parser_flush_cbc (context_p);
-      }
-
-      uint32_t status_flags = PARSER_IS_FUNCTION | PARSER_IS_FUNC_EXPRESSION | PARSER_IS_CLOSURE;
-
-      if (context_p->status_flags & PARSER_INSIDE_WITH)
-      {
-        status_flags |= PARSER_RESOLVE_THIS_FOR_CALLS;
-      }
-
-      function_literal_index = lexer_construct_function_object (context_p, status_flags);
-
-      JERRY_ASSERT (context_p->last_cbc_opcode == PARSER_CBC_UNAVAILABLE);
-
-      if (literals == 1)
-      {
-        context_p->last_cbc_opcode = CBC_PUSH_TWO_LITERALS;
-        context_p->last_cbc.literal_index = literal1;
-        context_p->last_cbc.value = function_literal_index;
-      }
-      else if (literals == 2)
-      {
-        context_p->last_cbc_opcode = CBC_PUSH_THREE_LITERALS;
-        context_p->last_cbc.literal_index = literal1;
-        context_p->last_cbc.value = literal2;
-        context_p->last_cbc.third_literal_index = function_literal_index;
-      }
-      else
-      {
-        parser_emit_cbc_literal (context_p,
-                                 CBC_PUSH_LITERAL,
-                                 function_literal_index);
-      }
-
-      context_p->last_cbc.literal_type = LEXER_FUNCTION_LITERAL;
-      context_p->last_cbc.literal_object_type = LEXER_LITERAL_OBJECT_ANY;
+      parser_parse_function_expression (context_p,
+                                        PARSER_IS_FUNCTION | PARSER_IS_FUNC_EXPRESSION | PARSER_IS_CLOSURE);
       break;
     }
     case LEXER_LEFT_BRACE:
@@ -687,6 +913,22 @@ parser_parse_unary_expression (parser_context_t *context_p, /**< context */
       parser_emit_cbc (context_p, CBC_PUSH_NULL);
       break;
     }
+#ifndef CONFIG_DISABLE_ES2015_ARROW_FUNCTION
+    case LEXER_RIGHT_PAREN:
+    {
+      if (context_p->stack_top_uint8 == LEXER_LEFT_PAREN
+          && lexer_check_arrow (context_p) == LEXER_ARROW)
+      {
+        parser_parse_function_expression (context_p,
+                                          PARSER_IS_FUNCTION | PARSER_IS_ARROW_FUNCTION | PARSER_ARROW_PARSE_ARGS);
+
+        (*grouping_level_p)--;
+        parser_stack_pop_uint8 (context_p);
+        return;
+      }
+      /* FALLTHRU */
+    }
+#endif /* !CONFIG_DISABLE_ES2015_ARROW_FUNCTION */
     default:
     {
       parser_raise_error (context_p, PARSER_ERR_PRIMARY_EXP_EXPECTED);
@@ -813,7 +1055,7 @@ parser_process_unary_expression (parser_context_t *context_p) /**< context */
             context_p->last_cbc_opcode = CBC_PUSH_PROP_THIS_LITERAL_REFERENCE;
             opcode = CBC_CALL_PROP;
           }
-          else if ((context_p->status_flags & (PARSER_INSIDE_WITH | PARSER_RESOLVE_THIS_FOR_CALLS))
+          else if ((context_p->status_flags & (PARSER_INSIDE_WITH | PARSER_RESOLVE_BASE_FOR_CALLS))
                    && PARSER_IS_PUSH_LITERAL (context_p->last_cbc_opcode)
                    && context_p->last_cbc.literal_type == LEXER_IDENT_LITERAL)
           {
@@ -945,7 +1187,7 @@ parser_process_unary_expression (parser_context_t *context_p) /**< context */
           continue;
         }
 
-        if (!context_p->token.was_newline
+        if (!(context_p->token.flags & LEXER_WAS_NEWLINE)
             && (context_p->token.type == LEXER_INCREASE || context_p->token.type == LEXER_DECREASE))
         {
           cbc_opcode_t opcode = (context_p->token.type == LEXER_INCREASE) ? CBC_POST_INCR : CBC_POST_DECR;
@@ -1265,16 +1507,14 @@ parser_process_binary_opcodes (parser_context_t *context_p, /**< context */
       opcode = (cbc_opcode_t) context_p->stack_top_uint8;
       parser_stack_pop_uint8 (context_p);
 
-      if (context_p->last_cbc_opcode == CBC_PUSH_LITERAL)
+      if (context_p->last_cbc_opcode == CBC_PUSH_LITERAL
+          && opcode == CBC_ASSIGN_SET_IDENT)
       {
-        if (opcode == CBC_ASSIGN_SET_IDENT)
-        {
-          JERRY_ASSERT (CBC_ARGS_EQ (CBC_ASSIGN_LITERAL_SET_IDENT,
-                                     CBC_HAS_LITERAL_ARG | CBC_HAS_LITERAL_ARG2));
-          context_p->last_cbc.value = parser_stack_pop_uint16 (context_p);
-          context_p->last_cbc_opcode = CBC_ASSIGN_LITERAL_SET_IDENT;
-          continue;
-        }
+        JERRY_ASSERT (CBC_ARGS_EQ (CBC_ASSIGN_LITERAL_SET_IDENT,
+                                   CBC_HAS_LITERAL_ARG | CBC_HAS_LITERAL_ARG2));
+        context_p->last_cbc.value = parser_stack_pop_uint16 (context_p);
+        context_p->last_cbc_opcode = CBC_ASSIGN_LITERAL_SET_IDENT;
+        continue;
       }
 
       if (cbc_flags[opcode] & CBC_HAS_LITERAL_ARG)
@@ -1320,6 +1560,11 @@ parser_process_binary_opcodes (parser_context_t *context_p, /**< context */
     else
     {
       opcode = LEXER_BINARY_OP_TOKEN_TO_OPCODE (token);
+
+      if (PARSER_IS_PUSH_NUMBER (context_p->last_cbc_opcode))
+      {
+        lexer_convert_push_number_to_push_literal (context_p);
+      }
 
       if (context_p->last_cbc_opcode == CBC_PUSH_LITERAL)
       {
@@ -1532,4 +1777,4 @@ parser_parse_expression (parser_context_t *context_p, /**< context */
  * @}
  */
 
-#endif /* JERRY_JS_PARSER */
+#endif /* !JERRY_DISABLE_JS_PARSER */

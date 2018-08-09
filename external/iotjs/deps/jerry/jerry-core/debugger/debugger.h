@@ -24,9 +24,24 @@
 /* JerryScript debugger protocol is a simplified version of RFC-6455 (WebSockets). */
 
 /**
+ * JerryScript debugger protocol version.
+ */
+#define JERRY_DEBUGGER_VERSION (4)
+
+/**
  * Frequency of calling jerry_debugger_receive() by the VM.
  */
 #define JERRY_DEBUGGER_MESSAGE_FREQUENCY 5
+
+/**
+ * Sleep time in milliseconds between each jerry_debugger_receive call
+ */
+#define JERRY_DEBUGGER_TIMEOUT 100
+
+/**
+  * This constant represents that the string to be sent has no subtype.
+  */
+#define JERRY_DEBUGGER_NO_SUBTYPE 0
 
 /**
  * Limited resources available for the engine, so it is important to
@@ -38,10 +53,16 @@
 
 /**
  * Calculate the maximum number of items for a given type
- * which can be transmitted by one message.
+ * which can be transmitted in one message.
  */
 #define JERRY_DEBUGGER_SEND_MAX(type) \
- ((JERRY_DEBUGGER_MAX_SEND_SIZE - sizeof (jerry_debugger_send_header_t) - 1) / sizeof (type))
+  ((size_t) ((JERRY_CONTEXT (debugger_max_send_size) - sizeof (jerry_debugger_send_type_t)) / sizeof (type)))
+
+/**
+ * Calculate the size of a message when a count number of items transmitted.
+ */
+#define JERRY_DEBUGGER_SEND_SIZE(count, type) \
+  ((size_t) ((count * sizeof (type)) + sizeof (jerry_debugger_send_type_t)))
 
 /**
  * Debugger operation modes:
@@ -75,10 +96,35 @@ typedef enum
 {
   JERRY_DEBUGGER_CONNECTED = 1u << 0, /**< debugger is connected */
   JERRY_DEBUGGER_BREAKPOINT_MODE = 1u << 1, /**< debugger waiting at a breakpoint */
-  JERRY_DEBUGGER_VM_STOP = 1u << 2, /**< stop at the next breakpoint regardless it is enabled */
+  JERRY_DEBUGGER_VM_STOP = 1u << 2, /**< stop at the next breakpoint even if disabled */
   JERRY_DEBUGGER_VM_IGNORE = 1u << 3, /**< ignore all breakpoints */
-  JERRY_DEBUGGER_VM_IGNORE_EXCEPTION = 1u << 4, /**< debugger stop at an exception */
+  JERRY_DEBUGGER_VM_IGNORE_EXCEPTION = 1u << 4, /**< debugger doesn't stop at any exception */
+  JERRY_DEBUGGER_VM_EXCEPTION_THROWN = 1u << 5, /**< no need to stop for this exception */
+  JERRY_DEBUGGER_PARSER_WAIT = 1u << 6, /**< debugger should wait after parsing is completed */
+  JERRY_DEBUGGER_PARSER_WAIT_MODE = 1u << 7, /**< debugger is waiting after parsing is completed */
+  JERRY_DEBUGGER_CLIENT_SOURCE_MODE = 1u << 8, /**< debugger waiting for client code */
+  JERRY_DEBUGGER_CLIENT_NO_SOURCE = 1u << 9, /**< debugger leaving the client source loop */
+  JERRY_DEBUGGER_CONTEXT_RESET_MODE = 1u << 10, /**< debugger and engine reinitialization mode */
 } jerry_debugger_flags_t;
+
+/**
+ * Set debugger flags.
+ */
+#define JERRY_DEBUGGER_SET_FLAGS(flags) \
+  JERRY_CONTEXT (debugger_flags) = (JERRY_CONTEXT (debugger_flags) | (uint32_t) (flags))
+
+/**
+ * Clear debugger flags.
+ */
+#define JERRY_DEBUGGER_CLEAR_FLAGS(flags) \
+  JERRY_CONTEXT (debugger_flags) = (JERRY_CONTEXT (debugger_flags) & (uint32_t) ~(flags))
+
+/**
+ * Set and clear debugger flags.
+ */
+#define JERRY_DEBUGGER_UPDATE_FLAGS(flags_to_set, flags_to_clear) \
+  JERRY_CONTEXT (debugger_flags) = ((JERRY_CONTEXT (debugger_flags) | (uint32_t) (flags_to_set)) \
+                                    & (uint32_t) ~(flags_to_clear))
 
 /**
  * Types for the package.
@@ -86,7 +132,9 @@ typedef enum
 typedef enum
 {
   /* Messages sent by the server to client. */
+  /* This is a handshake message, sent once during initialization. */
   JERRY_DEBUGGER_CONFIGURATION = 1, /**< debugger configuration */
+  /* These messages are sent by the parser. */
   JERRY_DEBUGGER_PARSE_ERROR = 2, /**< parse error */
   JERRY_DEBUGGER_BYTE_CODE_CP = 3, /**< byte code compressed pointer */
   JERRY_DEBUGGER_PARSE_FUNCTION = 4, /**< parsing a new function */
@@ -98,18 +146,23 @@ typedef enum
   JERRY_DEBUGGER_SOURCE_CODE_NAME_END = 10, /**< source code name last fragment */
   JERRY_DEBUGGER_FUNCTION_NAME = 11, /**< function name fragment */
   JERRY_DEBUGGER_FUNCTION_NAME_END = 12, /**< function name last fragment */
-  JERRY_DEBUGGER_RELEASE_BYTE_CODE_CP = 13, /**< invalidate byte code compressed pointer */
-  JERRY_DEBUGGER_MEMSTATS_RECEIVE = 14, /**< memstats sent to the client*/
-  JERRY_DEBUGGER_BREAKPOINT_HIT = 15, /**< notify breakpoint hit */
-  JERRY_DEBUGGER_EXCEPTION_HIT = 16, /**< notify exception hit */
-  JERRY_DEBUGGER_EXCEPTION_STR = 17, /**< exception string fragment */
-  JERRY_DEBUGGER_EXCEPTION_STR_END = 18, /**< exception string last fragment */
-  JERRY_DEBUGGER_BACKTRACE = 19, /**< backtrace data */
-  JERRY_DEBUGGER_BACKTRACE_END = 20, /**< last backtrace data */
-  JERRY_DEBUGGER_EVAL_RESULT = 21, /**< eval result */
-  JERRY_DEBUGGER_EVAL_RESULT_END = 22, /**< last part of eval result */
-  JERRY_DEBUGGER_EVAL_ERROR = 23, /**< eval result when an error is occured */
-  JERRY_DEBUGGER_EVAL_ERROR_END = 24, /**< last part of eval result when an error is occured */
+  JERRY_DEBUGGER_WAITING_AFTER_PARSE = 13, /**< engine waiting for a parser resume */
+  /* These messages are generic messages. */
+  JERRY_DEBUGGER_RELEASE_BYTE_CODE_CP = 14, /**< invalidate byte code compressed pointer */
+  JERRY_DEBUGGER_MEMSTATS_RECEIVE = 15, /**< memstats sent to the client */
+  JERRY_DEBUGGER_BREAKPOINT_HIT = 16, /**< notify breakpoint hit */
+  JERRY_DEBUGGER_EXCEPTION_HIT = 17, /**< notify exception hit */
+  JERRY_DEBUGGER_EXCEPTION_STR = 18, /**< exception string fragment */
+  JERRY_DEBUGGER_EXCEPTION_STR_END = 19, /**< exception string last fragment */
+  JERRY_DEBUGGER_BACKTRACE = 20, /**< backtrace data */
+  JERRY_DEBUGGER_BACKTRACE_END = 21, /**< last backtrace data */
+  JERRY_DEBUGGER_EVAL_RESULT = 22, /**< eval result */
+  JERRY_DEBUGGER_EVAL_RESULT_END = 23, /**< last part of eval result */
+  JERRY_DEBUGGER_WAIT_FOR_SOURCE = 24, /**< engine waiting for source code */
+  JERRY_DEBUGGER_OUTPUT_RESULT = 25, /**< output sent by the program to the debugger */
+  JERRY_DEBUGGER_OUTPUT_RESULT_END = 26, /**< last output result data */
+
+  JERRY_DEBUGGER_MESSAGES_OUT_MAX_COUNT, /**< number of different type of output messages by the debugger */
 
   /* Messages sent by the client to server. */
 
@@ -117,19 +170,61 @@ typedef enum
   JERRY_DEBUGGER_FREE_BYTE_CODE_CP = 1, /**< free byte code compressed pointer */
   JERRY_DEBUGGER_UPDATE_BREAKPOINT = 2, /**< update breakpoint status */
   JERRY_DEBUGGER_EXCEPTION_CONFIG = 3, /**< exception handler config */
-  JERRY_DEBUGGER_MEMSTATS = 4, /**< list memory statistics */
-  JERRY_DEBUGGER_STOP = 5, /**< stop execution */
+  JERRY_DEBUGGER_PARSER_CONFIG = 4, /**< parser config */
+  JERRY_DEBUGGER_MEMSTATS = 5, /**< list memory statistics */
+  JERRY_DEBUGGER_STOP = 6, /**< stop execution */
+  /* The following message is only available in waiting after parse mode. */
+  JERRY_DEBUGGER_PARSER_RESUME = 7, /**< stop waiting after parse */
+  /* The following four messages are only available in client switch mode. */
+  JERRY_DEBUGGER_CLIENT_SOURCE = 8, /**< first message of client source */
+  JERRY_DEBUGGER_CLIENT_SOURCE_PART = 9, /**< next message of client source */
+  JERRY_DEBUGGER_NO_MORE_SOURCES = 10, /**< no more sources notification */
+  JERRY_DEBUGGER_CONTEXT_RESET = 11, /**< context reset request */
   /* The following messages are only available in breakpoint
    * mode and they switch the engine to run mode. */
-  JERRY_DEBUGGER_CONTINUE = 6, /**< continue execution */
-  JERRY_DEBUGGER_STEP = 7, /**< next breakpoint, step into functions */
-  JERRY_DEBUGGER_NEXT = 8, /**< next breakpoint in the same context */
+  JERRY_DEBUGGER_CONTINUE = 12, /**< continue execution */
+  JERRY_DEBUGGER_STEP = 13, /**< next breakpoint, step into functions */
+  JERRY_DEBUGGER_NEXT = 14, /**< next breakpoint in the same context */
+  JERRY_DEBUGGER_FINISH = 15, /**< Continue running just after the function in the current stack frame returns */
   /* The following messages are only available in breakpoint
    * mode and this mode is kept after the message is processed. */
-  JERRY_DEBUGGER_GET_BACKTRACE = 9, /**< get backtrace */
-  JERRY_DEBUGGER_EVAL = 10, /**< first message of evaluating a string */
-  JERRY_DEBUGGER_EVAL_PART = 11, /**< next message of evaluating a string */
+  JERRY_DEBUGGER_GET_BACKTRACE = 16, /**< get backtrace */
+  JERRY_DEBUGGER_EVAL = 17, /**< first message of evaluating a string */
+  JERRY_DEBUGGER_EVAL_PART = 18, /**< next message of evaluating a string */
+
+  JERRY_DEBUGGER_MESSAGES_IN_MAX_COUNT, /**< number of different type of input messages */
 } jerry_debugger_header_type_t;
+
+/**
+ * Subtypes of eval.
+ */
+typedef enum
+{
+  JERRY_DEBUGGER_EVAL_EVAL = 0, /**< evaluate expression */
+  JERRY_DEBUGGER_EVAL_THROW = 1, /**< evaluate expression and throw the result */
+  JERRY_DEBUGGER_EVAL_ABORT = 2, /**< evaluate expression and abrot with the result */
+} jerry_debugger_eval_type_t;
+
+/**
+ * Subtypes of eval_result.
+ */
+typedef enum
+{
+  JERRY_DEBUGGER_EVAL_OK = 1, /**< eval result, no error */
+  JERRY_DEBUGGER_EVAL_ERROR = 2, /**< eval result when an error has occurred */
+} jerry_debugger_eval_result_type_t;
+
+/**
+ * Subtypes of output_result.
+ */
+typedef enum
+{
+  JERRY_DEBUGGER_OUTPUT_OK = 1, /**< output result, no error */
+  JERRY_DEBUGGER_OUTPUT_ERROR = 2, /**< output result, error */
+  JERRY_DEBUGGER_OUTPUT_WARNING = 3, /**< output result, warning */
+  JERRY_DEBUGGER_OUTPUT_DEBUG = 4, /**< output result, debug */
+  JERRY_DEBUGGER_OUTPUT_TRACE = 5, /**< output result, trace */
+} jerry_debugger_output_subtype_t;
 
 /**
  * Delayed free of byte code data.
@@ -145,11 +240,11 @@ typedef struct
  */
 typedef struct
 {
-  jerry_debugger_send_header_t header; /**< message header */
   uint8_t type; /**< type of the message */
   uint8_t max_message_size; /**< maximum incoming message size */
   uint8_t cpointer_size; /**< size of compressed pointers */
   uint8_t little_endian; /**< little endian machine */
+  uint8_t version; /**< debugger version */
 } jerry_debugger_send_configuration_t;
 
 /**
@@ -157,7 +252,6 @@ typedef struct
  */
 typedef struct
 {
-  jerry_debugger_send_header_t header; /**< message header */
   uint8_t type; /**< type of the message */
 } jerry_debugger_send_type_t;
 
@@ -174,9 +268,8 @@ typedef struct
  */
 typedef struct
 {
-  jerry_debugger_send_header_t header; /**< message header */
   uint8_t type; /**< type of the message */
-  uint8_t string[JERRY_DEBUGGER_SEND_MAX (uint8_t)]; /**< string data */
+  uint8_t string[]; /**< string data */
 } jerry_debugger_send_string_t;
 
 /**
@@ -184,7 +277,6 @@ typedef struct
  */
 typedef struct
 {
-  jerry_debugger_send_header_t header; /**< message header */
   uint8_t type; /**< type of the message */
   uint8_t line[sizeof (uint32_t)]; /**< value data */
   uint8_t column[sizeof (uint32_t)]; /**< value data */
@@ -195,7 +287,6 @@ typedef struct
  */
 typedef struct
 {
-  jerry_debugger_send_header_t header; /**< message header */
   uint8_t type; /**< type of the message */
   uint8_t byte_code_cp[sizeof (jmem_cpointer_t)]; /**< byte code compressed pointer */
 } jerry_debugger_send_byte_code_cp_t;
@@ -225,7 +316,6 @@ typedef struct
  */
 typedef struct
 {
-  jerry_debugger_send_header_t header; /**< message header */
   uint8_t type; /**< type of the message */
   uint8_t allocated_bytes[sizeof (uint32_t)]; /**< allocated bytes */
   uint8_t byte_code_bytes[sizeof (uint32_t)]; /**< byte code bytes */
@@ -239,7 +329,6 @@ typedef struct
  */
 typedef struct
 {
-  jerry_debugger_send_header_t header; /**< message header */
   uint8_t type; /**< type of the message */
   uint8_t byte_code_cp[sizeof (jmem_cpointer_t)]; /**< byte code compressed pointer */
   uint8_t offset[sizeof (uint32_t)]; /**< breakpoint offset */
@@ -259,16 +348,27 @@ typedef struct
  */
 typedef struct
 {
-  jerry_debugger_send_header_t header; /**< message header */
   uint8_t type; /**< type of the message */
-  jerry_debugger_frame_t frames[JERRY_DEBUGGER_SEND_MAX (jerry_debugger_frame_t)]; /**< frames */
+  jerry_debugger_frame_t frames[]; /**< frames */
 } jerry_debugger_send_backtrace_t;
 
+/**
+ * Incoming message: set behaviour when exception occures.
+ */
 typedef struct
 {
   uint8_t type; /**< type of the message */
   uint8_t enable; /**< non-zero: enable stop at exception */
 } jerry_debugger_receive_exception_config_t;
+
+/**
+ * Incoming message: set parser configuration.
+ */
+typedef struct
+{
+  uint8_t type; /**< type of the message */
+  uint8_t enable_wait; /**< non-zero: wait after parsing is completed */
+} jerry_debugger_receive_parser_config_t;
 
 /**
  * Incoming message: get backtrace.
@@ -289,37 +389,32 @@ typedef struct
 } jerry_debugger_receive_eval_first_t;
 
 /**
- * Incoming message: next message of evaluating expression.
+ * Incoming message: first message of client source.
  */
 typedef struct
 {
   uint8_t type; /**< type of the message */
-} jerry_debugger_receive_eval_part_t;
-
-/**
- * Data for evaluating expressions
- */
-typedef struct
-{
-  uint32_t eval_size; /**< total size of the eval string */
-  uint32_t eval_offset; /**< current offset in the eval string */
-} jerry_debugger_eval_data_t;
+  uint8_t code_size[sizeof (uint32_t)]; /**< total size of the message */
+} jerry_debugger_receive_client_source_first_t;
 
 void jerry_debugger_free_unreferenced_byte_code (void);
 
+void jerry_debugger_sleep (void);
+
 bool jerry_debugger_process_message (uint8_t *recv_buffer_p, uint32_t message_size,
-                                     bool *resume_exec_p, uint8_t *expected_message_p, void **message_data_p);
+                                     bool *resume_exec_p, uint8_t *expected_message_p,
+                                     jerry_debugger_uint8_data_t **message_data_p);
 void jerry_debugger_breakpoint_hit (uint8_t message_type);
 
 void jerry_debugger_send_type (jerry_debugger_header_type_t type);
 bool jerry_debugger_send_configuration (uint8_t max_message_size);
 void jerry_debugger_send_data (jerry_debugger_header_type_t type, const void *data, size_t size);
-bool jerry_debugger_send_string (uint8_t message_type, const uint8_t *string_p, size_t string_length);
+bool jerry_debugger_send_string (uint8_t message_type, uint8_t sub_type, const uint8_t *string_p, size_t string_length);
 bool jerry_debugger_send_function_cp (jerry_debugger_header_type_t type, ecma_compiled_code_t *compiled_code_p);
 bool jerry_debugger_send_parse_function (uint32_t line, uint32_t column);
 void jerry_debugger_send_memstats (void);
-bool jerry_debugger_send_exception_string (ecma_value_t exception_value);
+bool jerry_debugger_send_exception_string (void);
 
 #endif /* JERRY_DEBUGGER */
 
-#endif /* DEBUGGER_H */
+#endif /* !DEBUGGER_H */

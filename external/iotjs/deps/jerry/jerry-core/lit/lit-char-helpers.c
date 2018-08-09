@@ -226,6 +226,14 @@ lit_char_is_identifier_start (const uint8_t *src_p) /**< pointer to a vaild UTF8
     return lit_char_is_identifier_start_character (*src_p);
   }
 
+  /* ECMAScript 2015 specification allows some code points in supplementary plane.
+   * However, we don't permit characters in supplementary characters as start of identifier.
+   */
+  if ((*src_p & LIT_UTF8_4_BYTE_MASK) == LIT_UTF8_4_BYTE_MARKER)
+  {
+    return false;
+  }
+
   return lit_char_is_identifier_start_character (lit_utf8_peek_next (src_p));
 } /* lit_char_is_identifier_start */
 
@@ -260,6 +268,14 @@ lit_char_is_identifier_part (const uint8_t *src_p) /**< pointer to a vaild UTF8 
   if (*src_p <= LIT_UTF8_1_BYTE_CODE_POINT_MAX)
   {
     return lit_char_is_identifier_part_character (*src_p);
+  }
+
+  /* ECMAScript 2015 specification allows some code points in supplementary plane.
+   * However, we don't permit characters in supplementary characters as part of identifier.
+   */
+  if ((*src_p & LIT_UTF8_4_BYTE_MASK) == LIT_UTF8_4_BYTE_MARKER)
+  {
+    return false;
   }
 
   return lit_char_is_identifier_part_character (lit_utf8_peek_next (src_p));
@@ -371,7 +387,6 @@ lit_char_to_utf8_bytes (uint8_t *dst_p, /**< destination buffer */
     return 2;
   }
 
-  JERRY_ASSERT (!(chr & ~LIT_UTF8_3_BYTE_CODE_POINT_MAX));
   /* zzzzyyyy yyxxxxxx -> 1110zzzz 10yyyyyy 10xxxxxx */
   *(dst_p++) = (uint8_t) (LIT_UTF8_3_BYTE_MARKER | ((chr >> 12) & LIT_UTF8_LAST_4_BITS_MASK));
   *(dst_p++) = (uint8_t) (LIT_UTF8_EXTRA_BYTE_MARKER | ((chr >> 6) & LIT_UTF8_LAST_6_BITS_MASK));
@@ -400,7 +415,6 @@ lit_char_get_utf8_length (ecma_char_t chr) /**< EcmaScript character */
   }
 
   /* zzzzyyyy yyxxxxxx */
-  JERRY_ASSERT (!(chr & ~LIT_UTF8_3_BYTE_CODE_POINT_MAX));
   return 3;
 } /* lit_char_get_utf8_length */
 

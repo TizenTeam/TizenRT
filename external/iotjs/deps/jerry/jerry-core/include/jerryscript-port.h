@@ -20,6 +20,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "jerryscript-compiler.h"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -62,7 +64,7 @@ typedef enum
  *
  * Example: a libc-based port may implement this with exit() or abort(), or both.
  */
-void jerry_port_fatal (jerry_fatal_code_t code) __attribute__((noreturn));
+void JERRY_ATTR_NORETURN jerry_port_fatal (jerry_fatal_code_t code);
 
 /*
  *  I/O Port API
@@ -96,7 +98,7 @@ typedef enum
  * Example: a libc-based port may implement this with vfprintf(stderr) or
  * vfprintf(logfile), or both, depending on log level.
  */
-void jerry_port_log (jerry_log_level_t level, const char *format, ...) __attribute__ ((format (printf, 2, 3)));
+void JERRY_ATTR_FORMAT (printf, 2, 3) jerry_port_log (jerry_log_level_t level, const char *format, ...);
 
 /*
  * Date Port API
@@ -114,6 +116,12 @@ typedef struct
 /**
  * Get timezone and daylight saving data
  *
+ * Note:
+ *      This port function is called by jerry-core when
+ *      CONFIG_DISABLE_DATE_BUILTIN is _not_ defined. Otherwise this function is
+ *      not used.
+ *
+ * @param[out] tz_p time zone structure to fill.
  * @return true  - if success
  *         false - otherwise
  */
@@ -121,6 +129,12 @@ bool jerry_port_get_time_zone (jerry_time_zone_t *tz_p);
 
 /**
  * Get system time
+ *
+ * Note:
+ *      This port function is called by jerry-core when
+ *      CONFIG_DISABLE_DATE_BUILTIN is _not_ defined. It is also common practice
+ *      in application code to use this function for the initialization of the
+ *      random number generator.
  *
  * @return milliseconds since Unix epoch
  */
@@ -130,13 +144,25 @@ double jerry_port_get_current_time (void);
  * Get the current instance which contains the current context, heap and other
  * structures. Each port should provide its own implementation of this interface.
  *
- *Note:
- *    This port function is called by jerry-core when JERRY_ENABLE_EXTERNAL_CONTEXT
- *    is defined. Otherwise this function is not used.
+ * Note:
+ *      This port function is called by jerry-core when
+ *      JERRY_ENABLE_EXTERNAL_CONTEXT is defined. Otherwise this function is not
+ *      used.
  *
  * @return the pointer to the jerry instance.
  */
 struct jerry_instance_t *jerry_port_get_current_instance (void);
+
+/**
+ * Makes the process sleep for a given time.
+ *
+ * Note:
+ *      This port function is called by jerry-core when JERRY_DEBUGGER is
+ *      defined. Otherwise this function is not used.
+ *
+ * @param sleep_time milliseconds to sleep.
+ */
+void jerry_port_sleep (uint32_t sleep_time);
 
 /**
  * @}

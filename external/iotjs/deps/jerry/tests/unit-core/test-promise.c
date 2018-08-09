@@ -18,7 +18,6 @@
 #include "jerryscript-port-default.h"
 #include "test-common.h"
 
-#ifndef CONFIG_DISABLE_ES2015_PROMISE_BUILTIN
 
 const char *test_source = (
                            "var p1 = create_promise1();"
@@ -119,15 +118,26 @@ main (void)
 {
   jerry_init (JERRY_INIT_EMPTY);
 
+  if (!jerry_is_feature_enabled (JERRY_FEATURE_PROMISE))
+  {
+    jerry_port_log (JERRY_LOG_LEVEL_ERROR, "Promise is disabled!\n");
+    jerry_cleanup ();
+    return 0;
+  }
+
   register_js_function ("create_promise1", create_promise1_handler);
   register_js_function ("create_promise2", create_promise2_handler);
   register_js_function ("assert", assert_handler);
 
-  jerry_value_t parsed_code_val = jerry_parse ((jerry_char_t *) test_source, strlen (test_source), false);
-  TEST_ASSERT (!jerry_value_has_error_flag (parsed_code_val));
+  jerry_value_t parsed_code_val = jerry_parse (NULL,
+                                               0,
+                                               (jerry_char_t *) test_source,
+                                               strlen (test_source),
+                                               JERRY_PARSE_NO_OPTS);
+  TEST_ASSERT (!jerry_value_is_error (parsed_code_val));
 
   jerry_value_t res = jerry_run (parsed_code_val);
-  TEST_ASSERT (!jerry_value_has_error_flag (res));
+  TEST_ASSERT (!jerry_value_is_error (res));
 
   jerry_release_value (res);
   jerry_release_value (parsed_code_val);
@@ -152,7 +162,7 @@ main (void)
   /* Run the jobqueue. */
   res = jerry_run_all_enqueued_jobs ();
 
-  TEST_ASSERT (!jerry_value_has_error_flag (res));
+  TEST_ASSERT (!jerry_value_is_error (res));
   TEST_ASSERT (count_in_assert == 2);
 
   jerry_release_value (my_promise1);
@@ -161,14 +171,6 @@ main (void)
   jerry_release_value (str_reject);
 
   jerry_cleanup ();
-} /* main */
 
-#else /* CONFIG_DISABLE_ES2015_PROMISE_BUILTIN */
-
-int
-main (void)
-{
   return 0;
 } /* main */
-
-#endif /* !CONFIG_DISABLE_ES2015_PROMISE_BUILTIN */

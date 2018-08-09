@@ -105,17 +105,20 @@ typedef enum
   VM_OC_NONE,                    /**< do nothing */
   VM_OC_POP,                     /**< pop from stack */
   VM_OC_POP_BLOCK,               /**< pop block */
-  VM_OC_PUSH,                    /**< push one element  */
-  VM_OC_PUSH_TWO,                /**< push two elements onto the stack */
-  VM_OC_PUSH_THREE,              /**< push three elements onto the stack */
+  VM_OC_PUSH,                    /**< push one literal  */
+  VM_OC_PUSH_TWO,                /**< push two literals */
+  VM_OC_PUSH_THREE,              /**< push three literals */
   VM_OC_PUSH_UNDEFINED,          /**< push undefined value */
   VM_OC_PUSH_TRUE,               /**< push true value */
   VM_OC_PUSH_FALSE,              /**< push false value */
   VM_OC_PUSH_NULL,               /**< push null value */
   VM_OC_PUSH_THIS,               /**< push this */
-  VM_OC_PUSH_NUMBER_0,           /**< push number zero */
-  VM_OC_PUSH_NUMBER_POS_BYTE,    /**< push number between 1 and 256 */
-  VM_OC_PUSH_NUMBER_NEG_BYTE,    /**< push number between -1 and -256 */
+  VM_OC_PUSH_0,                  /**< push number zero */
+  VM_OC_PUSH_POS_BYTE,           /**< push number between 1 and 256 */
+  VM_OC_PUSH_NEG_BYTE,           /**< push number between -1 and -256 */
+  VM_OC_PUSH_LIT_0,              /**< push literal and number zero */
+  VM_OC_PUSH_LIT_POS_BYTE,       /**< push literal and number between 1 and 256 */
+  VM_OC_PUSH_LIT_NEG_BYTE,       /**< push literal and number between -1 and -256 */
   VM_OC_PUSH_OBJECT,             /**< push object */
   VM_OC_SET_PROPERTY,            /**< set property */
   VM_OC_SET_GETTER,              /**< set getter */
@@ -203,8 +206,10 @@ typedef enum
   VM_OC_FINALLY,                 /**< finally */
   VM_OC_CONTEXT_END,             /**< context end */
   VM_OC_JUMP_AND_EXIT_CONTEXT,   /**< jump and exit context */
-  VM_OC_BREAKPOINT_ENABLED,       /**< enabled breakpoint for debugger */
-  VM_OC_BREAKPOINT_DISABLED,      /**< disabled breakpoint for debugger */
+  VM_OC_BREAKPOINT_ENABLED,      /**< enabled breakpoint for debugger */
+  VM_OC_BREAKPOINT_DISABLED,     /**< disabled breakpoint for debugger */
+  VM_OC_RESOURCE_NAME,           /**< resource name of the current function */
+  VM_OC_LINE,                    /**< line number of the next statement */
 } vm_oc_types;
 
 /**
@@ -285,6 +290,8 @@ ecma_value_t vm_run (const ecma_compiled_code_t *bytecode_header_p, ecma_value_t
 
 bool vm_is_strict_mode (void);
 bool vm_is_direct_eval_form_call (void);
+
+ecma_value_t vm_get_backtrace (uint32_t max_depth);
 
 /**
  * @}

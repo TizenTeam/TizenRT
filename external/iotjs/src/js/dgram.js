@@ -15,8 +15,7 @@
 
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
-
-var UDP = process.binding(process.binding.udp);
+var Udp = require('udp');
 
 var BIND_STATE_UNBOUND = 0;
 var BIND_STATE_BINDING = 1;
@@ -40,7 +39,7 @@ function lookup4(address, callback) {
 
 function newHandle(type) {
   if (type == 'udp4') {
-    var handle = new UDP();
+    var handle = new Udp();
     handle.lookup = lookup4;
     return handle;
   }
@@ -103,8 +102,6 @@ Socket.prototype.bind = function(port, address, callback) {
 
   this._bindState = BIND_STATE_BINDING;
 
-  var address;
-
   if (util.isFunction(port)) {
     callback = port;
     port = 0;
@@ -139,7 +136,7 @@ Socket.prototype.bind = function(port, address, callback) {
 
     self._handle._reuseAddr = self._reuseAddr;
 
-    var err = self._handle.bind(ip, port | 0);
+    err = self._handle.bind(ip, port | 0);
     if (err) {
       var ex = util.exceptionWithHostPort(err, 'bind', ip, port);
       self.emit('error', ex);
@@ -152,7 +149,7 @@ Socket.prototype.bind = function(port, address, callback) {
   });
 
   return self;
-}
+};
 
 
 // thin wrapper around `send`, here for compatibility with dgram_legacy.js
@@ -242,11 +239,11 @@ Socket.prototype.send = function(buffer, offset, length, port, address,
 
   if (!util.isArray(buffer)) {
     if (util.isString(buffer)) {
-      list = [ new Buffer(buffer) ];
+      list = [new Buffer(buffer)];
     } else if (!util.isBuffer(buffer)) {
       throw new TypeError('First argument must be a buffer or a string');
     } else {
-      list = [ buffer ];
+      list = [buffer];
     }
   } else if (!(list = fixBufferList(buffer))) {
     throw new TypeError('Buffer list arguments must be buffers or strings');
@@ -298,7 +295,7 @@ function doSend(ex, self, ip, list, address, port, callback) {
 
   var buf = Buffer.concat(list);
 
-  var err = self._handle.send(buf, port, ip, function (err, length) {
+  var err = self._handle.send(buf, port, ip, function(err, length) {
     if (err) {
       err = util.exceptionWithHostPort(err, 'send', address, port);
     } else {
@@ -312,7 +309,7 @@ function doSend(ex, self, ip, list, address, port, callback) {
 
   if (err && callback) {
     // don't emit as error, dgram_legacy.js compatibility
-    var ex = exceptionWithHostPort(err, 'send', address, port);
+    ex = util.exceptionWithHostPort(err, 'send', address, port);
     process.nextTick(callback, ex);
   }
 }
@@ -448,7 +445,7 @@ Socket.prototype._stopReceiving = function() {
 function onMessage(nread, handle, buf, rinfo) {
   var self = handle.owner;
   if (nread < 0) {
-    return self.emit('error', errnoException(nread, 'recvmsg'));
+    return self.emit('error', util.errnoException(nread, 'recvmsg'));
   }
 
   rinfo.size = buf.length; // compatibility

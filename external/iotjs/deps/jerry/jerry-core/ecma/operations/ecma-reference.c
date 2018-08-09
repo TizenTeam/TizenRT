@@ -83,8 +83,7 @@ ecma_op_resolve_reference_value (ecma_object_t *lex_env_p, /**< starting lexical
     }
     else
     {
-      JERRY_ASSERT (ecma_get_lex_env_type (lex_env_p) == ECMA_LEXICAL_ENVIRONMENT_OBJECT_BOUND
-                    || ecma_get_lex_env_type (lex_env_p) == ECMA_LEXICAL_ENVIRONMENT_THIS_OBJECT_BOUND);
+      JERRY_ASSERT (ecma_get_lex_env_type (lex_env_p) == ECMA_LEXICAL_ENVIRONMENT_THIS_OBJECT_BOUND);
 
       ecma_object_t *binding_obj_p = ecma_get_lex_env_binding_object (lex_env_p);
 
@@ -105,7 +104,7 @@ ecma_op_resolve_reference_value (ecma_object_t *lex_env_p, /**< starting lexical
 
         if (getter_p == NULL)
         {
-          return ecma_make_simple_value (ECMA_SIMPLE_VALUE_UNDEFINED);
+          return ECMA_VALUE_UNDEFINED;
         }
 
         ecma_value_t base_value = ecma_make_object_value (binding_obj_p);

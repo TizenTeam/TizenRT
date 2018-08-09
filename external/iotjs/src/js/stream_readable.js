@@ -14,9 +14,8 @@
  */
 
 
-var Stream = require('stream').Stream;
+var Stream = require('stream_internal');
 var util = require('util');
-var assert = require('assert');
 
 
 function ReadableState(options) {
@@ -38,7 +37,7 @@ function ReadableState(options) {
 
   // become `true` just before emit 'end' event.
   this.endEmitted = false;
-};
+}
 
 
 function Readable(options) {
@@ -49,7 +48,7 @@ function Readable(options) {
   this._readableState = new ReadableState(options);
 
   Stream.call(this);
-};
+}
 
 util.inherits(Readable, Stream);
 
@@ -68,10 +67,6 @@ Readable.prototype.read = function(n) {
     res = readBuffer(this, n);
   } else {
     res = null;
-  }
-
-  if (state.ended && state.length == 0) {
-    emitEnd(this);
   }
 
   return res;
@@ -106,9 +101,7 @@ Readable.prototype.resume = function() {
   var state = this._readableState;
   if (!state.flowing) {
     state.flowing = true;
-    if (state.length > 0) {
-      emitData(this, readBuffer(this));
-    }
+    this.read();
   }
   return this;
 };
@@ -122,7 +115,7 @@ Readable.prototype.error = function(error) {
 Readable.prototype.push = function(chunk, encoding) {
   var state = this._readableState;
 
-  if (util.isNull(chunk)) {
+  if (chunk === null) {
     onEof(this);
   } else if (!util.isString(chunk) &&
              !util.isBuffer(chunk)) {
@@ -159,12 +152,13 @@ function readBuffer(stream, n) {
     res = Buffer.concat(state.buffer);
     state.buffer = [];
     state.length = 0;
+    emitData(stream, res);
   } else {
     throw new Error('not implemented');
   }
 
   return res;
-};
+}
 
 
 function emitEnd(stream) {
@@ -177,19 +171,20 @@ function emitEnd(stream) {
     state.endEmitted = true;
     stream.emit('end');
   }
-};
+}
 
 
 function emitData(stream, data) {
   var state = stream._readableState;
 
-  assert.equal(readBuffer(stream), null);
-  stream.emit('data', data);
+  if (state.buffer.length === 0 || state.length === 0) {
+    stream.emit('data', data);
+  }
 
   if (state.ended && state.length == 0) {
     emitEnd(stream);
   }
-};
+}
 
 
 function onEof(stream) {
@@ -200,7 +195,7 @@ function onEof(stream) {
   if (state.length == 0) {
     emitEnd(stream);
   }
-};
+}
 
 
 module.exports = Readable;

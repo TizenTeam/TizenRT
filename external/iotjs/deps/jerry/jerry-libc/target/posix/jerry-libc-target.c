@@ -48,7 +48,7 @@ long int syscall_3 (long int syscall_no, long int arg1, long int arg2, long int 
 /**
  * Exit - cause normal process termination with specified status code
  */
-void __attr_noreturn___ __attr_used___
+void __attr_weak___ __attr_noreturn___ __attr_used___
 exit (int status) /**< status code */
 {
 #ifdef ENABLE_INIT_FINI
@@ -71,7 +71,7 @@ exit (int status) /**< status code */
  * Abort current process, producing an abnormal program termination.
  * The function raises the SIGABRT signal.
  */
-void __attr_noreturn___ __attr_used___
+void __attr_weak___ __attr_noreturn___ __attr_used___
 abort (void)
 {
   syscall_1 (SYSCALL_NO (close), (long int) stdin);
@@ -88,9 +88,12 @@ abort (void)
 
 /**
  * Send a signal to the current process.
+ *
+ * @return 0 - upon successful completion,
+ *         non-zero value - otherwise.
  */
-int __attr_used___
-raise (int sig)
+int __attr_weak___ __attr_used___
+raise (int sig) /**< signal number */
 {
   return (int) syscall_2 (SYSCALL_NO (kill), syscall_0 (SYSCALL_NO (getpid)), sig);
 } /* raise */
@@ -99,9 +102,9 @@ raise (int sig)
  * fopen
  *
  * @return FILE pointer - upon successful completion,
- *         NULL - otherwise
+ *         NULL - otherwise.
  */
-FILE *
+FILE * __attr_weak___
 fopen (const char *path, /**< file path */
        const char *mode) /**< file open mode */
 {
@@ -110,16 +113,25 @@ fopen (const char *path, /**< file path */
   bool truncate = false;
   bool create_if_not_exist = false;
   bool position_at_end = false;
+  int modifier_position = 1;
 
   assert (path != NULL && mode != NULL);
-  assert (mode[1] == '+' || mode[1] == '\0');
+  assert (mode[1] == '\0'
+          || (mode[1] == '+' && mode[2] == '\0')
+          || (mode[1] == 'b' && mode[2] == '\0')
+          || (mode[1] == 'b' && mode[2] == '+' && mode[3] == '\0'));
+
+  if (mode[1] == 'b')
+  {
+    modifier_position = 2;
+  }
 
   switch (mode[0])
   {
     case 'r':
     {
       may_read = true;
-      may_write = (mode[1] == '+');
+      may_write = (mode[modifier_position] == '+');
       break;
     }
     case 'w':
@@ -127,7 +139,7 @@ fopen (const char *path, /**< file path */
       may_write = true;
       truncate = true;
       create_if_not_exist = true;
-      may_read = (mode[1] == '+');
+      may_read = (mode[modifier_position] == '+');
       break;
     }
     case 'a':
@@ -135,7 +147,7 @@ fopen (const char *path, /**< file path */
       may_write = true;
       position_at_end = true;
       create_if_not_exist = true;
-      if (mode[1] == '+')
+      if (mode[modifier_position] == '+')
       {
         assert (false && "unsupported mode a+");
       }
@@ -190,7 +202,7 @@ fopen (const char *path, /**< file path */
  * @return 0 - upon successful completion,
  *         non-zero value - otherwise.
  */
-int
+int __attr_weak___
 fclose (FILE *fp) /**< stream pointer */
 {
   syscall_2 (SYSCALL_NO (close), (long int) fp, 0);
@@ -203,7 +215,7 @@ fclose (FILE *fp) /**< stream pointer */
  *
  * @return number of elements read
  */
-size_t
+size_t __attr_weak___
 fread (void *ptr, /**< address of buffer to read to */
        size_t size, /**< size of elements to read */
        size_t nmemb, /**< number of elements to read */
@@ -236,7 +248,7 @@ fread (void *ptr, /**< address of buffer to read to */
  *
  * @return number of elements written
  */
-size_t
+size_t __attr_weak___
 fwrite (const void *ptr, /**< data to write */
         size_t size, /**< size of elements to write */
         size_t nmemb, /**< number of elements */
@@ -268,52 +280,9 @@ fwrite (const void *ptr, /**< data to write */
  *
  * @return 0 if success, -1 otherwise
  */
-int
+int __attr_weak___
 gettimeofday (void *tp,  /**< struct timeval */
               void *tzp) /**< struct timezone */
 {
   return (int) syscall_2 (SYSCALL_NO (gettimeofday), (long int) tp, (long int) tzp);
 } /* gettimeofday */
-
-/* FIXME */
-#if 0
-/**
- * Setup new memory limits
- */
-void
-jrt_set_mem_limits (size_t data_size, /**< limit for data + bss + brk heap */
-                    size_t stack_size) /**< limit for stack */
-{
-  struct
-  {
-    unsigned long long rlim_cur;
-    unsigned long long rlim_max;
-  } data_limit = { data_size, data_size };
-
-  struct
-  {
-    unsigned long long rlim_cur;
-    unsigned long long rlim_max;
-  } stack_limit = { stack_size, stack_size };
-
-  long int ret;
-
-#if defined (__TARGET_HOST_x64)
-  ret = syscall_2 (SYSCALL_NO (setrlimit), RLIMIT_DATA, (intptr_t) &data_limit);
-  assert (ret == 0);
-
-  ret = syscall_2 (SYSCALL_NO (setrlimit), RLIMIT_STACK, (intptr_t) &stack_limit);
-  assert (ret == 0);
-#elif defined (__TARGET_HOST_ARMv7)
-  ret = syscall_3 (SYSCALL_NO (prlimit64), 0, RLIMIT_DATA, (intptr_t) &data_limit);
-  assert (ret == 0);
-
-  ret = syscall_3 (SYSCALL_NO (prlimit64), 0, RLIMIT_STACK, (intptr_t) &stack_limit);
-  assert (ret == 0);
-#elif defined (__TARGET_HOST_x86)
-# error "__TARGET_HOST_x86 case is not implemented"
-#else /* !__TARGET_HOST_x64 && !__TARGET_HOST_ARMv7 && !__TARGET_HOST_x86 */
-# error "!__TARGET_HOST_x64 && !__TARGET_HOST_ARMv7 && !__TARGET_HOST_x86"
-#endif /* __TARGET_HOST_x64 */
-} /* jrt_set_mem_limits */
-#endif /* 0 */

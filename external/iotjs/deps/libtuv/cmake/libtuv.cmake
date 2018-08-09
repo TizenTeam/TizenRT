@@ -27,7 +27,7 @@ set(COMMON_SRCFILES
     ${INCLUDE_ROOT}/uv-errno.h
     ${INCLUDE_ROOT}/uv-threadpool.h
     ${INCLUDE_ROOT}/uv-version.h
-#   ${SOURCE_ROOT}/fs-poll.c
+    ${SOURCE_ROOT}/fs-poll.c
     ${SOURCE_ROOT}/heap-inl.h
     ${SOURCE_ROOT}/inet.c
     ${SOURCE_ROOT}/queue.h
@@ -57,6 +57,18 @@ set_target_properties(${TARGETLIBNAME} PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${LIB_OUT}"
     LIBRARY_OUTPUT_DIRECTORY "${LIB_OUT}"
     RUNTIME_OUTPUT_DIRECTORY "${BIN_OUT}")
+
+# build tuv shared library
+if (DEFINED CREATE_SHARED_LIB AND CREATE_SHARED_LIB STREQUAL "yes")
+  set(TARGETSHAREDLIBNAME tuv_shared)
+  add_library(${TARGETSHAREDLIBNAME} SHARED ${LIB_TUV_SRCFILES})
+  target_include_directories(${TARGETSHAREDLIBNAME} SYSTEM PRIVATE ${TARGET_INC})
+  target_include_directories(${TARGETSHAREDLIBNAME} PUBLIC ${LIB_TUV_INCDIRS})
+  set_target_properties(${TARGETSHAREDLIBNAME} PROPERTIES
+      LIBRARY_OUTPUT_DIRECTORY "${LIB_OUT}"
+      COMPILE_FLAGS -fPIC
+      OUTPUT_NAME tuv)
+endif()
 
 if(DEFINED COPY_TARGET_LIB)
   add_custom_command(TARGET ${TARGETLIBNAME} POST_BUILD

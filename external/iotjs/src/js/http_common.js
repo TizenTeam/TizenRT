@@ -14,16 +14,11 @@
  */
 
 var util = require('util');
-var HTTPParser = process.binding(process.binding.httpparser).HTTPParser;
 var IncomingMessage = require('http_incoming').IncomingMessage;
-var OutgoingMessage = require('http_outgoing').OutgoingMessage;
+var HTTPParser = require('http_parser').HTTPParser;
 
-
-
-var createHTTPParser = function() {
-  // REQUEST is the default type.
-  // For RESPONSE, use HTTPParser.reinitialize(HTTPParser.RESPONSE)
-  var parser = new HTTPParser(HTTPParser.REQUEST);
+exports.createHTTPParser = function(type) {
+  var parser = new HTTPParser(type);
   // cb during  http parsing from C side(http_parser)
   parser.OnHeaders = parserOnHeaders;
   parser.OnHeadersComplete = parserOnHeadersComplete;
@@ -32,19 +27,17 @@ var createHTTPParser = function() {
   return parser;
 };
 
-exports.createHTTPParser = createHTTPParser;
-
-
 // This is called when parsing of incoming http msg done
 function parserOnMessageComplete() {
   var stream = this.incoming;
 
-  if (stream) {
-    stream.complete = true;
-    // no more data from incoming, stream will emit 'end' event
-    stream.push(null);
+  if (!stream) {
+    return;
   }
 
+  stream.complete = true;
+  // no more data from incoming, stream will emit 'end' event
+  stream.push(null);
   stream.socket.resume();
 }
 
@@ -56,7 +49,7 @@ function parserOnHeadersComplete(info) {
 
   if (!url) {
     url = this._url;
-    this.url = "";
+    this.url = '';
   }
 
   if (!headers) {

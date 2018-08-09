@@ -17,13 +17,20 @@
 DIR="$1"
 shift
 
+VERBOSE=1
+if [ "$1" == "-q" ]
+then
+    unset VERBOSE
+    shift
+fi
+
 UNITTEST_ERROR=$DIR/unittests.failed
 UNITTEST_OK=$DIR/unittests.passed
 
 rm -f $UNITTEST_ERROR $UNITTEST_OK
 
-UNITTESTS=$(ls $DIR/unit-*)
-total=$(ls $DIR/unit-* | wc -l)
+UNITTESTS=$(find $DIR -maxdepth 1 -type f -name 'unit-*')
+total=$(find $DIR -maxdepth 1 -type f -name 'unit-*' | wc -l)
 
 if [ "$total" -eq 0 ]
 then
@@ -58,8 +65,8 @@ UNITTEST_TEMP=`mktemp unittest-out.XXXXXXXXXX`
 
 for unit_test in $UNITTESTS
 do
-    cmd_line="${unit_test#$ROOT_DIR}"
-    $unit_test &>$UNITTEST_TEMP
+    cmd_line="$RUNTIME ${unit_test#$ROOT_DIR}"
+    $RUNTIME $unit_test &>$UNITTEST_TEMP
     status_code=$?
 
     if [ $status_code -ne 0 ]
@@ -76,7 +83,7 @@ do
 
         failed=$((failed+1))
     else
-        echo "[$tested/$total] $cmd_line: PASS"
+        test $VERBOSE && echo "[$tested/$total] $cmd_line: PASS"
 
         echo "$unit_test" >> $UNITTEST_OK
 

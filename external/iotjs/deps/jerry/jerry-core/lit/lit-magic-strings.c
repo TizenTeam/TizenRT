@@ -23,7 +23,7 @@
  * @return number of the strings, if there were registered,
  *         zero - otherwise.
  */
-inline uint32_t __attr_always_inline___
+inline uint32_t JERRY_ATTR_ALWAYS_INLINE
 lit_get_magic_string_ex_count (void)
 {
   return JERRY_CONTEXT (lit_magic_string_ex_count);
@@ -108,12 +108,9 @@ lit_get_magic_string_size_block_start (lit_utf8_size_t size) /**< magic string s
 const lit_utf8_byte_t *
 lit_get_magic_string_ex_utf8 (lit_magic_string_ex_id_t id) /**< extern magic string id */
 {
-  if (JERRY_CONTEXT (lit_magic_string_ex_array) && id < JERRY_CONTEXT (lit_magic_string_ex_count))
-  {
-    return JERRY_CONTEXT (lit_magic_string_ex_array)[id];
-  }
+  JERRY_ASSERT (JERRY_CONTEXT (lit_magic_string_ex_array) && id < JERRY_CONTEXT (lit_magic_string_ex_count));
 
-  JERRY_UNREACHABLE ();
+  return JERRY_CONTEXT (lit_magic_string_ex_array)[id];
 } /* lit_get_magic_string_ex_utf8 */
 
 /**

@@ -84,7 +84,7 @@ ecma_builtin_helper_object_to_string (const ecma_value_t this_arg) /**< this arg
      'Null' or one of possible object's classes.
      The string with null character is maximum 27 characters long. */
   const lit_utf8_size_t buffer_size = 27;
-  lit_utf8_byte_t str_buffer[buffer_size];
+  JERRY_VLA (lit_utf8_byte_t, str_buffer, buffer_size);
 
   lit_utf8_byte_t *buffer_ptr = str_buffer;
 
@@ -122,7 +122,7 @@ ecma_value_t
 ecma_builtin_helper_get_to_locale_string_at_index (ecma_object_t *obj_p, /**< this object */
                                                    uint32_t index) /**< array index */
 {
-  ecma_value_t ret_value = ecma_make_simple_value (ECMA_SIMPLE_VALUE_EMPTY);
+  ecma_value_t ret_value = ECMA_VALUE_EMPTY;
   ecma_string_t *index_string_p = ecma_new_ecma_string_from_uint32 (index);
 
   ECMA_TRY_CATCH (index_value,
@@ -131,8 +131,7 @@ ecma_builtin_helper_get_to_locale_string_at_index (ecma_object_t *obj_p, /**< th
 
   if (ecma_is_value_undefined (index_value) || ecma_is_value_null (index_value))
   {
-    ecma_string_t *return_string_p = ecma_get_magic_string (LIT_MAGIC_STRING__EMPTY);
-    ret_value = ecma_make_string_value (return_string_p);
+    ret_value = ecma_make_magic_string_value (LIT_MAGIC_STRING__EMPTY);
   }
   else
   {
@@ -141,10 +140,9 @@ ecma_builtin_helper_get_to_locale_string_at_index (ecma_object_t *obj_p, /**< th
                     ret_value);
 
     ecma_object_t *index_obj_p = ecma_get_object_from_value (index_obj_value);
-    ecma_string_t *locale_string_magic_string_p = ecma_get_magic_string (LIT_MAGIC_STRING_TO_LOCALE_STRING_UL);
 
     ECMA_TRY_CATCH (to_locale_value,
-                    ecma_op_object_get (index_obj_p, locale_string_magic_string_p),
+                    ecma_op_object_get_by_magic_id (index_obj_p, LIT_MAGIC_STRING_TO_LOCALE_STRING_UL),
                     ret_value);
 
     if (ecma_op_is_callable (to_locale_value))
@@ -166,9 +164,6 @@ ecma_builtin_helper_get_to_locale_string_at_index (ecma_object_t *obj_p, /**< th
     }
 
     ECMA_FINALIZE (to_locale_value);
-
-    ecma_deref_ecma_string (locale_string_magic_string_p);
-
     ECMA_FINALIZE (index_obj_value);
   }
 
@@ -207,16 +202,15 @@ ecma_builtin_helper_object_get_properties (ecma_object_t *obj_p, /**< object */
                                                                          only_enumerable_properties,
                                                                          false);
 
-  ecma_collection_iterator_t iter;
-  ecma_collection_iterator_init (&iter, props_p);
+  ecma_value_t *ecma_value_p = ecma_collection_iterator_init (props_p);
 
-  while (ecma_collection_iterator_next (&iter))
+  while (ecma_value_p != NULL)
   {
     ecma_string_t *index_string_p = ecma_new_ecma_string_from_uint32 (index);
 
     ecma_value_t completion = ecma_builtin_helper_def_prop (new_array_p,
                                                             index_string_p,
-                                                            *iter.current_value_p,
+                                                            *ecma_value_p,
                                                             true, /* Writable */
                                                             true, /* Enumerable */
                                                             true, /* Configurable */
@@ -226,10 +220,12 @@ ecma_builtin_helper_object_get_properties (ecma_object_t *obj_p, /**< object */
 
     ecma_deref_ecma_string (index_string_p);
 
+    ecma_value_p = ecma_collection_iterator_next (ecma_value_p);
+
     index++;
   }
 
-  ecma_free_values_collection (props_p, true);
+  ecma_free_values_collection (props_p, 0);
 
   return new_array;
 } /* ecma_builtin_helper_object_get_properties */
@@ -277,7 +273,7 @@ ecma_builtin_helper_array_index_normalize (ecma_number_t index, /**< index */
     {
       if (ecma_number_is_negative (index))
       {
-        ecma_number_t index_neg = ecma_number_negate (index);
+        ecma_number_t index_neg = -index;
 
         if (index_neg > length)
         {
@@ -326,17 +322,16 @@ ecma_builtin_helper_array_concat_value (ecma_object_t *obj_p, /**< array */
                                         uint32_t *length_p, /**< [in,out] array's length */
                                         ecma_value_t value) /**< value to concat */
 {
-  ecma_value_t ret_value = ecma_make_simple_value (ECMA_SIMPLE_VALUE_EMPTY);
+  ecma_value_t ret_value = ECMA_VALUE_EMPTY;
 
   /* 5.b */
   if (ecma_is_value_object (value)
       && (ecma_object_get_class_name (ecma_get_object_from_value (value)) == LIT_MAGIC_STRING_ARRAY_UL))
   {
-    ecma_string_t *magic_string_length_p = ecma_new_ecma_length_string ();
     /* 5.b.ii */
     ECMA_TRY_CATCH (arg_len_value,
-                    ecma_op_object_get (ecma_get_object_from_value (value),
-                                        magic_string_length_p),
+                    ecma_op_object_get_by_magic_id (ecma_get_object_from_value (value),
+                                                    LIT_MAGIC_STRING_LENGTH),
                     ret_value);
     ECMA_OP_TO_NUMBER_TRY_CATCH (arg_len_number, arg_len_value, ret_value);
 
@@ -383,7 +378,6 @@ ecma_builtin_helper_array_concat_value (ecma_object_t *obj_p, /**< array */
 
     ECMA_OP_TO_NUMBER_FINALIZE (arg_len_number);
     ECMA_FINALIZE (arg_len_value);
-    ecma_deref_ecma_string (magic_string_length_p);
   }
   else
   {
@@ -406,7 +400,7 @@ ecma_builtin_helper_array_concat_value (ecma_object_t *obj_p, /**< array */
 
   if (ecma_is_value_empty (ret_value))
   {
-    ret_value = ecma_make_simple_value (ECMA_SIMPLE_VALUE_TRUE);
+    ret_value = ECMA_VALUE_TRUE;
   }
 
   return ret_value;
@@ -476,7 +470,7 @@ ecma_builtin_helper_string_index_normalize (ecma_number_t index, /**< index */
  *         - The String.prototype.indexOf routine.
  *         - The String.prototype.lastIndexOf routine.
  *
- * @return uint32_t - (last) index of search string
+ * @return ecma_value_t - (last) index of search string as an ecma-value
  */
 ecma_value_t
 ecma_builtin_helper_string_prototype_object_index_of (ecma_value_t this_arg, /**< this argument */
@@ -484,7 +478,7 @@ ecma_builtin_helper_string_prototype_object_index_of (ecma_value_t this_arg, /**
                                                       ecma_value_t arg2, /**< routine's second argument */
                                                       bool first_index) /**< routine's third argument */
 {
-  ecma_value_t ret_value = ecma_make_simple_value (ECMA_SIMPLE_VALUE_EMPTY);
+  ecma_value_t ret_value = ECMA_VALUE_EMPTY;
 
   /* 1 */
   ECMA_TRY_CATCH (check_coercible_val,
@@ -550,14 +544,14 @@ ecma_builtin_helper_string_prototype_object_index_of (ecma_value_t this_arg, /**
  *         - The ecma_builtin_helper_string_prototype_object_index_of helper routine.
  *         - The ecma_builtin_string_prototype_object_replace_match helper routine.
  *
- * @return uint32_t - the normalized value of the index
+ * @return bool - whether there is a match for the search string
  */
 bool
 ecma_builtin_helper_string_find_index (ecma_string_t *original_str_p, /**< index */
                                        ecma_string_t *search_str_p, /**< string's length */
                                        bool first_index, /**< whether search for first (t) or last (f) index */
                                        ecma_length_t start_pos, /**< start position */
-                                       ecma_length_t *ret_index_p) /**< position found in original string */
+                                       ecma_length_t *ret_index_p) /**< [out] position found in original string */
 {
   bool match_found = false;
   const ecma_length_t original_len = ecma_string_get_length (original_str_p);
@@ -677,13 +671,13 @@ ecma_builtin_helper_def_prop (ecma_object_t *obj_p, /**< object */
   prop_desc.value = value;
 
   prop_desc.is_writable_defined = true;
-  prop_desc.is_writable = writable;
+  prop_desc.is_writable = ECMA_BOOL_TO_BITFIELD (writable);
 
   prop_desc.is_enumerable_defined = true;
-  prop_desc.is_enumerable = enumerable;
+  prop_desc.is_enumerable = ECMA_BOOL_TO_BITFIELD (enumerable);
 
   prop_desc.is_configurable_defined = true;
-  prop_desc.is_configurable = configurable;
+  prop_desc.is_configurable = ECMA_BOOL_TO_BITFIELD (configurable);
 
   return ecma_op_object_define_own_property (obj_p,
                                              index_p,
