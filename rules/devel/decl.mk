@@ -68,6 +68,8 @@ iotjs_branch=sandbox/rzr/tizenrt/master
 #contents_rules+=devel/iotjs/contents
 #contents_rules+=devel/contents/example
 
+-include rules/webthing/rules.mk
+
 
 #{ devel
 #image_type=iotivity
