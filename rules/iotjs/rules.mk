@@ -36,11 +36,12 @@
 
 #TODO
 date8?=$(shell date +%Y-%m-%d -u)
+git?=git
 
 iotjs_dir?=external/iotjs
 iotjs_url?=https://github.com/Samsung/iotjs
 iotjs_branch?=master
-#iotjs_branch=release_1.0
+iotjs_tag?=release_1.0
 iotjs_profile?=tizenrt
 iotjs_kconfig?=${iotjs_dir}/config/tizenrt/Kconfig.runtime
 
@@ -55,11 +56,12 @@ ${iotjs_dir}/deps/%:  ${iotjs_dir}
 	-@ls ${iotjs_dir}/.git ${iotjs_dir}/.gitmodules
 	@ls $@ || cd ${iotjs_dir} && git submodule update --init --recursive 
 
-${iotjs_dir}: ${iotjs_dir}/.git
+${iotjs_dir}:
+	ls $@ || ${MAKE} ${iotjs_dir}/.git
 
 ${iotjs_dir}/.git:
-	rm -rf ${@D}
-	git clone -b "${iotjs_branch}" --recursive ${iotjs_url} ${@D}
+	rm -rf "${@D}"
+	git clone -b "${iotjs_branch}" --recursive "${iotjs_url}" "${@D}"
 	@ls $@
 
 ${iotjs_dir}/%: ${iotjs_dir}
@@ -79,12 +81,18 @@ iotjs/import: iotjs/del
 	${make} iotjs/prep
 	${make} iotjs/commit
 
+iotjs/download: ${iotjs_dir}/.git
+	ls $<
+
+iotjs/release:
+	${make} iotjs_branch="${iotjs_tag}" iotjs/del iotjs/download iotjs/commit
+
 iotjs/commit: ${iotjs_dir}/.git
-	cd ${iotjs_dir} && git describe --tag ${iotjs_branch}
-	cd ${<D} && git log --pretty=%cd ${iotjs_branch} --date=short HEAD~1..HEAD
-	iotjs_tag=$$(cd ${<D} && git describe --tag ${iotjs_branch}) \
+	cd "${iotjs_dir}" && git describe --tag ${iotjs_branch}
+	-cd "${<D}" && git log --pretty='%cd' ${iotjs_branch} --date=short "HEAD~1..HEAD" ||:
+	iotjs_tag=$$(cd "${<D}" && git describe --tag "${iotjs_branch}") \
 && \
-	iotjs_date8=$$(cd ${<D}  && git log --pretty='%cd' ${iotjs_branch} --date=short "HEAD~1..HEAD") \
+	iotjs_date8=$$(cd "${<D}"  && git log --pretty='%cd' "${iotjs_branch}" --date=short "HEAD~1..HEAD") \
 && \
 	${RM} -rfv \
   ${iotjs_dir}/.git \
@@ -95,8 +103,9 @@ iotjs/commit: ${iotjs_dir}/.git
 	git add -f "${iotjs_dir}" \
 && \
 	git commit -sam "\
-WIP: iotjs: Import \"$${iotjs_tag}\" ($${iotjs_date8}) \
-${iotjs_url}#${iotjs_branch} \
+WIP: iotjs: Import '$${iotjs_tag}' ($${iotjs_date8})\n\
+\n\
+Origin: ${iotjs_url}#${iotjs_branch}\n\
 "
 
 iotjs/setup/debian: /etc/debian_version
