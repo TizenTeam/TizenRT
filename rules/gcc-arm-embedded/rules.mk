@@ -31,7 +31,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 ############################################################################
-
+-include rules/gcc-arm-embedded/decl.mk
 
 ${toolchain_dir}:
 	mkdir -p ${@D}
@@ -49,5 +49,6 @@ ${toolchain_dir}/%: ${toolchain_dir}
 gcc-arm-embedded/setup: ${CC}
 	$< --version
 
-gcc-arm-embedded/setup/debian:
-	sudo apt-get install -y libc6-i386 
+gcc-arm-embedded/setup/debian: ${CC}
+	sudo apt-get install -y libc6-i386 \
+ || sudo apt-get install -y libc6
