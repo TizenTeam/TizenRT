@@ -31,6 +31,10 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 ############################################################################
+#TODO
+webthing_project ?= webthing-iotjs
+webthing_rules_dir ?= ${CURDIR}/rules/webthing
+iotjs_main ?= ${webthing_rules_dir}/index.js
 
 
 #default: rule/default
@@ -216,11 +220,19 @@ devel/contents: devel/contents/del ${contents_dir} ${contents_rules}
 #	@echo "Ready"
 ## demo
 
-#TODO
-devel/contents/example: ${contents_dir}/webthing-node
-	rm -rf ${contents_dir}/example
-	rsync -avx ${contents_dir}/webthing-node/ ${contents_dir}/example/
-	cp -av $</example/artik05x-thing.js ${contents_dir}/example/index.js
+
+devel/contents/example: webthing/contents ${contents_dir}/example/index.js
+#	rm -rf ${contents_dir}/example
+#	mkdir -p ${contents_dir}/iotjs-modules/${webthing_project}
+#	rsync -avx ${contents_dir}/${webthing_project}/ ${contents_dir}/iotjs-modules/${webthing_project}/
+#	find ${contents_dir}/ -type d -iname '.git' -exec rm -rf {} \;
+#	find ${contents_dir}/ -type d -iname 'node_modules' -exec rm -rf {} \;
+#	${MAKE} 
+	du -ks ${contents_dir}
+
+${contents_dir}/example/index.js: ${iotjs_main} ${contents_dir}
+	install -d ${@D}
+	install $< $@
 
 devel/machine/%:
 	${MAKE} -e machine=${@F} help
