@@ -59,8 +59,8 @@ defconfig?=${configs_dir}/${config_type}/defconfig
 
 configure?=${os_dir}/tools/configure.sh
 config?=${os_dir}/.config
-image?=${build_dir}/output/bin/${project}
-deploy_image?=${image}
+image_file?=${build_dir}/output/bin/${project}
+deploy_image?=${image_file}
 all+=${deploy_image}
 
 prep_files+=${os_dir}/Make.defs
