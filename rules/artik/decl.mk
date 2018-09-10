@@ -42,8 +42,8 @@ machine_family?=artik05x
 vendor_id?=0403
 product_id?=6010
 
-image=build/output/bin/tinyara_head.bin
-deploy_image=${image}-signed
+image_file=${CURDIR}/build/output/bin/tinyara_head.bin
+deploy_image=${image_file}-signed
 partition_map?=${CURDIR}/${configs_dir}/${machine_family}/scripts/partition_map.cfg
 factory_image?=${build_dir}/output/bin/factoryimage.gz
 
@@ -70,7 +70,7 @@ image_type?=hello
 machine_family?=${machine}
 config_type?=${machine}/${image_type}
 
-all+=${image} ${config} ${defconfig} ${base_defconfig}
+all+=${image_file} ${config} ${defconfig} ${base_defconfig}
 
 
 build_dir?=build/output/bin/
@@ -84,7 +84,6 @@ config_type?=${machine}/${image_type}
 config?=${os_dir}/.config
 
 image?=${project}
-elf_image?=${image}
 deploy_image?=${image}._deploy.bin
 all+=${deploy_image}
 
