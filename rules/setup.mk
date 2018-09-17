@@ -45,6 +45,7 @@ setup/os/ubuntu\
 setup/os/linuxmint\
 : rules/debian/rules.mk 
 	${make} -f $<
+	${MAKE} -f rules/gcc-arm-embedded/rules.mk gcc-arm-embedded/setup/debian
 
 setup: /etc/os-release
 	cat $<
