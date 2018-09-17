@@ -54,11 +54,6 @@ openocd_cfg=${CURDIR}/${configs_dir}/${machine_family}/scripts/${machine_family}
 cfg=${CURDIR}/build/configs/${machine_family}/scripts/${machine_family}.cfg
 
 
-signer_url?=https://developer.artik.io/downloads/artik-053s/download#
-signer_archive?=${HOME}/Downloads/ARTIK053S.zip
-signer?=${extra_dir}/ARTIK053/artik05x_codesigner
-prep_files+=${signer}
-
 bl1?=${CURDIR}/build/configs/${machine}/bin/bl1.bin
 bl2?=${CURDIR}/build/configs/${machine}/bin/bl2.bin
 sssfw?=${CURDIR}/build/configs/${machine}/bin/sssfw.bin
