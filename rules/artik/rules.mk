@@ -93,7 +93,7 @@ artik/factory: ${openocd_cfg} ${factory_image} ${partition_map}
 "
 
 #TODO
-artik/firmware: ${CURDIR}/build/configs/artik05x/artik05x_user_binary.sh ${image_file}
+artik/firmware: ${CURDIR}/build/configs/artik05x/artik05x_user_binary.sh ${image}
 	bash -x -e $< --topdir=${CURDIR}/os --board=${machine}
 
 
