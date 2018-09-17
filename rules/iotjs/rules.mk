@@ -87,6 +87,8 @@ iotjs/download: ${iotjs_dir}/.git
 iotjs/release:
 	${make} iotjs_branch="${iotjs_tag}" iotjs/del iotjs/download iotjs/commit
 
+
+
 iotjs/commit: ${iotjs_dir}/.git
 	cd "${iotjs_dir}" && git describe --tag ${iotjs_branch}
 	-cd "${<D}" && git log --pretty='%cd' ${iotjs_branch} --date=short "HEAD~1..HEAD" ||:
@@ -102,11 +104,9 @@ iotjs/commit: ${iotjs_dir}/.git
 && \
 	git add -f "${iotjs_dir}" \
 && \
-	git commit -sam "\
-WIP: iotjs: Import '$${iotjs_tag}' ($${iotjs_date8})\n\
-\n\
-Origin: ${iotjs_url}#${iotjs_branch}\n\
-"
+	msg=$$(printf "WIP: iotjs: Import '$${iotjs_tag}' ($${iotjs_date8})\n\n\nOrigin: ${iotjs_url}#${iotjs_branch}\n") \
+&& \
+	git commit -sam "$${msg}"
 
 iotjs/setup/debian: /etc/debian_version
 	sudo apt-get install -y cmake python
