@@ -54,7 +54,8 @@ static void iotjs_startup_wifi_connect(void);
 static void iotjs_startup_wifi_sta_connected(wifi_manager_result_e status)
 {
 	printf("log: %s status=0x%x\n", __FUNCTION__, status);
-	g_is_connected = true;
+	g_is_connected = ((status == WIFI_MANAGER_SUCCESS) ||
+			  (status == WIFI_MANAGER_ALREADY_CONNECTED));
 }
 
 static void iotjs_startup_wifi_sta_disconnected(wifi_manager_disconnect_e status)
@@ -99,7 +100,11 @@ static void iotjs_startup_wifi_connect(void)
 	config.ap_auth_type = (wifi_manager_ap_auth_type_e) CONFIG_EXAMPLES_IOTJS_STARTUP_WIFI_AUTH;
 	config.ap_crypto_type = (wifi_manager_ap_crypto_type_e) CONFIG_EXAMPLES_IOTJS_STARTUP_WIFI_CRYPTO;
 
-	status = wifi_manager_connect_ap(&config);
+	wifi_manager_reconnect_config_s reconfig;
+	reconfig.type = WIFI_RECONN_INTERVAL;
+	reconfig.interval = 10;
+
+	status = wifi_manager_connect_ap_config(&config, &reconfig);
 	if (status != WIFI_MANAGER_SUCCESS) {
 		printf("error: wifi_manager_connect_ap (status=0x%x)\n", status);
 	}
