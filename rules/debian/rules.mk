@@ -33,7 +33,9 @@
 ############################################################################
 
 sudo?=sudo
-make?=make
+debian_make?=make -f rules/debian/rules.mk
+
+debian/default: debian/setup
 
 debian/setup/%: /etc/os-release
 	@echo "TODO: support other OS"
@@ -42,20 +44,23 @@ debian/setup/%: /etc/os-release
 /etc/os-release:
 	@echo "TODO: Please install lsb package to guess your system"
 
+/etc/debian_version:
+	@echo "TODO: port to other OS than $@"
+	ls $@
+
 debian/setup/debian: /etc/debian_version
 	${sudo} apt-get update -y
 	${sudo} apt-get install -y git gperf libncurses5-dev flex bison
 	${sudo} apt-get install -y openocd libusb-1.0
 	${sudo} apt-get install -y genromfs time curl
 	${sudo} apt-get install -y texinfo
+	${sudo} apt-get install -y screen
 
 debian/setup/ubuntu: debian/setup/debian
 	sync
 
 debian/setup: /etc/os-release
-	cat $<
-	. ${<} && ls /etc/debian_version && ${make} debian/setup/$${ID}
-
-/etc/debian_version:
-	@echo "TODO: port to other OS than $@"
-	ls $@
+	grep "ID" "${<}"
+	. "${<}" \
+ && { [ "$${ID_LIKE}" = "" ] || ID="$${ID_LIKE}"; } \
+ && ${debian_make} debian/setup/$${ID}
