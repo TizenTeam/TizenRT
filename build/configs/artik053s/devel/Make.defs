@@ -146,7 +146,7 @@ define DOWNLOAD
 endef
 
 define OTA_IMG
-  $(TOPDIR)/../build/configs/artik05x/artik05x_ota.sh --board=artik053s --secure
+  $(TOPDIR)/../build/configs/artik05x/artik05x_ota.sh --secure
 endef
 
 define MAKE_BOARD_SPECIFIC_BIN
