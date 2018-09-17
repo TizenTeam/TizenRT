@@ -43,7 +43,8 @@ vendor_id?=0403
 product_id?=6010
 
 image=build/output/bin/tinyara_head.bin
-deploy_image=${image}-signed
+#TODO: rely on upstream scripts
+deploy_image=${image}
 partition_map?=${CURDIR}/${configs_dir}/${machine_family}/scripts/partition_map.cfg
 factory_image?=${build_dir}/output/bin/factoryimage.gz
 
