@@ -43,14 +43,8 @@ artik/help: ${configs_dir}/${machine}/README.md rules/${platform}/decl.mk rules/
 	@echo "# deploy_image=${deploy_image}"
 	@echo "# cfg=${openocd_cfg}"
 	@echo "# tty=${tty}"
-	${signer} -h
 
 ${deploy_image}: all
-
-#${image} ${signer}
-#	${signer} -sign "${<}"
-#	${signer} -verify "${@}"
-#	ls -l "$@"
 
 artik/image: ${deploy_image}
 	ls -l $^
@@ -71,30 +65,6 @@ artik/deploy/openocd/${machine}: ${openocd_cfg} ${partition_map} ${bl1} ${bl2} $
 # http://openocd.org/doc-release/html/index.html#toc-Reset-Configuration-1
 reset/%: openocd/help
 	@echo "press micron switch near to led and mcu of S05s"
-
-${signer_archive}: 
-	@echo "# Please download from:"
-	@echo "# ${signer_url}#${@F}"
-	ls $@
-
-${signer}: ${signer_archive}
-	@echo "unpack $< to $@"
-	mkdir -p ${@D} && cd ${@D} && ls $@ || unzip ${<}
-	chmod a+rx $@
-	@ls $@
-
-artik/signer: ${signer}
-	ls $<
-	-$< -h
-
-
-artik/sign: ${deploy_image}
-	ls -l "$<"
-
-${sdk}:
-	@echo "TODO: download it to: $@"
-	ls $@
-
 
 artik/partition: ${partition_map}
 	cat "$<"
