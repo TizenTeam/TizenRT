@@ -45,7 +45,9 @@ artik/help: ${configs_dir}/${machine}/README.md rules/${platform}/decl.mk rules/
 	@echo "# tty=${tty}"
 	${signer} -h
 
-#${deploy_image}: ${image} ${signer}
+${deploy_image}: all
+
+#${image} ${signer}
 #	${signer} -sign "${<}"
 #	${signer} -verify "${@}"
 #	ls -l "$@"
