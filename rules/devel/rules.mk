@@ -197,6 +197,8 @@ devel/machines: ${defconfigs}
  ${MAKE} devel/machine/$${machine} ; \
 done
 
+devel/machines/del:
+	rm -rf build/configs/*/devel
 #TODO
 demo: devel/demo
 
