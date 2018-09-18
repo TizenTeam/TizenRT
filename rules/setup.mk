@@ -31,22 +31,21 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 ############################################################################
+sudo?=sudo
 
-setup/%: /etc/os-release
+setup/os/%: /etc/os-release
 	@echo "TODO: support other OS"
 	cat $<
 
 /etc/os-release:
-	@echo "TODO: Please install lsb package to guess your system"
-sudo?=sudo
+	@echo "TODO: Please install lsb package to guess your OS"
 
-#TODO
-setup/os/debian: rules/debian/rules.mk 
+setup/os/debian
+setup/os/ubuntu\
+setup/os/linuxmint\
+: rules/debian/rules.mk 
 	${make} -f $<
-
-setup/os:
-	echo "error: os unsupported please file bugs"
 
 setup: /etc/os-release
 	cat $<
-	. ${<} && ls /etc/debian_version && ${make} setup/os/$${ID}
+	. ${<} && ${make} setup/os/$${ID}
