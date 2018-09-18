@@ -116,7 +116,7 @@ iotjs/help:
 	@echo "# iotjs_branch=${iotjs_branch}"
 
 iotjs/contents: ${iotjs_dir}/samples  ./tools/fs/contents/
-	cp -rfa $</* $@/
+	cp -rfa ${iotjs_dir}/samples  ./tools/fs/contents/
 
 ${iotjs_dir}/samples: rules/iotjs/index.js
 	mkdir -p $@
