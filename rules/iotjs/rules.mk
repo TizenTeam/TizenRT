@@ -111,3 +111,6 @@ iotjs/commit: ${iotjs_dir}/.git
 iotjs/setup/debian: /etc/debian_version
 	sudo apt-get install -y cmake python
 
+iotjs/help:
+	@echo "# iotjs_url=${iotjs_url}"
+	@echo "# iotjs_branch=${iotjs_branch}"
