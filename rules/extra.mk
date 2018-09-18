@@ -33,7 +33,7 @@
 ############################################################################
 
 # board usb
-tty?=$(shell ls /dev/ttyUSB* 2> /dev/null || echo /dev/TODO/setup/port | sort | head -n1)
+tty?=$(shell ls /dev/ttyUSB* 2> /dev/null || echo /dev/TODO/setup/port | sort | tail -n1)
 export tty
 tty_rate?=115200
 export tty_rate
