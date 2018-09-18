@@ -49,7 +49,7 @@ kconfig/setup/debian: rules/kconfig-frontends/rules.mk
 	cd ${kconfig_dir} && ./debian/rules rule/debi
 
 /usr/bin/kconfig-conf:
-	ls $@ || kconfig/setup/debian
+	ls $@ || ${MAKE} kconfig/setup/debian
 	@ls $@
 
 prep_files+=/usr/bin/kconfig-conf
