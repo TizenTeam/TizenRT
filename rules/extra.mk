@@ -69,6 +69,8 @@ configure: ${configs_dir} ${kernel}/configure
 	ls $<
 
 monitor/screen: ${tty}
+	echo "log: About to run GNU screen, to quit: type 'Ctrl+a' then 'k' "
+	sleep 10
 	screen $< ${tty_rate}
 
 monitor/picocom: ${tty}
