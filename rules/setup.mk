@@ -41,9 +41,12 @@ setup/%: /etc/os-release
 sudo?=sudo
 
 #TODO
-setup/debian:
+setup/os/debian:
 	${make} -f rules/debian/rules.sh 
+
+setup/os:
+	echo "error: os unsupported please file bugs"
 
 setup: /etc/os-release
 	cat $<
-	. ${<} && ls /etc/$${ID}_version && ${make} setup/$${ID}
+	. ${<} && ls /etc/debian_version && ${make} setup/os/$${ID}
