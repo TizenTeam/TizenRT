@@ -50,4 +50,4 @@ setup/os/linuxmint\
 
 setup: /etc/os-release
 	cat $<
-	. ${<} && ${make} setup/os/$${ID}
+	. ${<} && ${MAKE} setup/os/$${ID}
