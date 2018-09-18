@@ -114,3 +114,10 @@ iotjs/setup/debian: /etc/debian_version
 iotjs/help:
 	@echo "# iotjs_url=${iotjs_url}"
 	@echo "# iotjs_branch=${iotjs_branch}"
+
+iotjs/contents: ${iotjs_dir}/samples  ./tools/fs/contents/
+	cp -rfa $</* $@/
+
+${iotjs_dir}/samples: rules/iotjs/index.js
+	mkdir -p $@
+	cp $< $@/
