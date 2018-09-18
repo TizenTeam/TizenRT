@@ -39,6 +39,7 @@ kconfig_dir?=${CURDIR}/tmp/kconfig-frontends
 
 kconfig/setup/debian: rules/kconfig-frontends/rules.mk
 	${sudo} apt-get update -y
+	-apt-cache show kconfig-frontends && echo "TODO: install package $@" ||:
 	${sudo} apt-get install -y dh-autoreconf sudo devscripts
 	${sudo} apt-get install -y flex gperf libncurses5-dev # TODO
 	${sudo} apt-get install -y bison pkg-config
