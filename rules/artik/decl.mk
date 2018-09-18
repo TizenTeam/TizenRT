@@ -36,9 +36,10 @@
 platform?=artik
 base_image_type?=minimal
 
-url?=https://github.com/SamsungARTIK/artik-sdk
-machine?=artik053
+#url?=https://github.com/SamsungARTIK/artik-sdk
+platform?=artik
 machine_family?=artik05x
+machine?=${platform}053
 vendor_id?=0403
 product_id?=6010
 
@@ -54,26 +55,16 @@ OPENOCD_SCRIPTS=${CURDIR}/build/tools/openocd
 openocd_cfg=${CURDIR}/${configs_dir}/${machine_family}/scripts/${machine_family}.cfg
 cfg=${CURDIR}/build/configs/${machine_family}/scripts/${machine_family}.cfg
 
-
-bl1?=${CURDIR}/build/configs/${machine}/bin/bl1.bin
-bl2?=${CURDIR}/build/configs/${machine}/bin/bl2.bin
-sssfw?=${CURDIR}/build/configs/${machine}/bin/sssfw.bin
-wlanfw?=${CURDIR}/build/configs/${machine}/bin/wlanfw.bin
-os?=${CURDIR}/${deploy_image}
-
-
+#bl1?=${CURDIR}/build/configs/${machine}/bin/bl1.bin
+#bl2?=${CURDIR}/build/configs/${machine}/bin/bl2.bin
+#sssfw?=${CURDIR}/build/configs/${machine}/bin/sssfw.bin
+#wlanfw?=${CURDIR}/build/configs/${machine}/bin/wlanfw.bin
+#os?=${CURDIR}/${deploy_image}
 
 configure?=${os_dir}/tools/configure.sh
 image_type?=minimal
 image_type?=hello
-
-
-machine_family?=${machine}
 config_type?=${machine}/${image_type}
-
-all+=${image} ${config} ${defconfig} ${base_defconfig}
-
-
 build_dir?=build/output/bin/
 
 base_image_type?=minimal
@@ -84,8 +75,7 @@ defconfig?=${configs_dir}/${machine}/${image_type}/defconfig
 config_type?=${machine}/${image_type}
 config?=${os_dir}/.config
 
-image?=${project}
-deploy_image?=${image}._deploy.bin
+all+=${image} ${config} ${defconfig} ${base_defconfig}
 all+=${deploy_image}
 
 include rules/gcc-arm-embedded/decl.mk
