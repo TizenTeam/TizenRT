@@ -52,9 +52,9 @@ debian/setup/debian: /etc/debian_version
 debian/setup/ubuntu: debian/setup/debian
 	sync
 
-debiab/setup: /etc/os-release
+debian/setup: /etc/os-release
 	cat $<
-	. ${<} && ls /etc/$${ID}_version && ${make} debian/setup/$${ID}
+	. ${<} && ls /etc/debian_version && ${make} debian/setup/$${ID}
 
 /etc/debian_version:
 	@echo "TODO: port to other OS than $@"
