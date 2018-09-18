@@ -44,7 +44,7 @@ setup/os/debian\
 setup/os/ubuntu\
 setup/os/linuxmint\
 : rules/debian/rules.mk 
-	${make} -f $<
+	${MAKE} -f $<
 	${MAKE} -f rules/gcc-arm-embedded/rules.mk gcc-arm-embedded/setup/debian
 	${MAKE} /usr/bin/kconfig-conf
 
