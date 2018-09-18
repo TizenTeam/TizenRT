@@ -40,7 +40,7 @@ setup/os/%: /etc/os-release
 /etc/os-release:
 	@echo "TODO: Please install lsb package to guess your OS"
 
-setup/os/debian
+setup/os/debian\
 setup/os/ubuntu\
 setup/os/linuxmint\
 : rules/debian/rules.mk 
