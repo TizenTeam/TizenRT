@@ -60,10 +60,8 @@ export sudo
 
 # Overload external dep to be pulled
 #TODO: upstream neededchanges and set to master or released
-#iotjs_url=https://github.com/rzr/iotjs
-#iotjs_branch=master
-#iotjs_url=https://github.com/tizenteam/iotjs
-#iotjs_branch=sandbox/rzr/tizenrt/master
+iotjs_url=https://github.com/tizenteam/iotjs
+iotjs_branch=sandbox/rzr/tizenrt/master
 #iotjs_url=file://${HOME}/mnt/iotjs
 
 -include rules/iotjs/rules.mk
