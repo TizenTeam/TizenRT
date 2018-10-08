@@ -1,0 +1,37 @@
+{
+  "name": "webthing-iotjs",
+  "version": "0.7.0",
+  "description": "HTTP Web Thing implementation ported for IoT.js",
+  "main": "webthing.js",
+  "scripts": {
+    "lint": "eslint .",
+    "start": "iotjs example/multiple-things",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rzr/webthing-iotjs.git"
+  },
+  "keywords": [
+    "mozilla",
+    "iot",
+    "web",
+    "thing",
+    "webthing",
+    "iotjs",
+    "iotjs-supported",
+    "iotjs-module"
+  ],
+  "author": "Philippe Coval",
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/rzr/webthing-iotjs/issues"
+  },
+  "homepage": "https://github.com/rzr/webthing-iotjs#readme",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "babel-eslint": "^8.2.6",
+    "eslint": "^4.19.1"
+  }
+}
