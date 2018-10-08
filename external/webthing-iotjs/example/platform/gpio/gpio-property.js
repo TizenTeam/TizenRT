@@ -14,6 +14,8 @@ var console = require('console'); // Disable logs here by editing to '!console.l
 
 var log = console.log || function () {};
 
+var verbose = !console.log || function () {};
+
 var webthing;
 
 try {
@@ -30,44 +32,44 @@ var gpio = require('gpio');
 function GpioOutProperty(thing, name, value, metadata, config) {
   var _this = this;
 
-  Property.call(this, thing, name, new Value(value, function (value) {
-    _this.handleValueChanged && _this.handleValueChanged(value);
-  }), {
+  var self = this;
+  Property.call(this, thing, name, new Value(Boolean(value)), {
     '@type': 'OnOffProperty',
     label: metadata && metadata.label || "On/Off: ".concat(name),
     type: 'boolean',
     description: metadata && metadata.description || "GPIO Actuator on pin=".concat(config.pin)
   });
   {
-    _this.port = gpio.open({
+    this.config = config;
+    this.port = gpio.open({
       pin: config.pin,
       direction: gpio.DIRECTION.OUT
-    }, function (err) {
-      log("log: GPIO: ".concat(_this.getName(), ": open: ").concat(err, " (null expected)"));
+    }, function (err, port) {
+      log("log: GPIO: ".concat(self.getName(), ": open: ").concat(err));
 
       if (err) {
-        console.error("error: GPIO: ".concat(_this.getName(), ": Fail to open: ").concat(err));
+        console.error("error: GPIO: ".concat(self.getName(), ": Fail to open: ").concat(err));
         return err;
       }
 
-      _this.handleValueChanged = function (value) {
-        try {
-          log("log: GPIO: ".concat(_this.getName(), ": writing: ").concat(value));
+      self.port = port;
 
-          _this.port.write(value);
-        } catch (err) {
-          console.error("error: GPIO: ".concat(_this.getName(), ": Failed to write: ").concat(err));
-          return err;
-        }
+      self.value.valueForwarder = function (value) {
+        self.port.write(value, function (err) {
+          if (err) {
+            log("error: GPIO: ".concat(self.getName(), ": Fail to write: ").concat(err));
+            return err;
+          }
+        });
       };
     });
   }
 
   this.close = function () {
     try {
-      _this.port && _this.port.closeSync();
+      self.port && self.port.closeSync();
     } catch (err) {
-      console.error("error: GPIO: ".concat(_this.getName(), ": Fail to close: ${err}"));
+      console.error("error: GPIO: ".concat(_this.getName(), ": Fail to close: ").concat(err));
       return err;
     }
 
@@ -78,55 +80,53 @@ function GpioOutProperty(thing, name, value, metadata, config) {
 }
 
 function GpioInProperty(thing, name, value, metadata, config) {
-  var _this = this;
+  var _this2 = this;
 
-  _this.value = new Value(value, function (value) {
-    _this.handleValueChanged && _this.handleValueChanged(value);
-  });
-  Property.call(this, thing, name, _this.value, {
+  var self = this;
+  Property.call(this, thing, name, new Value(value), {
     '@type': 'BooleanProperty',
     label: metadata && metadata.label || "On/Off: ".concat(name),
     type: 'boolean',
+    readOnly: true,
     description: metadata && metadata.description || "GPIO Sensor on pin=".concat(config.pin)
   });
   {
-    _this.period = 100;
-    _this.port = gpio.open({
+    this.config = config;
+    self.period = 1000;
+    self.port = gpio.open({
       pin: config.pin,
       direction: gpio.DIRECTION.IN
     }, function (err) {
-      log("log: GPIO: ".concat(_this.getName(), ": open: ").concat(err, " (null expected)"));
+      log("log: GPIO: ".concat(self.getName(), ": open: ").concat(err, " (null expected)"));
 
       if (err) {
-        console.error("errror: GPIO: ".concat(_this.getName(), ": Fail to open"));
+        console.error("error: GPIO: ".concat(self.getName(), ": Failed to open: ").concat(err));
         return null;
       }
 
-      _this.inverval = setInterval(function () {
-        var value = _this.port.readSync(); // log("log: GPIO: " + _this.getName() + ": read: " + value);
+      self.inverval = setInterval(function () {
+        var value = Boolean(self.port.readSync());
+        verbose("log: verbose: GPIO: ".concat(self.getName(), ": update: ").concat(value));
 
-
-        if (value !== _this.lastValue) {
-          log("log: GPIO: ".concat(_this.getName(), ": change: ").concat(value));
-
-          _this.value.notifyOfExternalUpdate(value);
-
-          _this.lastValue = value;
+        if (value !== self.lastValue) {
+          log("log: GPIO: ".concat(self.getName(), ": change: ").concat(value));
+          self.value.notifyOfExternalUpdate(value);
+          self.lastValue = value;
         }
-      }, _this.period);
+      }, self.period);
     });
   }
 
-  _this.close = function () {
+  self.close = function () {
     try {
-      _this.inverval && clearInterval(_this.inverval);
-      _this.port && _this.port.closeSync();
+      self.inverval && clearInterval(self.inverval);
+      self.port && self.port.closeSync();
     } catch (err) {
-      console.error("error: GPIO: ".concat(_this.getName(), ": Fail to close"));
+      console.error("error: GPIO: ".concat(_this2.getName(), " close:").concat(err));
       return err;
     }
 
-    log("log: GPIO: ".concat(_this.getName(), ": close:"));
+    log("log: GPIO: ".concat(_this2.getName(), ": close:"));
   };
 
   return this;

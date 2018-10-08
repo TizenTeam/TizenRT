@@ -24,6 +24,7 @@ var GpioProperty = require('../gpio/gpio-property');
 function PlayPHatThing(name, type, description) {
   var _this = this;
 
+  var self = this;
   Thing.call(this, name || 'PlayPHat', type || [], description || 'A web connected Play RaspberryPi Hat');
   {
     this.gpioProperties = [new GpioProperty(this, 'Left', false, {
@@ -68,7 +69,7 @@ function PlayPHatThing(name, type, description) {
       pin: 6
     })];
     this.gpioProperties.forEach(function (property) {
-      _this.addProperty(property);
+      self.addProperty(property);
     });
   }
 

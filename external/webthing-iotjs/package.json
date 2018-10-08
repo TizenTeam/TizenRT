@@ -1,12 +1,14 @@
 {
   "name": "webthing-iotjs",
-  "version": "0.7.0",
+  "version": "0.8.1",
   "description": "HTTP Web Thing implementation ported for IoT.js",
   "main": "webthing.js",
   "scripts": {
     "lint": "eslint .",
-    "start": "iotjs example/multiple-things",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "node": "NODE_PATH=. node",
+    "start": "make start",
+    "test": "make test",
+    "simplest": "iotjs example/simplest-thing"
   },
   "repository": {
     "type": "git",
@@ -22,13 +24,19 @@
     "iotjs-supported",
     "iotjs-module"
   ],
-  "author": "Philippe Coval",
+  "author": "Philippe Coval <p.coval@samsung.com> (https://www.npmjs.com/~rzr)",
   "license": "MPL-2.0",
   "bugs": {
     "url": "https://github.com/rzr/webthing-iotjs/issues"
   },
   "homepage": "https://github.com/rzr/webthing-iotjs#readme",
   "dependencies": {
+    "@babel/cli": "^7.1.2",
+    "@babel/core": "^7.1.2",
+    "@babel/plugin-transform-arrow-functions": "^7.0.0",
+    "@babel/plugin-transform-block-scoping": "^7.0.0",
+    "@babel/plugin-transform-template-literals": "^7.0.0",
+    "@babel/preset-env": "^7.1.0"
   },
   "devDependencies": {
     "babel-eslint": "^8.2.6",

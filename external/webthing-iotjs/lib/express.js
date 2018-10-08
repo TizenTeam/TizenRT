@@ -10,7 +10,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.*
  */
+// Disable logs here by editing to '!console.log'
+var verbose = !console.log || function () {};
+
 function Express() {
+  var _this2 = this;
+
   var _this = this;
 
   this.routes = {
@@ -57,7 +62,7 @@ function Express() {
     var result = {};
     var re = /:[^/]+/g;
     var ids = pattern.match(re);
-    re = pattern.replace('/', '\/');
+    re = pattern.replace('/', '\\/');
     re = "^".concat(re, "$");
 
     for (var id in ids) {
@@ -93,8 +98,8 @@ function Express() {
       return;
     }
 
-    if (this.parse(req, pattern)) {
-      res = this.extendsServerResponse(res);
+    if (_this2.parse(req, pattern)) {
+      res = _this2.extendsServerResponse(res);
 
       if (callback) {
         callback(req, res);
@@ -104,12 +109,12 @@ function Express() {
 
   this.handleRequest = function (req, res, pattern, callback) {
     if (req.method === 'PUT') {
-      this.receive(req, function (req) {
+      _this2.receive(req, function (req) {
         _this.handlePut(req, res, pattern, callback);
       });
     } else if (req.method === 'GET') {
-      if (this.parse(req, pattern)) {
-        res = this.extendsServerResponse(res);
+      if (_this2.parse(req, pattern)) {
+        res = _this2.extendsServerResponse(res);
 
         if (callback) {
           callback(req, res);
@@ -127,6 +132,7 @@ function Express() {
   };
 
   this.request = function (req, res) {
+    verbose("log: request: ".concat(req.url));
     req.params = {};
 
     for (var pattern in _this.routes[req.method]) {
@@ -137,6 +143,6 @@ function Express() {
   };
 }
 
-module.exports = function express() {
+module.exports = function () {
   return new Express();
 };

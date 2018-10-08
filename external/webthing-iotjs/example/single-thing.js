@@ -14,13 +14,13 @@ var WebThingServer = webthing.server.WebThingServer;
 
 function makeThing() {
   var thing = new Thing('My Lamp', ['OnOffSwitch', 'Light'], 'A web connected lamp');
-  thing.addProperty(new Property(thing, 'on', new Value(true, function () {}), {
+  thing.addProperty(new Property(thing, 'on', new Value(true), {
     '@type': 'OnOffProperty',
     label: 'On/Off',
     type: 'boolean',
     description: 'Whether the lamp is turned on'
   }));
-  thing.addProperty(new Property(thing, 'brightness', new Value(50, function () {}), {
+  thing.addProperty(new Property(thing, 'brightness', new Value(50), {
     '@type': 'BrightnessProperty',
     label: 'Brightness',
     type: 'number',
