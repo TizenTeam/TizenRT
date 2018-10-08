@@ -41,7 +41,7 @@ configs_dir?=build/configs
 defconfig?=${configs_dir}/${machine}/devel/defconfig
 # TODO: Override here if needed:
 platform?=artik
-machine?=${platform}053
+machine?=${platform}055s
 base_image_type?=iotjs
 
 # Default:
