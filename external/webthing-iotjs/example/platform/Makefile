@@ -9,32 +9,43 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.*
 #}
 
+default: all
+
 main_src ?= index.js
 lib_srcs ?= $(wildcard */*.js | sort)
 runtime ?= iotjs
 topreldir ?= ../..
 topdir ?= ${CURDIR}/${topreldir}
-run_args ?= start
+run_args ?=
+npm_args ?= start
 sudo ?= sudo
+tmp_dir ?= tmp
+NODE_PATH := ${topreldir}:${NODE_PATH}
+export NODE_PATH
 
-default: check
 
 %: %/${runtime}
 	echo "# $@: $^"
 
-run/%: ${main_src} /sys/class/gpio/export
-	ls $<
+all: check
+
+setup/node: ${topreldir}/node_modules node_modules
+	@echo "NODE_PATH=$${NODE_PATH}"
+	@echo "$@: $^"
+
+setup/iotjs:
+	echo "log: IoT.js's help expected to be printed"
+	${runtime} -h ||:
+	echo "$@: $^"
+
+run/%: /sys/class/gpio/export ${main_src} setup
+	ls -l $<
 	-which ${@F}
-	${@F} $< ${run_args}
+	${@F} ${main_src} ${run_args}
 
-run/npm: ${main_src} package.json /sys/class/gpio/export
-	ls -l node_modules || ${MAKE} node_modules
-	ls -l ${topreldir}/node_modules || { cd ${topreldir} && npm install ; }
-	npm run ${run_args}
-
-run/node: ${main_src} package.json /sys/class/gpio/export
-	ls $<
-	NODE_PATH=.:${topreldir}:${topreldir}/extra ${@F} $< ${run_args}
+run/npm: /sys/class/gpio/export package.json setup
+	ls -l $<
+	npm run ${npm_args} ${run_args}
 
 run: run/${runtime}
 
@@ -52,7 +63,12 @@ node_modules: package.json
 package.json:
 	npm init
 
+${topreldir}/node_modules: ${topreldir}/package.json
+	cd ${@D} && npm install
+
+
 check/%: ${lib_srcs}
+	${MAKE} setup
 	status=0 ; \
  for src in $^; do \
  echo "log: check: $${src}: ($@)" ; \
@@ -65,18 +81,26 @@ check/%: ${lib_srcs}
 check: check/${runtime}
 
 
-artik530/%: ${main_src} /sys/class/gpio/export
-	${MAKE} run/${@F} run_args="${@D}"
+board/%: ${main_src} board/%.js /sys/class/gpio/export setup
+	${runtime} $< ${@F}
 
 flex-phat/%: ${main_src} /sys/class/gpio/export
-	-cat /proc/device-tree/hat/product
 	-gpio -v || sudo apt-get install gpio
 	gpio -g mode 11 up
 	${MAKE} run/${@F} run_args="${@D}"
 
 play-phat/%: ${main_src} /sys/class/gpio/export
-	-cat /proc/device-tree/hat/product
 	-lsmod | grep gpio_keys \
  && ${sudo} modprobe -rv gpio_keys \
  || echo "log: will use /sys/class/gpio/"
+	${MAKE} run/${@F} run_args="${@D}"
+
+traffic-phat/%: ${main_src} /sys/class/gpio/export
+	-gpio -v || sudo apt-get install gpio || echo "TODO: install BCM tool"
+	list="13 19 26" ; \
+ for num in $${list} ; do \
+ sudo gpio export $num in \
+ sudo gpio -g mode $num up \
+ sudo gpio unexport $num \
+ done
 	${MAKE} run/${@F} run_args="${@D}"

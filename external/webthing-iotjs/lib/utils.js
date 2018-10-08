@@ -10,7 +10,7 @@ module.exports = {
    * @returns {String} The current time in the form YYYY-mm-ddTHH:MM:SS+00:00
    */
   timestamp: function () {
-    var date = "YYYY-mm-ddTHH:MM:SS+00:00"; // = new Date().toString();
+    var date = 'YYYY-mm-ddTHH:MM:SS+00:00'; // TODO
 
     return date.replace(/\.\d{3}Z/, '+00:00');
   },
@@ -21,6 +21,6 @@ module.exports = {
    * @returns localhost
    */
   getIP: function () {
-    return "127.0.0.1";
+    return '127.0.0.1';
   }
 };

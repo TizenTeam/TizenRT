@@ -35,10 +35,85 @@ function Property(thing, name, value, metadata) {
     });
   }
   /**
+   * Validate new property value before setting it.
+   *
+   * @param {*} value - New value
+   */
+
+  this.validateValue = function (value) {
+    switch (_this2.metadata.type) {
+      case 'null':
+        if (value !== null) {
+          throw new Error('Value must be null');
+        }
+
+        break;
+
+      case 'boolean':
+        if (typeof value !== 'boolean') {
+          throw new Error('Value must be a boolean');
+        }
+
+        break;
+
+      case 'object':
+        if (typeof value !== 'object') {
+          throw new Error('Value must be an object');
+        }
+
+        break;
+
+      case 'array':
+        if (!Array.isArray(value)) {
+          throw new Error('Value must be an array');
+        }
+
+        break;
+
+      case 'number':
+        if (typeof value !== 'number') {
+          throw new Error('Value must be a number');
+        }
+
+        break;
+
+      case 'integer':
+        if (typeof value !== 'number' || value % 1 !== 0) {
+          throw new Error('Value must be an integer');
+        }
+
+        break;
+
+      case 'string':
+        if (typeof value !== 'string') {
+          throw new Error('Value must be a string');
+        }
+
+        break;
+    }
+
+    if (_this2.metadata.hasOwnProperty('readOnly') && _this2.metadata.readOnly) {
+      throw new Error('Read-only property');
+    }
+
+    if (_this2.metadata.hasOwnProperty('minimum') && value < _this2.metadata.minimum) {
+      throw new Error("Value less than minimum: ".concat(_this2.metadata.minimum));
+    }
+
+    if (_this2.metadata.hasOwnProperty('maximum') && value > _this2.metadata.maximum) {
+      throw new Error("Value greater than maximum: ".concat(_this2.metadata.maximum));
+    }
+
+    if (_this2.metadata.hasOwnProperty('enum') && _this2.metadata.enum.length > 0 && !_this2.metadata.enum.includes(value)) {
+      throw new Error("Invalid enum value");
+    }
+  };
+  /**
    * Get the property description.
    *
    * @returns {Object} Description of the property as an object.
    */
+
 
   this.asPropertyDescription = function () {
     var description = JSON.parse(JSON.stringify(_this2.metadata));

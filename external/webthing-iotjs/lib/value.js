@@ -23,20 +23,13 @@ function Value(initialValue, valueForwarder) {
    * Initialize the object.
    *
    * @param {*} initialValue The initial value
-   * @param {function} valueForwarder The method that updates the actual value
-   *                                  on the thing
+   * @param {function?} valueForwarder The method that updates the actual value
+   *                                   on the thing
    */
   {
     EventEmitter.call(this);
     this.lastValue = initialValue;
-
-    if (!valueForwarder) {
-      this.valueForwarder = function () {
-        throw new Error('Read-only value');
-      };
-    } else {
-      this.valueForwarder = valueForwarder;
-    }
+    this.valueForwarder = valueForwarder || null;
   }
   /**
    * Set a new value for this thing.
@@ -45,7 +38,9 @@ function Value(initialValue, valueForwarder) {
    */
 
   this.set = function (value) {
-    _this.valueForwarder(value);
+    if (_this.valueForwarder) {
+      _this.valueForwarder(value);
+    }
 
     _this.notifyOfExternalUpdate(value);
   };

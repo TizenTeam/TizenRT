@@ -21,7 +21,7 @@ version: "2"
 services:
   web:
     build: .
-    command: /usr/bin/make run
+    command: start
     volumes:
       - /usr/local/webthing-iotjs/webthing-iotjs
     ports:

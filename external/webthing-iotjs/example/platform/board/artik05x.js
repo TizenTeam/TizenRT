@@ -23,45 +23,42 @@ var AdcProperty = require('../adc/adc-property');
 
 var GpioProperty = require('../gpio/gpio-property');
 
-function ARTIK530Thing(name, type, description) {
-  var _this = this;
-
+function ARTIK05xThing(name, type, description) {
   var self = this;
-  Thing.call(this, name || 'ARTIK530', type || [], description || 'A web connected ARTIK530 or ARTIK720');
+  Thing.call(this, name || 'ARTIK05x', type || [], description || 'A web connected ARTIK05x');
   {
-    this.pinProperties = [new GpioProperty(this, 'RedLED', false, {
-      description: 'Red LED on interposer board (on GPIO28)'
+    this.pinProperties = [new GpioProperty(this, 'BlueLed', false, {
+      description: 'Blue LED on ARTIK05x board (on GPIO45)'
     }, {
       direction: 'out',
-      pin: 28
-    }), new GpioProperty(this, 'BlueLED', false, {
-      description: 'Blue LED on interposer board (on GPIO38)'
+      pin: 49
+    }), new GpioProperty(this, 'RedLed', false, {
+      description: 'Red LED on ARTIK05x board (on GPIO45)'
     }, {
       direction: 'out',
-      pin: 38
-    }), new GpioProperty(this, 'Up', true, {
-      description: 'SW403 Button: Nearest board edge,\
- next to red LED (on GPIO30)'
+      pin: 45
+    }), new GpioProperty(this, 'LeftButton', true, {
+      description: 'Left Button on ARTIK05x board (on GPIO42)'
     }, {
       direction: 'in',
-      pin: 30
-    }), new GpioProperty(this, 'Down', true, {
-      description: 'SW404 Button: Next to blue LED (on GPIO32)'
+      pin: 42
+    }), new GpioProperty(this, 'RightButton', true, {
+      description: 'Right Button on ARTIK05x board (on GPIO44)'
     }, {
       direction: 'in',
-      pin: 32
-    }), new AdcProperty(this, 'ADC0', 0, {
-      description: 'Analog port of ARTIK05x'
-    }, {
-      direction: 'in',
-      device: '/sys/bus/platform/devices\
-/c0053000.adc/iio:device0/in_voltage0_raw'
+      pin: 44
     }), new AdcProperty(this, 'ADC1', 0, {
       description: 'Analog port of ARTIK05x'
     }, {
+      device: '/dev/adc0',
       direction: 'in',
-      device: '/sys/bus/platform/devices/\
-c0053000.adc/iio:device0/in_voltage1_raw'
+      pin: 0
+    }), new AdcProperty(this, 'ADC2', 0, {
+      description: 'Analog port of ARTIK05x'
+    }, {
+      device: '/dev/adc0',
+      direction: 'in',
+      pin: 1
     })];
     this.pinProperties.forEach(function (property) {
       self.addProperty(property);
@@ -69,7 +66,7 @@ c0053000.adc/iio:device0/in_voltage1_raw'
   }
 
   this.close = function () {
-    _this.pinProperties.forEach(function (property) {
+    self.pinProperties.forEach(function (property) {
       property.close && property.close();
     });
   };
@@ -79,7 +76,7 @@ c0053000.adc/iio:device0/in_voltage1_raw'
 
 module.exports = function () {
   if (!module.exports.instance) {
-    module.exports.instance = new ARTIK530Thing();
+    module.exports.instance = new ARTIK05xThing();
   }
 
   return module.exports.instance;

@@ -3,6 +3,7 @@
 [![license](https://img.shields.io/badge/license-MPL--2.0-blue.svg)](LICENSE)
 [![GitHub forks](https://img.shields.io/github/forks/rzr/webthing-iotjs.svg?style=social&label=Fork&maxAge=2592000)](https://GitHub.com/rzr/webthing-iotjs/network/)
 [![Build Status](https://travis-ci.org/rzr/webthing-iotjs.svg?branch=master)](https://travis-ci.org/rzr/webthing-iotjs)
+[![NPM](https://img.shields.io/npm/v/webthing-iotjs.svg)](https://www.npmjs.com/package/webthing-iotjs)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Frzr%2Fwebthing-iotjs.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Frzr%2Fwebthing-iotjs?ref=badge_shield)
 
 
@@ -26,13 +27,23 @@ which is just simulating an actuator (LED, switch, relay...).
 ```
 iotjs -h
 
+iotjs example/multiple-things.js 
+# setting new humidity level: 18.207531485648474
+
+curl T -H 'Content-Type: application/json'  http://localhost:8888/
+# [{"name":"My Lamp","href":"/0", (...)  "href":"/1/properties/level"} .. (...) }]
+
+curl T -H 'Content-Type: application/json'  http://$HOSTNAME:8888/1/properties/level
+# {"level":42.666}
+
+
 iotjs example/simplest-thing.js 
 # Usage:
 # 
 # iotjs example/simplest-thing.js [port]
-# 
-# Try:
-# curl -X PUT -H 'Content-Type: application/json' --data '{"on": true }' http://localhost:8888/properties/on
+
+curl -X PUT -H 'Content-Type: application/json' --data '{"on": true }' http://localhost:8888/properties/on
+# {"on":true}
 ```
 
 Then thing can be connected to Mozilla IoT gateway using the Thing Web URL adapter.
@@ -47,11 +58,11 @@ For more insights and details please guide:
 
 ## REFERENCES: ##
 
-* https://github.com/mozilla/webthing-node
+* https://github.com/mozilla-iot/webthing-node
 * https://github.com/rzr/webthing-iotjs/wiki
 * https://s-opensource.org/2018/06/21/webthing-iotjs/
 
 
 ## LICENSE: ##
 
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Frzr%2Fmastodon-lite.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Frzr%2Fmastodon-lite?ref=badge_large)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Frzr%2Fwebthing-iotjs.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Frzr%2Fwebthing-iotjs?ref=badge_large)

@@ -22,10 +22,7 @@ var Thing = webthing.Thing;
 var GpioProperty = require('../gpio/gpio-property');
 
 function FlexPHatThing(name, type, description) {
-  var _this2 = this;
-
-  var _this = this;
-
+  var self = this;
   Thing.call(this, name || 'FlexPHat', type || [], description || 'A web connected Flex RaspberryPi Hat');
   {
     this.gpioProperties = [new GpioProperty(this, 'Relay', false, {
@@ -60,12 +57,12 @@ function FlexPHatThing(name, type, description) {
       pin: 23
     })];
     this.gpioProperties.forEach(function (property) {
-      _this.addProperty(property);
+      self.addProperty(property);
     });
   }
 
   this.close = function () {
-    _this2.gpioProperties.forEach(function (property) {
+    self.gpioProperties.forEach(function (property) {
       property.close && property.close();
     });
   };

@@ -144,7 +144,9 @@ function ThingsHandler(things) {
    */
 
   this.get = function (req, res) {
-    if (!req || req.method !== 'GET') return;
+    if (!req || req.method !== 'GET') {
+      return;
+    }
 
     var things = _this4.things.getThings();
 
@@ -254,7 +256,9 @@ function PropertyHandler(things) {
 
 
   this.put = function (req, res) {
-    if (!req || req.method !== 'PUT') return;
+    if (!req || req.method !== 'PUT') {
+      return;
+    }
 
     var thing = _this7.getThing(req);
 
@@ -274,7 +278,7 @@ function PropertyHandler(things) {
       try {
         thing.setProperty(propertyName, req.body[propertyName]);
       } catch (e) {
-        res.status(403).end();
+        res.status(400).end();
         return;
       }
 
@@ -361,10 +365,12 @@ function WebThingServer(things, port, sslOptions) {
   }
   /**
    * Start listening for incoming connections.
+   *
+   * @returns {Promise} Promise which resolves once the server is started.
    */
 
   this.start = function () {
-    _this8.server.listen(_this8.port);
+    return _this8.server.listen(_this8.port);
   };
   /**
    * Stop listening.
