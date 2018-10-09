@@ -195,7 +195,7 @@ done
 devel/machines/del:
 	rm -rf build/configs/*/devel
 #TODO
-demo: clean devel/demo
+demo: devel/demo
 
 .PHONY: devel/commit
 
