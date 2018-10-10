@@ -32,38 +32,23 @@
 #
 ############################################################################
 
+project_name?=devel
 
-default: rule/default
-	@echo "# Check README for more details"
+top/${project_name}/default: ${project_name}/demo
+	@echo "# $@: $^"
 
--include rules/local.tmp.mk
--include rules/config.mk
-
-# Default
-os?=nuttx
-
-extra_dir?=/tmp/${USER}${CURDIR}
-export extra_dir
-
-tmp_dir?=${CURDIR}/tmp
-export tmp_dir
+top_dir?=${CURDIR}/../..
+rules_dir?=${top_dir}/rules
 
 # Declaration fragments
-kernel?=${os}
-include rules/./${kernel}/decl.mk
-
-platform?=qemu
-include rules/./${platform}/decl.mk
-
-toolchain?=gcc-arm-embedded
-include rules/${toolchain}/decl.mk
-
-include rules/decl.mk
+include ${rules_dir}/base/config.mk
+include ${rules_dir}/${kernel}/decl.mk
+include ${rules_dir}/${platform}/decl.mk
+include ${rules_dir}/base/decl.mk
 
 # Rules fragments
-include rules/${platform}/rules.mk
-include rules/${kernel}/rules.mk
-include rules/${toolchain}/rules.mk
--include rules/extra.mk
--include rules/setup.mk
-include rules/rules.mk
+include ${rules_dir}/${platform}/rules.mk
+include ${rules_dir}/${kernel}/rules.mk
+include ${rules_dir}/base/rules.mk
+include ${rules_dir}/base/extra.mk
+include ${rules_dir}/base/setup.mk

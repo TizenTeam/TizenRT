@@ -33,35 +33,30 @@
 ############################################################################
 
 top_dir?=.
-rules_dir?=${topdir}/rules
-platform?=artik
+rules_dir?=${top_dir}/rules
+MAKE+=V=1
+self?=${rules_dir}/build.mk
+export make
+os_dir?=${CURDIR}
+build_dir?=${os_dir}
+tmp_dir?=${top_dir}/tmp/${project_name}/${machine}
+export tmp_dir
+apps_dir?=${top_dir}/apps
+machine?=qemu
 base_image_type?=minimal
-
-platform?=artik
-machine_family?=artik05x
-machine?=${platform}055s
-vendor_id?=0403
-product_id?=6010
-toolchain?=gcc-arm-embedded
-
-image=${build_dir}/output/bin/tinyara_head.bin
-deploy_image=${image}
-
-configure?=${os_dir}/tools/configure.sh
-image_type?=minimal
-config_type?=${machine}/${image_type}
-build_dir?=${top_dir}/build/output/bin/
-
-base_image_type?=minimal
-
+config_dir?=${build_dir}/configs
 base_defconfig?=${configs_dir}/${machine}/${base_image_type}/defconfig
-defconfig?=${configs_dir}/${machine}/${image_type}/defconfig
+image_type?=${base_image_type}
 config_type?=${machine}/${image_type}
+defconfig?=${configs_dir}/${config_type}/defconfig
+defconfigs?=$(wildcard build/configs/*/${base_image_type}/defconfig)
+configure?=${os_dir}/tools/configure.sh
 config?=${os_dir}/.config
-
-all+=${image} ${config} ${defconfig} ${base_defconfig}
+image?=${build_dir}/output/bin/${project}
+contents_dir?=${top_dir}/tools/fs/contents
+deploy_image?=${image}
 all+=${deploy_image}
-
-setup_debian_rules+=artik/setup/debian
-
-include ${rules_dir}/${toolchain}/decl.mk
+project_name?=devel
+image_type?=${project_name}
+prep_files+=${os_dir}/Make.defs
+README?=$(wildcard ${top_dir}/README*)

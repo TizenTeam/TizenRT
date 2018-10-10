@@ -32,4 +32,5 @@
 #
 ############################################################################
 
-include rules/index.mk
+top_dir?=${CURDIR}
+include ${top_dir}/rules/Makefile

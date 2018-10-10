@@ -32,36 +32,30 @@
 #
 ############################################################################
 
+sudo?=sudo
 top_dir?=.
-rules_dir?=${topdir}/rules
-platform?=artik
-base_image_type?=minimal
+rules_dir?=${top_dir}/rules
 
-platform?=artik
-machine_family?=artik05x
-machine?=${platform}055s
-vendor_id?=0403
-product_id?=6010
-toolchain?=gcc-arm-embedded
+setup/os/%: /etc/os-release
+	@echo "# TODO: support other OS ($@)"
+	cat $<
 
-image=${build_dir}/output/bin/tinyara_head.bin
-deploy_image=${image}
+setup/os/debian: /etc/os-release ${rules_dir}/debian/rules.mk ${setup_debian_rules}
+	grep "ID" $<
+	. "${<}" \
+ && { [ "$${ID_LIKE}" = "" ] || ID="$${ID_LIKE}"; } \
+ && echo ID=$${ID} \
+ && make -f "${rules_dir}/debian/rules.mk" debian/setup/$${ID}
 
-configure?=${os_dir}/tools/configure.sh
-image_type?=minimal
-config_type?=${machine}/${image_type}
-build_dir?=${top_dir}/build/output/bin/
+setup/os/ubuntu: setup/os/debian
+	echo "# log: $@"
 
-base_image_type?=minimal
+setup/os/linuxmint: setup/os/debian
+	echo "# log: $@"
 
-base_defconfig?=${configs_dir}/${machine}/${base_image_type}/defconfig
-defconfig?=${configs_dir}/${machine}/${image_type}/defconfig
-config_type?=${machine}/${image_type}
-config?=${os_dir}/.config
+/etc/os-release:
+	@echo "# TODO: Please install lsb package to guess your OS"
 
-all+=${image} ${config} ${defconfig} ${base_defconfig}
-all+=${deploy_image}
-
-setup_debian_rules+=artik/setup/debian
-
-include ${rules_dir}/${toolchain}/decl.mk
+setup: /etc/os-release
+	cat $<
+	. ${<} && ${MAKE} setup/os/$${ID}

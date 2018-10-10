@@ -32,22 +32,30 @@
 #
 ############################################################################
 
+top_dir?=.
+rules_dir?=${top_dir}/rules
+
+-include ${rules_dir}/gcc-arm-embedded/decl.mk
 
 ${toolchain_dir}:
-	mkdir -p ${@D}
-	cd ${@D} && curl -sL ${toolchain_url} | tar xvj
-	ls $@ 
-	ls ${toolchain_bin}
-	ls ${CC}
+	@echo "# log: Installing toolchain: ${@}"
+	@rm -rf ${@}.tmp
+	@mkdir -p ${@}.tmp
+	curl -sL ${toolchain_url} | tar xj -C ${@}.tmp
+	@mkdir -p ${@D}
+	@mv ${@}.tmp/${@F} ${@}
+	@ls $@ 
+	@ls ${toolchain_bin}
+	@ls ${CC}
 	-file ${CC}
 	${CC} --version
 
-
 ${toolchain_dir}/%: ${toolchain_dir}
-	ls $@
+	@ls $@
 
 gcc-arm-embedded/setup: ${CC}
 	$< --version
 
-gcc-arm-embedded/setup/debian:
-	sudo apt-get install -y libc6-i386 
+gcc-arm-embedded/setup/debian: ${CC}
+	sudo apt-get install -y curl libc6-i386 \
+ || sudo apt-get install -y curl libc6

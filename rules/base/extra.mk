@@ -32,38 +32,65 @@
 #
 ############################################################################
 
-top_dir?=.
-rules_dir?=${top_dir}/rules
+# board usb
+tty?=$(shell ls /dev/ttyUSB* 2> /dev/null | sort | tail -n1 || echo "/TODO/setup-port/dev/ttyUSB")
+export tty
+tty_rate?=115200
+export tty_rate
+udev?=/etc/udev/rules.d/99-usb-${vendor_id}-${product_id}.rules
+# Where to download and install tools or extra files:
+extra_dir?=${HOME}/usr/local/opt/${os}/extra
+# make sure user belongs to sudoers
+sudo?=sudo
+export sudo
 
-artik/help: ${configs_dir}/${machine}/README.md ${rules_dir}/${platform}/decl.mk ${rules_dir}/${platform}/rules.mk
-	-cat $<
+# Overide for your platform
+vendor_id?=0000
+product_id?=${vendor_id}
 
-artik/image: ${deploy_image}
-	@ls -l $^
 
-artik/download: ${deploy_image} ${contents_dir} ${os_dir}
-	@echo "# log: Clean in ${contents_dir} to save flash"
-	@-find "${contents_dir}/" -iname '.git' -type d -prune -exec rm -rfv {} \;
-	@-du -ks ${contents_dir}
-	@ls -l /dev/ttyUSB*
-	${MAKE} -C ${os_dir} ${@F} ALL
-	@ls -l /dev/ttyUSB*
+extra/commit: ${configs_dir}/${machine}/${image_type}
+	git add ${configs_dir}/${machine}/${image_type} ||:
+	git commit -sam "WIP: ${image_type}" ||:
 
-artik/deploy: artik/download
+extra/demo: commit cleanall menuconfig all deploy console
+	${MAKE} commit
+
+extra/run: extra/commit deploy console
+	${MAKE} commit
+
+configs: build/configs/${machine}
+	ls $</
+
+monitor/screen: ${tty}
+	@echo "# log: About to run GNU screen, to quit: type 'Ctrl+a' then 'k' "
+	sleep 10
+	screen $< ${tty_rate}
+
+monitor/picocom: ${tty}
+	picocom -b ${tty_rate} --omap crcrlf --imap crcrlf --echo $<
+
+%/monitor: monitor/screen
 	@echo "# log: $@: $^"
 
-artik/run: monitor
+monitor: ${platform}/monitor
 	@echo "# log: $@: $^"
 
-artik/setup/debian:
-	sudo apt-get install -y genromfs openocd
+console: ${platform}/monitor
+	@echo "# log: $@: $^"
 
-artik/demo: artik/help
-	${MAKE} -e prep
-	${MAKE} -e configure
-	${MAKE} -e deploy
-	${MAKE} -e run
+${tty}:
+	ls /dev/tty*
+	ls /dev/ttyUSB*
+	ls $@
 
-include ${rules_dir}/${toolchain}/rules.mk
+${udev}:
+	lsusb | grep "${vendor_id}:${product_id}"
+	@echo "SUBSYSTEMS==\"usb\",ATTRS{idVendor}==\"${vendor_id}\",ATTRS{idProduct}==\"${product_id}\",MODE=\"0666\" RUN+=\"/sbin/modprobe ftdi_sio RUN+=\"/bin/sh -c 'echo ${vendor_id} ${product_id} > /sys/bus/usb-serial/drivers/ftdi_sio/new_id' " \
+  | ${sudo} tee $@
 
-.PHONY: artik/download
+extra/udev: ${udev}
+	cat $<
+	sudo udevadm control --reload
+	@echo "# TODO: su -l ${USER}"
+	@echo "# TODO: replug usb : ${vendor_id}:${product_id}"

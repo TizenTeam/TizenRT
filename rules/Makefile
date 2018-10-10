@@ -32,36 +32,6 @@
 #
 ############################################################################
 
-top_dir?=.
-rules_dir?=${topdir}/rules
-platform?=artik
-base_image_type?=minimal
-
-platform?=artik
-machine_family?=artik05x
-machine?=${platform}055s
-vendor_id?=0403
-product_id?=6010
-toolchain?=gcc-arm-embedded
-
-image=${build_dir}/output/bin/tinyara_head.bin
-deploy_image=${image}
-
-configure?=${os_dir}/tools/configure.sh
-image_type?=minimal
-config_type?=${machine}/${image_type}
-build_dir?=${top_dir}/build/output/bin/
-
-base_image_type?=minimal
-
-base_defconfig?=${configs_dir}/${machine}/${base_image_type}/defconfig
-defconfig?=${configs_dir}/${machine}/${image_type}/defconfig
-config_type?=${machine}/${image_type}
-config?=${os_dir}/.config
-
-all+=${image} ${config} ${defconfig} ${base_defconfig}
-all+=${deploy_image}
-
-setup_debian_rules+=artik/setup/debian
-
-include ${rules_dir}/${toolchain}/decl.mk
+top_dir?=..
+project_name?=base
+include ${top_dir}/rules/${project_name}/Makefile

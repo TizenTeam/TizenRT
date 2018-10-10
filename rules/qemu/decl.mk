@@ -32,10 +32,15 @@
 #
 ############################################################################
 
+top_dir?=.
+rules_dir?=${top_dir}/rules
+
 chip?=arm
 machine?=qemu
 qemu_machine?=lm3s6965evb
 base_image_type?=tc_64k
 qemu?=qemu-system-${chip}
+toolchain?=gcc-${chip}-embedded
+setup_debian_rules+=qemu/setup/debian
 
-include rules/gcc-arm-embedded/decl.mk
+include ${rules_dir}/${toolchain}/decl.mk

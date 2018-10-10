@@ -32,18 +32,23 @@
 #
 ############################################################################
 
-setup/%: /etc/os-release
-	@echo "TODO: support other OS"
-	cat $<
+project_name?=base
 
-/etc/os-release:
-	@echo "TODO: Please install lsb package to guess your system"
-sudo?=sudo
+top/${project_name}/default: ${project_name}/default
+	@echo "# $@: $^"
 
-#TODO
-setup/debian:
-	${make} -f rules/debian/rules.sh 
+top_dir?=${CURDIR}/../..
+rules_dir?=${top_dir}/rules
 
-setup: /etc/os-release
-	cat $<
-	. ${<} && ls /etc/$${ID}_version && ${make} setup/$${ID}
+# Declaration fragments
+include ${rules_dir}/base/config.mk
+include ${rules_dir}/${kernel}/decl.mk
+include ${rules_dir}/${platform}/decl.mk
+include ${rules_dir}/${project_name}/decl.mk
+
+# Rules fragments
+include ${rules_dir}/${platform}/rules.mk
+include ${rules_dir}/${kernel}/rules.mk
+include ${rules_dir}/base/extra.mk
+include ${rules_dir}/base/setup.mk
+include ${rules_dir}/${project_name}/rules.mk

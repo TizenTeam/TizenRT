@@ -33,27 +33,15 @@
 ############################################################################
 
 ${config}: ${configure} ${defconfig}
-	ls -l $^
+	@ls -l $^
 	cd ${<D} && ./${<F} ${config_type}
-	ls -l ${config}
+	@ls -l ${config}
 
-#all: rule/all
-#	sync
-
-#nuttx
-os_subdirs?=$(shell find ${os_dir} -maxdepth 1 -mindepth 1 -type d \
-  | grep -v 'tools')
-
-${tmp_dir}/osdirs.lst:
-	mkdir -p ${@D}
-	echo ${os_subdirs} > $@
-
-#TODO
 tinyara/setup: ${os_subdirs}
 	for dir in $^ ; do ln -fs $${dir} . ; done
 	ln -fs ${configs_dir} configs
 	ln -fs ../../os/arch/Kconfig.board ${configs_dir}/Kconfig 
 
 tinyara/configure: ${config}
-	ls $<
+	@ls $<
 

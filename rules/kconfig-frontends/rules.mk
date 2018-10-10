@@ -32,13 +32,9 @@
 #
 ############################################################################
 
-kconfig_url?=https://github.com/TizenTeam/kconfig-frontends
-kconfig_branch?=debian
-sudo?=sudo
-kconfig_dir?=${CURDIR}/tmp/kconfig-frontends
-
-kconfig/setup/debian: rules/kconfig-frontends/rules.mk
+kconfig/setup/debian: ${rules_dir}/kconfig-frontends/rules.mk
 	${sudo} apt-get update -y
+	-apt-cache show kconfig-frontends && echo "#log: TODO: install package $@" ||:
 	${sudo} apt-get install -y dh-autoreconf sudo devscripts
 	${sudo} apt-get install -y flex gperf libncurses5-dev # TODO
 	${sudo} apt-get install -y bison pkg-config
@@ -48,7 +44,5 @@ kconfig/setup/debian: rules/kconfig-frontends/rules.mk
 	cd ${kconfig_dir} && ./debian/rules rule/debi
 
 /usr/bin/kconfig-conf:
-	ls $@ || kconfig/setup/debian
+	@ls $@ > /dev/null 2>&1 || ${MAKE} kconfig/setup/debian
 	@ls $@
-
-prep_files+=/usr/bin/kconfig-conf

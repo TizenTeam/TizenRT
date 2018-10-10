@@ -31,62 +31,22 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 ############################################################################
+top_dir?=.
+rules_dir?=${top_dir}/rules
+iotjs_dir?=${top_dir}/external/iotjs
 
-# board usb
-tty?=$(shell ls /dev/ttyUSB* 2> /dev/null || echo /dev/TODO/setup/port | sort | head -n1)
-export tty
-tty_rate?=115200
-export tty_rate
-udev?=/etc/udev/rules.d/99-usb-${vendor_id}-${product_id}.rules
+# TODO: Upstream changes and remove this block
+iotjs_url?=https://github.com/tizenteam/iotjs
+iotjs_revision?=sandbox/rzr/tizenrt/master
 
-
-extra/commit:
-	git add ${configs_dir}/${machine}/${image_type} ||:
-	git commit -sam "WIP: ${image_type}" ||:
-
-extra/demo: commit cleanall menuconfig all deploy console
-	${MAKE} commit
-
-extra/run: commit done/deploy console
-	${MAKE} commit
-
-configs: build/configs/${machine}/
-	ls $<
-#
-
-reset: reset/${machine}
-	sync
-
-ls: ${image}
-	ls $^
-
-configure: ${configs_dir} ${kernel}/configure
-	ls $<
-
-monitor/screen: ${tty}
-	screen $< ${tty_rate}
-
-monitor/picocom: ${tty}
-	picocom -b ${tty_rate} --omap crcrlf --imap crcrlf --echo $<
-
-monitor: monitor/screen
-	sync
-
-console: monitor
-
-
-${tty}:
-	ls /dev/tty*
-	ls /dev/ttyUSB*
-	ls $@
-
-${udev}:
-	lsusb | grep "${vendor_id}:${product_id}"
-	@echo "SUBSYSTEMS==\"usb\",ATTRS{idVendor}==\"${vendor_id}\",ATTRS{idProduct}==\"${product_id}\",MODE=\"0666\" RUN+=\"/sbin/modprobe ftdi_sio RUN+=\"/bin/sh -c 'echo ${vendor_id} ${product_id} > /sys/bus/usb-serial/drivers/ftdi_sio/new_id' " \
-  | ${sudo} tee $@
-
-rule/udev: ${udev}
-	cat $<
-	sudo udevadm control --reload
-	@echo "#TODO: su -l ${USER}"
-	@echo "#TODO: replug usb : ${vendor_id}:${product_id}"
+iotjs_url?=https://github.com/Samsung/iotjs
+# TODO: Pin latest version
+iotjs_tag?=release_1.0
+iotjs_revision?=master
+iotjs_profile?=tizenrt
+iotjs_kconfig?=${iotjs_dir}/config/tizenrt/Kconfig.runtime
+iotjs_prep_files+=${iotjs_dir}/deps/jerry/CMakeLists.txt
+iotjs_prep_files+=${iotjs_kconfig}
+iotjs_js_file?=${rules_dir}/iotjs/index.js
+prep_files+=${iotjs_prep_files}
+setup_debian_rules+=iotjs/setup/debian

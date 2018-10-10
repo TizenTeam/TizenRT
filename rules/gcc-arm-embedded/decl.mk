@@ -32,11 +32,12 @@
 #
 ############################################################################
 
-
+top_dir?=.
 toolchain_abi?=arm-none-eabi
 toolchain_package?=gcc-${toolchain_abi}-4_9-2015q3
-#TODO: override in configure file
-extra_dir?=${CURDIR}/tmp/extra
+# TODO: override in config file
+tmp_dir?=${top_dir}/tmp
+extra_dir?=${tmp_dir}/extra
 toolchain_dir?=${extra_dir}/${toolchain_package}
 
 toolchain_file?=${toolchain_package}-2015q3-20150921-linux.tar.bz2
@@ -50,3 +51,5 @@ export PATH
 CROSSCOMPIL?=${toolchain_bin}/${toolchain_abi}-
 CC=${CROSSCOMPIL}gcc
 prep_files+=${CC}
+
+setup_debian_rules+=gcc-arm-embedded/setup/debian

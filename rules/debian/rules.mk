@@ -32,30 +32,31 @@
 #
 ############################################################################
 
+top_dir?=.
+rules_dir?=${top_dir}/rules
 sudo?=sudo
-make?=make
 
-debian/setup/%: /etc/os-release
-	@echo "TODO: support other OS"
-	cat $<
+debian/default: debian/setup
+	@echo "# log: $@: $^"
 
 /etc/os-release:
-	@echo "TODO: Please install lsb package to guess your system"
+	@echo "# log: TODO: Please install lsb package to guess your system ($@)"
 
-debian/setup/debian: /etc/debian_version
+/etc/debian_version:
+	@echo "# log: TODO: port to other OS than $@"
+	cat $@
+
+debian/setup: /etc/debian_version
 	${sudo} apt-get update -y
 	${sudo} apt-get install -y git gperf libncurses5-dev flex bison
 	${sudo} apt-get install -y openocd libusb-1.0
 	${sudo} apt-get install -y genromfs time curl
 	${sudo} apt-get install -y texinfo
+	${sudo} apt-get install -y screen
+	${MAKE} $< ${setup_debian_rules}
 
-debian/setup/ubuntu: debian/setup/debian
-	sync
-
-debiab/setup: /etc/os-release
+debian/setup/%: /etc/os-release
+	@echo "# log: TODO: support other OS"
 	cat $<
-	. ${<} && ls /etc/$${ID}_version && ${make} debian/setup/$${ID}
 
-/etc/debian_version:
-	@echo "TODO: port to other OS than $@"
-	ls $@
+debian/setup/debian: debian/setup

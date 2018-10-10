@@ -32,28 +32,19 @@
 #
 ############################################################################
 
+# TODO: Overide here if needed
+#platform?=artik
+#machine?=${platform}055s
+#export machine
+#base_image_type?=nettest
+project_name?=devel
 
-MAKE+=V=1
-self?=build.mk
-make?=${MAKE} -f ${self}
-os_dir?=${CURDIR}
-build_dir?=${os_dir}
-tmp_dir?=${CURDIR}/tmp
-export make
-apps_dir?=apps
+#extra_dir?=/tmp/${USER}${CURDIR}
+#export extra_dir
 
-base_image_type?=minimal
-config_dir?=${build_dir}/configs
-base_defconfig?=${configs_dir}/${machine}/${base_image_type}/defconfig
-image_type?=${base_image_type}
-config_type?=${machine}/${image_type}
-defconfig?=${configs_dir}/${config_type}/defconfig
-export config_type
-configure?=${os_dir}/tools/configure.sh
-config?=${os_dir}/.config
-image?=${build_dir}/output/bin/${project}
-deploy_image?=${image}
-all+=${deploy_image}
-
-prep_files+=${os_dir}/Make.defs
-README?=$(wildcard README*)
+# Default:
+os?=tinyara
+kernel?=${os}
+platform?=qemu
+machine?=${platform}
+base_image_type?=tc_64k

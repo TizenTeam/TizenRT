@@ -32,36 +32,35 @@
 #
 ############################################################################
 
-top_dir?=.
-rules_dir?=${topdir}/rules
-platform?=artik
-base_image_type?=minimal
+top/artik/default: artik/help artik/demo
+	@echo "# $@: $^"
 
-platform?=artik
-machine_family?=artik05x
-machine?=${platform}055s
-vendor_id?=0403
-product_id?=6010
-toolchain?=gcc-arm-embedded
+base_image_type?=nettest
+image_type?=artik
 
-image=${build_dir}/output/bin/tinyara_head.bin
-deploy_image=${image}
+V?=1
+top_dir?=${CURDIR}/../..
+export top_dir
 
-configure?=${os_dir}/tools/configure.sh
-image_type?=minimal
-config_type?=${machine}/${image_type}
-build_dir?=${top_dir}/build/output/bin/
+rules_dir?=${top_dir}/rules
+# Declaration fragments
+-include ${rules_dir}/artik/config.mk
+-include ${rules_dir}/base/config.mk
 
-base_image_type?=minimal
+# Default
+os?=tinyara
 
-base_defconfig?=${configs_dir}/${machine}/${base_image_type}/defconfig
-defconfig?=${configs_dir}/${machine}/${image_type}/defconfig
-config_type?=${machine}/${image_type}
-config?=${os_dir}/.config
+kernel?=${os}
+include ${rules_dir}/${kernel}/decl.mk
 
-all+=${image} ${config} ${defconfig} ${base_defconfig}
-all+=${deploy_image}
+platform?=qemu
+include ${rules_dir}/${platform}/decl.mk
+include ${rules_dir}/base/decl.mk
 
-setup_debian_rules+=artik/setup/debian
-
-include ${rules_dir}/${toolchain}/decl.mk
+# Rules fragments
+include ${rules_dir}/${platform}/rules.mk
+include ${rules_dir}/${kernel}/rules.mk
+include ${rules_dir}/${toolchain}/rules.mk
+include ${rules_dir}/base/rules.mk
+include ${rules_dir}/base/extra.mk
+include ${rules_dir}/base/setup.mk

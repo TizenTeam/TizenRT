@@ -31,28 +31,33 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 ############################################################################
+top_dir?=.
+rules_dir?=${top_dir}/rules
 
-include rules/gcc-arm-embedded/rules.mk
+include ${rules_dir}/${toolchain}/rules.mk
 
 qemu/run: ${deploy_image}
-	ls -l ${<D}
+	@ls -l ${<D}
+	@echo "# log: To stop type killall ${qemu}"
+	@echo "# log: Type reset if no prompt after $@"
+	sleep 10
 	${qemu} -M ${qemu_machine} -kernel $< -nographic
 
 qemu/run/bg:
-	${make} qemu/run &
+	{ ${MAKE} qemu/run || reset } &
 	echo $? > pid.tmp
 
-qemu/console: qemu/run
-	sync
+qemu/monitor: qemu/run
+	@echo "# log: $@: $^"
 
 qemu/deploy:
-	@echo "# uneeded for ${platform}"
+	@echo "# log: uneeded for ${platform}"
 
 qemu/sleep/%:
 	sleep ${@F}
 
 qemu/stop:
-	echo "TODO: use pid amd reset"
+	@echo "# log: TODO: use pid amd reset"
 	killall ${qemu}
 	-reset
 
@@ -61,3 +66,6 @@ qemu/stop/bg: pid.tmp
 
 qemu/check: qemu/run/bg qemu/sleep/20 qemu/stop/bg
 	@echo "# $@: $^"
+
+qemu/setup/debian:
+	${sudo} apt-get install -y qemu-system-arm

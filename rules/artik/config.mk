@@ -32,31 +32,7 @@
 #
 ############################################################################
 
-
-#default: rule/default
-#	@echo "# $@: $^"
-
-# TODO: Override here if needed:
 platform?=artik
-base_image_type?=nettest
-
-# Default:
-os?=tinyara
-platform?=qemu
-base_image_type?=tc_64k
-
-# Where to download and install tools or extra files:
-extra_dir?=${HOME}/usr/local/opt/${os}/extra
-
-# make sure user belongs to sudoers
-sudo?=sudo
-export sudo
-
-# More work in progress rules can be shared in
--include rules/devel.mk
-image_type=devel
-#base_image_type=nettest
-
-# which can contain extra rules ie: include rules/iotjs/rules.mk
-
-#} devel
+machine?=${platform}055s
+base_image_type?=minimal
+image_type?=devel
