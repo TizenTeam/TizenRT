@@ -83,14 +83,19 @@ RUN echo "#log: ${project}: Setup system" \
   libtool-bin \
   gawk \
   python-dev \
+  \
+  curl \
   && apt-get clean \
   && sync
+
+ARG app
+ENV app ${app:-.}
 
 ADD . /usr/local/src/${project}
 WORKDIR /usr/local/src/${project}
 RUN echo "#log: ${project}: Preparing sources" \
   && set -x \
-  && make -f Makefile setup \
+  && make -C rules/${app} setup \
   && chown -R nobody . \
   && sync
 
@@ -99,5 +104,9 @@ WORKDIR /usr/local/src/${project}
 RUN echo "#log: ${project}: Building sources" \
   && set -x \
   && export HOME=${PWD} \
-  && make -f Makefile \
+  && make -C rules/${app} \
   && sync
+
+WORKDIR /usr/local/src/${project}
+ENTRYPOINT [ "/usr/bin/make" ]
+CMD [ "run" ]

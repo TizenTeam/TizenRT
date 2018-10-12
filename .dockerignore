@@ -1,3 +1,35 @@
-#.dockerignore
+# .dockerignore
+Dockerfile
+
+# .gitignore
+.depend
+Make.dep
+.built
+*.o
+*.a
+*.d
+*.i
 *~
-tmp
+*~*
+.#*
+*#
+*.orig
+*.rej
+.swp
+.*.swp
+.gdbinit
+cscope.out
+tags
+
+# ctags index file
+.tags
+.tags_sorted_by_file
+
+# Developer playground
+/tmp/
+*.tmp
+*.tmp.*
+
+# tools
+*.rej
+
