@@ -32,20 +32,31 @@
 #
 ############################################################################
 
-project_name?=webthing-iotjs
-top_dir?=${CURDIR}
-rules_dir?=${top_dir}/rules
-platform?=artik
-machine?=${platform}055s
+project_name?=mastodon-lite
 
-webthing-iotjs_url?=https://github.com/rzr/webthing-iotjs
-# TODO: Pin latest version
-#webthing-iotjs_revision?=webthing-iotjs-0.7.0
-webthing-iotjs_revision?=master
-webthing-iotjs_dir?=${top_dir}/external/webthing-iotjs
-webthing-iotjs_build_dir?=${contents_dir}/example/iotjs_modules/webthing
-webthing-iotjs_js_file?=${rules_dir}/webthing-iotjs/index.js
-contents_rules+=${webthing-iotjs_build_dir}
-contents_rules+=${contents_dir}/example/index.js
-# TODO: Use current iotjs and then try servers ws
-iotjs_prep_files+=${iotjs_dir}/src/modules/iotjs_module_websocket.h
+top/mastodon-lite/default: mastodon-lite/default
+	@echo "# $@: $^"
+
+base_image_type?=iotjs
+top_dir?=$(realpath ${CURDIR}/../..)
+rules_dir?=${top_dir}/rules
+
+# Declaration fragments
+include ${rules_dir}/artik/config.mk
+include ${rules_dir}/base/config.mk
+include ${rules_dir}/${kernel}/decl.mk
+include ${rules_dir}/${platform}/decl.mk
+include ${rules_dir}/base/decl.mk
+include ${rules_dir}/iotjs/decl.mk
+include ${rules_dir}/webthing-iotjs/decl.mk
+include ${rules_dir}/mastodon-lite/decl.mk
+
+# Rules fragments
+include ${rules_dir}/${platform}/rules.mk
+include ${rules_dir}/${kernel}/rules.mk
+include ${rules_dir}/base/rules.mk
+include ${rules_dir}/base/extra.mk
+include ${rules_dir}/base/setup.mk
+include ${rules_dir}/iotjs/rules.mk
+include ${rules_dir}/webthing-iotjs/rules.mk
+include ${rules_dir}/mastodon-lite/rules.mk

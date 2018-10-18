@@ -32,20 +32,22 @@
 #
 ############################################################################
 
-project_name?=webthing-iotjs
+project_name?=mastodon-lite
 top_dir?=${CURDIR}
 rules_dir?=${top_dir}/rules
 platform?=artik
 machine?=${platform}055s
 
-webthing-iotjs_url?=https://github.com/rzr/webthing-iotjs
+mastodon-lite_url?=https://github.com/rzr/mastodon-lite
 # TODO: Pin latest version
-#webthing-iotjs_revision?=webthing-iotjs-0.7.0
-webthing-iotjs_revision?=master
-webthing-iotjs_dir?=${top_dir}/external/webthing-iotjs
-webthing-iotjs_build_dir?=${contents_dir}/example/iotjs_modules/webthing
-webthing-iotjs_js_file?=${rules_dir}/webthing-iotjs/index.js
-contents_rules+=${webthing-iotjs_build_dir}
+#mastodon-lite_revision?=mastodon-lite-0.7.0
+mastodon-lite_revision?=master
+mastodon-lite_dir?=${top_dir}/external/mastodon-lite
+mastodon-lite_build_dir?=${contents_dir}/example/iotjs_modules/mastodon-lite
+mastodon-lite_js_file?=${rules_dir}/mastodon-lite/index.js
+contents_rules+=${mastodon-lite_build_dir}
 contents_rules+=${contents_dir}/example/index.js
+#contents_rules+=${contents_dir}/example/webthing.js
+contents_rules+=${contents_dir}/.mastodon-lite.json
 # TODO: Use current iotjs and then try servers ws
 iotjs_prep_files+=${iotjs_dir}/src/modules/iotjs_module_websocket.h

@@ -12,6 +12,6 @@
 
 console.log('log: IoT.js app: Starting:');
 console.log(process);
-var main = 'iotjs_modules/webthing/example/platform/index.js';
+var main = 'mastodon-lite/example/webthing/index.js';
 console.log('log: IoT.js app: Loading: ' + main);
 var app = require(main);
