@@ -33,5 +33,5 @@
 ############################################################################
 
 top_dir?=$(realpath ${CURDIR}/..)
-project_name?=base
+project_name?=webthing-iotjs
 include ${top_dir}/rules/${project_name}/Makefile
