@@ -64,7 +64,7 @@ configs: build/configs/${machine}
 
 monitor/screen: ${tty}
 	@echo "# log: About to run GNU screen, to quit: type 'Ctrl+a' then 'k' "
-	@echo "# log: Please plug ${platform} board again now"
+	@echo "# log: Please plug ${machine} board again now"
 	sleep 10
 	screen $< ${tty_rate}
 
