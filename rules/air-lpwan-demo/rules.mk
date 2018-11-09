@@ -82,7 +82,7 @@ air-lpwan-demo/del:
 	-git commit -am "WIP: webthing: About to replace import (${air-lpwan-demo_revision})"
 
 air-lpwan-demo/import: air-lpwan-demo/del
-	${make} air-lpwan-demo/commit
+	${MAKE} air-lpwan-demo/commit
 
 ${air-lpwan-demo_build_dir}: ${air-lpwan-demo_dir} ${air-lpwan-demo_self}
 	@mkdir -p "$@"
