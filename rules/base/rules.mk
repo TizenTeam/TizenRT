@@ -216,4 +216,8 @@ run: deploy ${platform}/run
 demo: help print ${project}/demo
 	@echo "# log: $@: $^"
 
+contents/del:
+	@rm -rf ${contents_dir}
+	-git checkout ${contents_dir}/.gitignore
+
 .PHONY: os/configure os/make
