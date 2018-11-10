@@ -32,41 +32,26 @@
 #
 ############################################################################
 
-artik/default: base/build
+platform?=artik
+project_name?=artik
+image_type?=devel
+base_image_type?=onboard
+
+top/artik/default: artik/default
 	@echo "# $@: $^"
 
-top_dir?=.
-rules_dir?=${topdir}/rules
-platform?=artik
-base_image_type?=minimal
+top_dir?=$(realpath ${CURDIR}/../..)
+rules_dir?=${top_dir}/rules
 
-platform?=artik
-machine_family?=artik05x
-machine?=${platform}055s
-vendor_id?=0403
-product_id?=6010
-toolchain?=gcc-arm-embedded
+# Declaration fragments
+include ${rules_dir}/artik/decl.mk
+include ${rules_dir}/base/config.mk
+include ${rules_dir}/${kernel}/decl.mk
+include ${rules_dir}/base/decl.mk
 
-image=${build_dir}/output/bin/tinyara_head.bin
-deploy_image=${image}
-
-os_dir?=${top_dir}/os
-build_dir?=${top_dir}/build
-configure?=${os_dir}/tools/configure.sh
-image_type?=minimal
-config_type?=${machine}/${image_type}
-build_dir?=${top_dir}/build/output/bin/
-
-base_image_type?=minimal
-
-base_defconfig?=${configs_dir}/${machine}/${base_image_type}/defconfig
-defconfig?=${configs_dir}/${machine}/${image_type}/defconfig
-config_type?=${machine}/${image_type}
-config?=${os_dir}/.config
-
-all+=${image} ${config} ${defconfig} ${base_defconfig}
-all+=${deploy_image}
-
-setup_debian_rules+=artik/setup/debian
-
-include ${rules_dir}/${toolchain}/decl.mk
+# Rules fragments
+include ${rules_dir}/${kernel}/rules.mk
+include ${rules_dir}/base/extra.mk
+include ${rules_dir}/base/setup.mk
+include ${rules_dir}/base/rules.mk
+include ${rules_dir}/artik/rules.mk
