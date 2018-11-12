@@ -38,7 +38,7 @@ rules_dir?=${top_dir}/rules
 
 # TODO: Upstream changes and remove this block
 iotjs_url?=https://github.com/tizenteam/iotjs
-iotjs_revision?=sandbox/rzr/tizenrt/master
+iotjs_revision?=sandbox/rzr/tizenrt/latest/master
 
 iotjs_url?=https://github.com/Samsung/iotjs
 # TODO: Pin latest version
