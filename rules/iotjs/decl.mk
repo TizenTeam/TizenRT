@@ -36,11 +36,13 @@ project_name?=iotjs
 top_dir?=${CURDIR}
 rules_dir?=${top_dir}/rules
 
+iotjs_url?=https://github.com/pando-project/iotjs
+iotjs_revision?=master
+
 # TODO: Upstream changes and remove this block
 iotjs_url?=https://github.com/tizenteam/iotjs
 iotjs_revision?=sandbox/rzr/tizenrt/master
 
-iotjs_url?=https://github.com/Samsung/iotjs
 # TODO: Pin latest version
 iotjs_tag?=release_1.0
 iotjs_revision?=master
