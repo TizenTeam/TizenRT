@@ -38,14 +38,16 @@ rules_dir?=${top_dir}/rules
 platform?=artik
 machine?=${platform}055s
 
+# TODO: Use current iotjs and then try servers	 ws
+iotjs_prep_files+=${iotjs_dir}/src/modules/iotjs_module_websocket.h
+iotjs_modules_dir?=${contents_dir}/example/iotjs_modules
+
 webthing-iotjs_url?=https://github.com/rzr/webthing-iotjs
 # TODO: Pin latest version
 #webthing-iotjs_revision?=webthing-iotjs-0.7.0
 webthing-iotjs_revision?=master
 webthing-iotjs_dir?=${top_dir}/external/webthing-iotjs
-webthing-iotjs_build_dir?=${contents_dir}/iotjs_modules/webthing-iotjs
+webthing-iotjs_build_dir?=${iotjs_modules_dir}/webthing
 webthing-iotjs_js_file?=${rules_dir}/webthing-iotjs/index.js
 contents_rules+=${webthing-iotjs_build_dir}
 contents_rules+=${contents_dir}/example/index.js
-# TODO: Use current iotjs and then try servers ws
-iotjs_prep_files+=${iotjs_dir}/src/modules/iotjs_module_websocket.h

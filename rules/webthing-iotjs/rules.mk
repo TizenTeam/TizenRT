@@ -83,9 +83,13 @@ webthing-iotjs/del:
 webthing-iotjs/import: webthing-iotjs/del
 	${MAKE} webthing-iotjs/commit
 
+
+webthing-iotjs/deploy: ${webthing-iotjs_build_dir}
+	ls $<
+	du -ks ${iotjs_modules_dir}
+
 ${webthing-iotjs_build_dir}: ${webthing-iotjs_dir} ${webthing-iotjs_self}
-	@mkdir -p "$@"
-	rsync -avx --delete "$</" "$@/"
+	make -C ${<} deploy deploy_modules_dir=${iotjs_modules_dir}
 	@-find "$@/" -iname '.git' -type d -prune -exec rm -rfv '{}' \; ||:
 	@-find "$@/" -iname 'node_modules' -type d -prune -exec rm -rf '{}' \; ||:
 	du -ks $@
