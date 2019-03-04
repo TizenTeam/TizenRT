@@ -56,3 +56,4 @@ iotjs_build_dir?=${contents_dir}/example
 contents_rules+=${iotjs_build_dir}/index.js
 prep_files+=${iotjs_prep_files}
 setup_debian_rules+=iotjs/setup/debian
+iotjs_modules_dir?=${contents_dir}/example/iotjs_modules
