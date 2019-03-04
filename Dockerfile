@@ -32,7 +32,7 @@
 
 #FROM debian:stable
 FROM 32bit/debian
-MAINTAINER Philippe Coval (philippe.coval@osg.samsung.com)
+LABEL maintainer Philippe Coval (p.coval@samsung.com)
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV LC_ALL en_US.UTF-8
