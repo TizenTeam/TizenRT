@@ -12,6 +12,6 @@
 
 console.log('log: IoT.js app: Starting:');
 console.log(process);
-var main = '/rom/iotjs_modules/webthing-iotjs/example/platform/index.js';
+var main = 'iotjs_modules/webthing-iotjs/example/platform/index.js';
 console.log('log: IoT.js app: Loading: ' + main);
 var app = require(main);
