@@ -123,6 +123,6 @@ iotjs/demo: iotjs/help
 	${MAKE} -e ${@D}/deploy
 	${MAKE} -e run
 
-${contents_dir}/example/%.js: ${rules_dir}/${project_name}/%.js
+${contents_dir}/example/%.js: ${iotjs_example_dir}/%.js
 	install -d ${@D}
 	install $^ ${@D}
